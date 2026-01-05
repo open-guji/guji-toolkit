@@ -35,6 +35,12 @@ class HomePage extends StatelessWidget {
                 runSpacing: 16,
                 children: [
                   _ActionCard(
+                    title: '古籍对校',
+                    description: '比较两段文本，输出差异分析。',
+                    icon: Icons.compare_arrows,
+                    onTap: () => context.go('/collation'),
+                  ),
+                  _ActionCard(
                     title: '开始编辑',
                     description: '直接修改和校勘文本。',
                     icon: Icons.edit,

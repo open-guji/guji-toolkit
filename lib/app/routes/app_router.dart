@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:guji_toolkit/core/widgets/main_layout.dart';
 import 'package:guji_toolkit/features/common/placeholders.dart';
 import 'package:guji_toolkit/features/home/home_page.dart';
+import 'package:guji_toolkit/features/collation/collation_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -17,6 +18,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/editor',
             builder: (context, state) => const EditorPage(),
+          ),
+          GoRoute(
+            path: '/collation',
+            builder: (context, state) => const CollationPage(),
           ),
           GoRoute(
             path: '/scanner',
