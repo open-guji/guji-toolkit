@@ -9,39 +9,41 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: _getSelectedIndex(location),
-            onDestinationSelected: (index) => _onItemTapped(index, context),
-            labelType: NavigationRailLabelType.all,
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: Text('首页'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.edit_note_outlined),
-                selectedIcon: Icon(Icons.edit_note),
-                label: Text('编辑器'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.scanner_outlined),
-                selectedIcon: Icon(Icons.scanner),
-                label: Text('扫描'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings),
-                label: Text('设置'),
-              ),
-            ],
-          ),
-          const VerticalDivider(thickness: 1, width: 1),
-          Expanded(child: child),
-        ],
+    return SelectionArea(
+      child: Scaffold(
+        body: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: _getSelectedIndex(location),
+              onDestinationSelected: (index) => _onItemTapped(index, context),
+              labelType: NavigationRailLabelType.all,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: Text('首页'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.edit_note_outlined),
+                  selectedIcon: Icon(Icons.edit_note),
+                  label: Text('编辑器'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.scanner_outlined),
+                  selectedIcon: Icon(Icons.scanner),
+                  label: Text('扫描'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings),
+                  label: Text('设置'),
+                ),
+              ],
+            ),
+            const VerticalDivider(thickness: 1, width: 1),
+            Expanded(child: child),
+          ],
+        ),
       ),
     );
   }
