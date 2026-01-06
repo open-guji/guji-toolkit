@@ -33,7 +33,7 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('请输入文本并点击"开始对比"'), findsOneWidget);
+      expect(find.text('点击"开始对比"查看结果'), findsOneWidget);
     });
 
     testWidgets('有结果时应该显示相似度', (tester) async {
@@ -83,8 +83,8 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
 
       // 验证图例显示
-      expect(find.text('删除'), findsOneWidget);
-      expect(find.text('新增'), findsOneWidget);
+      expect(find.text('[-删除-]'), findsOneWidget);
+      expect(find.text('[+添加+]'), findsOneWidget);
     });
   });
 }

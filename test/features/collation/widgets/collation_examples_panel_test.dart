@@ -40,7 +40,7 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('示例'), findsOneWidget);
+      expect(find.text('示例：'), findsOneWidget);
     });
 
     testWidgets('应该显示所有示例按钮', (tester) async {
@@ -50,7 +50,7 @@ void main() {
 
       // 应该为每个示例创建一个按钮
       for (final example in CollationExamples.examples) {
-        expect(find.text(example.name), findsOneWidget);
+        expect(find.text(example.name.split('：').last), findsOneWidget);
       }
     });
 
@@ -61,7 +61,7 @@ void main() {
 
       // 点击第一个示例
       final firstExample = CollationExamples.examples.first;
-      await tester.tap(find.text(firstExample.name));
+      await tester.tap(find.text(firstExample.name.split('：').last));
 
       verify(() => mockBloc.add(any(that: isA<LoadExampleEvent>()))).called(1);
     });

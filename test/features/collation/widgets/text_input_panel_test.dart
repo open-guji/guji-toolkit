@@ -47,8 +47,8 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
 
       expect(find.byType(TextField), findsNWidgets(2));
-      expect(find.text('文本 1（底本）'), findsOneWidget);
-      expect(find.text('文本 2（校本）'), findsOneWidget);
+      expect(find.text('文本 1'), findsOneWidget);
+      expect(find.text('文本 2'), findsOneWidget);
     });
 
     testWidgets('输入文本1应该触发事件', (tester) async {

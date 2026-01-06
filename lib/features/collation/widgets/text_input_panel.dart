@@ -14,6 +14,15 @@ class _TextInputPanelState extends State<TextInputPanel> {
   final TextEditingController _controller2 = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // 初始化控制器内容
+    final state = context.read<CollationBloc>().state;
+    _controller1.text = state.text1;
+    _controller2.text = state.text2;
+  }
+
+  @override
   void dispose() {
     _controller1.dispose();
     _controller2.dispose();
