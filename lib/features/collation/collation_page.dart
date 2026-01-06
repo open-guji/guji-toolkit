@@ -27,110 +27,92 @@ class _CollationPageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 标题区域
-            Text(
-              '古籍对校',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '比较两段古籍文本，输出差异分析结果',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 标题区域
+              Text(
+                '古籍对校',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            const CollationExamplesPanel(),
-            const SizedBox(height: 24),
+              const SizedBox(height: 8),
+              Text(
+                '比较两段古籍文本，输出差异分析结果',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 24),
 
-            // 主要内容区域
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 左侧：文本输入区
-                  const Expanded(flex: 3, child: TextInputPanel()),
-                  const SizedBox(width: 16),
+              // 1. 设置部分 (最优先显示)
+              const CollationOptionsPanel(),
+              const SizedBox(height: 16),
 
-                  // 右侧：选项和结果区
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      children: [
-                        // 对校选项
-                        const CollationOptionsPanel(),
-                        const SizedBox(height: 16),
+              // 示例面板 (作为辅助放在这里)
+              const CollationExamplesPanel(),
+              const SizedBox(height: 24),
 
-                        // 对比按钮
-                        BlocBuilder<CollationBloc, CollationState>(
-                          builder: (context, state) {
-                            final isDisabled = state.isButtonDisabled;
-                            String buttonText;
-                            Widget buttonIcon;
+              // 2. 文本输入区 (上下排列)
+              const TextInputPanel(),
+              const SizedBox(height: 24),
 
-                            if (state.isComparing) {
-                              buttonText = '对比中...';
-                              buttonIcon = const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+              // 3. 对比按钮
+              BlocBuilder<CollationBloc, CollationState>(
+                builder: (context, state) {
+                  final isDisabled = state.isButtonDisabled;
+                  String buttonText;
+                  Widget buttonIcon;
+
+                  if (state.isComparing) {
+                    buttonText = '对比中...';
+                    buttonIcon = const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    );
+                  } else if (state.ignoreTraditional && state.isOpenCCLoading) {
+                    buttonText = 'OpenCC 加载中...';
+                    buttonIcon = const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    );
+                  } else {
+                    buttonText = '开始对比';
+                    buttonIcon = const Icon(Icons.compare_arrows);
+                  }
+
+                  return SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: isDisabled
+                          ? null
+                          : () {
+                              context.read<CollationBloc>().add(
+                                const PerformCollationEvent(),
                               );
-                            } else if (state.ignoreTraditional &&
-                                state.isOpenCCLoading) {
-                              buttonText = 'OpenCC 加载中...';
-                              buttonIcon = const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              );
-                            } else {
-                              buttonText = '开始对比';
-                              buttonIcon = const Icon(Icons.compare_arrows);
-                            }
-
-                            return SizedBox(
-                              width: double.infinity,
-                              child: FilledButton.icon(
-                                onPressed: isDisabled
-                                    ? null
-                                    : () {
-                                        context.read<CollationBloc>().add(
-                                          const PerformCollationEvent(),
-                                        );
-                                      },
-                                icon: buttonIcon,
-                                label: Text(buttonText),
-                                style: FilledButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
-                        // 结果显示区
-                        const Expanded(child: ResultDisplayPanel()),
-                      ],
+                            },
+                      icon: buttonIcon,
+                      label: Text(buttonText),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-          ],
+              const SizedBox(height: 32),
+
+              // 4. 结果显示区
+              const ResultDisplayPanel(),
+              const SizedBox(height: 48), // Bottom padding
+            ],
+          ),
         ),
       ),
     );

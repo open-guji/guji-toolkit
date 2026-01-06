@@ -3,12 +3,16 @@ import 'package:guji_diff/guji_diff.dart';
 import 'package:guji_toolkit/features/collation/bloc/collation_event.dart';
 import 'package:guji_toolkit/features/collation/models/collation_state.dart';
 
+import 'package:guji_toolkit/features/collation/services/opencc_service.dart';
+
 /// 古籍对校 BLoC
 class CollationBloc extends Bloc<CollationEvent, CollationState> {
   final VerbatimCollation _collation;
+  final OpenCCService _openCCService;
 
-  CollationBloc({VerbatimCollation? collation})
+  CollationBloc({VerbatimCollation? collation, OpenCCService? openCCService})
     : _collation = collation ?? VerbatimCollation(),
+      _openCCService = openCCService ?? RealOpenCCService(),
       super(const CollationState()) {
     // 注册事件处理器
     on<UpdateText1Event>(_onUpdateText1);
@@ -31,7 +35,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
   ) async {
     emit(state.copyWith(isOpenCCLoading: true));
     try {
-      await TextNormalizer.ensureReady();
+      await _openCCService.ensureReady();
       emit(state.copyWith(isOpenCCLoading: false, isOpenCCReady: true));
     } catch (e) {
       emit(
@@ -106,7 +110,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     try {
       // 如果启用了繁简兼容，确保 OpenCC 已就绪（特别是 Web 平台需要异步加载脚本）
       if (state.ignoreTraditional && !state.isOpenCCReady) {
-        await TextNormalizer.ensureReady();
+        await _openCCService.ensureReady();
       }
 
       // 创建对校选项

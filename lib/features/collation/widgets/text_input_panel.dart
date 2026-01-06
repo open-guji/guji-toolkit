@@ -42,87 +42,66 @@ class _TextInputPanelState extends State<TextInputPanel> {
           _controller2.text = state.text2;
         }
       },
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 底本输入框
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '文本输入',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Row(
-                  children: [
-                    // 文本1输入框
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '文本 1',
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: _controller1,
-                              maxLines: null,
-                              expands: true,
-                              decoration: const InputDecoration(
-                                hintText: '请输入第一段古籍文本...',
-                                border: OutlineInputBorder(),
-                              ),
-                              onChanged: (value) {
-                                context.read<CollationBloc>().add(
-                                  UpdateText1Event(value),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    // 文本2输入框
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '文本 2',
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: _controller2,
-                              maxLines: null,
-                              expands: true,
-                              decoration: const InputDecoration(
-                                hintText: '请输入第二段古籍文本...',
-                                border: OutlineInputBorder(),
-                              ),
-                              onChanged: (value) {
-                                context.read<CollationBloc>().add(
-                                  UpdateText2Event(value),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                '底本',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
                 ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _controller1,
+                maxLines: 8,
+                minLines: 4,
+                decoration: const InputDecoration(
+                  hintText: '请输入底本内容...',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.all(12),
+                ),
+                onChanged: (value) {
+                  context.read<CollationBloc>().add(UpdateText1Event(value));
+                },
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+
+          // 校本输入框
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '校本',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _controller2,
+                maxLines: 8,
+                minLines: 4,
+                decoration: const InputDecoration(
+                  hintText: '请输入校本内容（可对比多段文本）...',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.all(12),
+                ),
+                onChanged: (value) {
+                  context.read<CollationBloc>().add(UpdateText2Event(value));
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

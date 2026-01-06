@@ -33,8 +33,7 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('对校选项'), findsOneWidget);
-      expect(find.text('忽略标点符号'), findsOneWidget);
+      expect(find.text('忽略标点'), findsOneWidget);
       expect(find.text('繁简兼容'), findsOneWidget);
     });
 
@@ -46,7 +45,7 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
 
       final checkbox = tester.widget<CheckboxListTile>(
-        find.widgetWithText(CheckboxListTile, '忽略标点符号'),
+        find.widgetWithText(CheckboxListTile, '忽略标点'),
       );
       expect(checkbox.value, true);
     });
@@ -55,7 +54,7 @@ void main() {
       when(() => mockBloc.state).thenReturn(const CollationState());
 
       await tester.pumpWidget(buildTestWidget());
-      await tester.tap(find.widgetWithText(CheckboxListTile, '忽略标点符号'));
+      await tester.tap(find.widgetWithText(CheckboxListTile, '忽略标点'));
 
       verify(
         () => mockBloc.add(const ToggleIgnorePunctuationEvent(false)),
@@ -80,7 +79,7 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('OpenCC 正在加载...'), findsOneWidget);
+      expect(find.text('正在加载繁简转换引擎...'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
@@ -91,7 +90,10 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('自动识别繁简体对应关系 ✓'), findsOneWidget);
+      // Subtitle helper was removed, so this check is no longer valid or needs update if status is shown elsewhere
+      // Currently, success state has no text indicator in the new UI, just absence of error/loading
+      // We can check that the loading indicator is GONE
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('OpenCC 错误应该显示错误信息', (tester) async {

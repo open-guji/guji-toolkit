@@ -13,74 +13,63 @@ class ResultDisplayPanel extends StatelessWidget {
       builder: (context, state) {
         final result = state.result;
 
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        if (result == null) {
+          return Center(
+            child: Text(
+              '点击"开始对比"查看结果',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '对比结果',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (result != null)
-                      Text(
-                        '相似度: ${(result.similarity * 100).toStringAsFixed(1)}%',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: result == null
-                        ? Center(
-                            child: Text(
-                              '点击"开始对比"查看结果',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          )
-                        : result.error != null
-                        ? Center(
-                            child: Text(
-                              result.error!,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            child: DiffTextRenderer(diff: result.diff),
-                          ),
+                Text(
+                  '对比结果',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 12),
-                if (result != null && result.error == null)
-                  const CollationLegend(),
+                Text(
+                  '相似度: ${(result.similarity * 100).toStringAsFixed(1)}%',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
-          ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(minHeight: 100),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: result.error != null
+                  ? Center(
+                      child: Text(
+                        result.error!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: DiffTextRenderer(diff: result.diff),
+                    ),
+            ),
+            const SizedBox(height: 12),
+            if (result.error == null) const CollationLegend(),
+          ],
         );
       },
     );
