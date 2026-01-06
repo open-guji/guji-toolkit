@@ -1,5 +1,7 @@
+import 'package:equatable/equatable.dart';
+
 /// 对校状态模型
-class CollationState {
+class CollationState extends Equatable {
   final String text1;
   final String text2;
   final bool ignorePunctuation;
@@ -33,10 +35,20 @@ class CollationState {
       result: result ?? this.result,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        text1,
+        text2,
+        ignorePunctuation,
+        ignoreTraditional,
+        isComparing,
+        result,
+      ];
 }
 
 /// 对校结果模型
-class CollationResult {
+class CollationResult extends Equatable {
   final String diff;
   final double similarity;
   final String? error;
@@ -46,4 +58,7 @@ class CollationResult {
     required this.similarity,
     this.error,
   });
+
+  @override
+  List<Object?> get props => [diff, similarity, error];
 }
