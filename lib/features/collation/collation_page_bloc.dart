@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
-import 'package:guji_toolkit/features/collation/widgets/text_input_panel_bloc.dart';
-import 'package:guji_toolkit/features/collation/widgets/collation_options_panel_bloc.dart';
-import 'package:guji_toolkit/features/collation/widgets/result_display_panel_bloc.dart';
-import 'package:guji_toolkit/features/collation/widgets/collation_examples_panel.dart';
+import 'package:guji_toolkit/features/collation/widgets/widgets.dart';
 
 class CollationPageBloc extends StatelessWidget {
   const CollationPageBloc({super.key});
@@ -53,7 +50,7 @@ class _CollationPageContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 左侧：文本输入区
-                  const Expanded(flex: 3, child: TextInputPanelBloc()),
+                  const Expanded(flex: 3, child: TextInputPanel()),
                   const SizedBox(width: 16),
 
                   // 右侧：选项和结果区
@@ -62,7 +59,7 @@ class _CollationPageContent extends StatelessWidget {
                     child: Column(
                       children: [
                         // 对校选项
-                        const CollationOptionsPanelBloc(),
+                        const CollationOptionsPanel(),
                         const SizedBox(height: 16),
 
                         // 对比按钮
@@ -102,7 +99,7 @@ class _CollationPageContent extends StatelessWidget {
                         const SizedBox(height: 16),
 
                         // 结果显示区
-                        const Expanded(child: ResultDisplayPanelBloc()),
+                        const Expanded(child: ResultDisplayPanel()),
                       ],
                     ),
                   ),

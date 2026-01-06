@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
+import 'package:guji_toolkit/features/collation/models/collation_example.dart';
 
 class CollationExamplesPanel extends StatelessWidget {
   const CollationExamplesPanel({super.key});
@@ -29,34 +30,16 @@ class CollationExamplesPanel extends StatelessWidget {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: [
-                    _ExampleButton(
-                      label: '简单短句',
-                      text1: '学而时习之，不亦说乎？',
-                      text2: '学而时习之，不亦悦乎？',
-                    ),
-                    const SizedBox(width: 8),
-                    _ExampleButton(
-                      label: '繁简异体',
-                      text1: '國之大事，在祀與戎。',
-                      text2: '国之大事，在祀与戎。',
-                    ),
-                    const SizedBox(width: 8),
-                    _ExampleButton(
-                      label: '长段落示例',
-                      text1:
-                          '夫英雄者，胸怀大志，腹有良谋，有包藏宇宙之机，吞吐天地之志者也。操曰：「君言是也。操之志，亦非碌碌之辈也。」',
-                      text2:
-                          '夫英雄者，胸怀大志，腹有良谋，有包藏宇宙之机，吞吐天地之志者也。公曰：「君言是也。操之志，亦非碌碌之辈也。」',
-                    ),
-                    const SizedBox(width: 8),
-                    _ExampleButton(
-                      label: '较多差异',
-                      text1:
-                          '晋太元中，武陵人捕鱼为业。缘溪行，忘路之远近。忽逢桃花林，夹岸数百步，中无杂树，芳草鲜美，落英缤纷。',
-                      text2: '晋太元中，武陵人以为业。沿溪行，忘路之远。忽逢桃林，夹岸数百步，中无杂树，芳草鲜美，落英缤纷。',
-                    ),
-                  ],
+                  children: CollationExamples.examples.map((example) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: _ExampleButton(
+                        label: example.name.split('：').last,
+                        text1: example.text1,
+                        text2: example.text2,
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
