@@ -11,37 +11,42 @@ class CollationExamplesPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isVertical) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.lightbulb_outline,
-                size: 18,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '示例',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ...CollationExamples.examples.map((example) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: _ExampleButton(
-                label: example.name.split('：').last,
-                text1: example.text1,
-                text2: example.text2,
-              ),
-            );
-          }),
-        ],
+      return Align(
+        alignment: Alignment.topRight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '示例',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ...CollationExamples.examples.map((example) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: _ExampleButton(
+                  label: example.name.split('：').last,
+                  text1: example.text1,
+                  text2: example.text2,
+                ),
+              );
+            }),
+          ],
+        ),
       );
     }
 

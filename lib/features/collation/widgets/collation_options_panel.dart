@@ -12,9 +12,10 @@ class CollationOptionsPanel extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
+            // Title and Options in one row
             Row(
               children: [
+                // Title
                 Icon(
                   Icons.settings,
                   size: 18,
@@ -27,13 +28,8 @@ class CollationOptionsPanel extends StatelessWidget {
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Options
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+                const SizedBox(width: 24),
+                // Options
                 _OptionCheckbox(
                   label: '忽略标点',
                   value: state.ignorePunctuation,

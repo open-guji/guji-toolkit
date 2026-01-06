@@ -58,8 +58,8 @@ class _CollationPageContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 左侧：输入框
-                  const Expanded(flex: 3, child: TextInputPanel()),
-                  const SizedBox(width: 24),
+                  const Expanded(flex: 6, child: TextInputPanel()),
+                  const SizedBox(width: 8),
                   // 右侧：示例列表
                   const Expanded(
                     flex: 1,
