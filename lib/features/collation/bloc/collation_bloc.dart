@@ -5,7 +5,11 @@ import 'package:guji_toolkit/features/collation/models/collation_state.dart';
 
 /// 古籍对校 BLoC
 class CollationBloc extends Bloc<CollationEvent, CollationState> {
-  CollationBloc() : super(const CollationState()) {
+  final VerbatimCollation _collation;
+
+  CollationBloc({VerbatimCollation? collation})
+    : _collation = collation ?? VerbatimCollation(),
+      super(const CollationState()) {
     // 注册事件处理器
     on<UpdateText1Event>(_onUpdateText1);
     on<UpdateText2Event>(_onUpdateText2);
@@ -112,8 +116,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       );
 
       // 执行逐字对校
-      final collation = VerbatimCollation();
-      final changes = collation.compare(
+      final changes = _collation.compare(
         state.text1,
         state.text2,
         options: options,
