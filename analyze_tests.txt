@@ -1,0 +1,21 @@
+﻿Analyzing guji-toolkit...                                       
+
+  error - The getter 'examples' isn't defined for the type 'CollationExample' - test\features\collation\models\collation_example_test.dart:7:31 - undefined_getter
+  error - The getter 'examples' isn't defined for the type 'CollationExample' - test\features\collation\models\collation_example_test.dart:11:46 - undefined_getter
+  error - The getter 'examples' isn't defined for the type 'CollationExample' - test\features\collation\models\collation_example_test.dart:20:36 - undefined_getter
+  error - The getter 'examples' isn't defined for the type 'CollationExample' - test\features\collation\models\collation_example_test.dart:26:54 - undefined_getter
+  error - The getter 'examples' isn't defined for the type 'CollationExample' - test\features\collation\models\collation_example_test.dart:33:54 - undefined_getter
+  error - The getter 'examples' isn't defined for the type 'CollationExample' - test\features\collation\widgets\collation_examples_panel_test.dart:52:46 - undefined_getter
+  error - The getter 'examples' isn't defined for the type 'CollationExample' - test\features\collation\widgets\collation_examples_panel_test.dart:63:45 - undefined_getter
+
+flutter : 7 issues found. (ran in 1.2s)
+At line:1 char:1
++ flutter analyze 2>&1 | Out-File -Encoding utf
+8 analyze_tests.txt
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (7 
+    issues found. (ran in 1.2s):String) [], R  
+  emoteException
+    + FullyQualifiedErrorId : NativeCommandErr 
+   or
+ 

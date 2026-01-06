@@ -1,154 +1,101 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:guji_toolkit/features/collation/providers/collation_provider.dart';
+import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
 import 'package:guji_toolkit/features/collation/widgets/text_input_panel.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockCollationBloc extends MockBloc<CollationEvent, CollationState>
+    implements CollationBloc {}
+
+class FakeUpdateText1Event extends Fake implements UpdateText1Event {}
+
+class FakeUpdateText2Event extends Fake implements UpdateText2Event {}
 
 void main() {
-  group('TextInputPanel Widget Tests', () {
-    testWidgets('应该显示文本输入面板标题', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: TextInputPanel(),
-            ),
-          ),
+  late MockCollationBloc mockBloc;
+
+  setUpAll(() {
+    registerFallbackValue(FakeUpdateText1Event());
+    registerFallbackValue(FakeUpdateText2Event());
+  });
+
+  setUp(() {
+    mockBloc = MockCollationBloc();
+  });
+
+  Widget buildTestWidget() {
+    return MaterialApp(
+      home: Scaffold(
+        body: BlocProvider<CollationBloc>.value(
+          value: mockBloc,
+          child: const TextInputPanel(),
         ),
+      ),
+    );
+  }
+
+  group('TextInputPanel', () {
+    testWidgets('应该显示两个文本输入框', (tester) async {
+      when(() => mockBloc.state).thenReturn(const CollationState());
+      whenListen(
+        mockBloc,
+        Stream<CollationState>.fromIterable([const CollationState()]),
       );
 
-      expect(find.text('文本输入'), findsOneWidget);
-    });
+      await tester.pumpWidget(buildTestWidget());
 
-    testWidgets('应该显示两个文本输入框', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: TextInputPanel(),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('文本 1'), findsOneWidget);
-      expect(find.text('文本 2'), findsOneWidget);
       expect(find.byType(TextField), findsNWidgets(2));
+      expect(find.text('文本 1（底本）'), findsOneWidget);
+      expect(find.text('文本 2（校本）'), findsOneWidget);
     });
 
-    testWidgets('应该显示提示文本', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: TextInputPanel(),
-            ),
-          ),
-        ),
+    testWidgets('输入文本1应该触发事件', (tester) async {
+      when(() => mockBloc.state).thenReturn(const CollationState());
+      whenListen(
+        mockBloc,
+        Stream<CollationState>.fromIterable([const CollationState()]),
       );
 
-      expect(find.text('请输入第一段古籍文本...'), findsOneWidget);
-      expect(find.text('请输入第二段古籍文本...'), findsOneWidget);
-    });
+      await tester.pumpWidget(buildTestWidget());
 
-    testWidgets('输入文本1应该更新状态', (WidgetTester tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: TextInputPanel(),
-            ),
-          ),
-        ),
-      );
-
-      // 找到第一个文本输入框
       final textField1 = find.byType(TextField).first;
       await tester.enterText(textField1, '春眠不觉晓');
-      await tester.pump();
 
-      // 验证状态已更新
-      final state = container.read(collationProvider);
-      expect(state.text1, '春眠不觉晓');
+      verify(() => mockBloc.add(any(that: isA<UpdateText1Event>()))).called(1);
     });
 
-    testWidgets('输入文本2应该更新状态', (WidgetTester tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: TextInputPanel(),
-            ),
-          ),
-        ),
+    testWidgets('输入文本2应该触发事件', (tester) async {
+      when(() => mockBloc.state).thenReturn(const CollationState());
+      whenListen(
+        mockBloc,
+        Stream<CollationState>.fromIterable([const CollationState()]),
       );
 
-      // 找到第二个文本输入框
+      await tester.pumpWidget(buildTestWidget());
+
       final textField2 = find.byType(TextField).last;
       await tester.enterText(textField2, '处处闻啼鸟');
-      await tester.pump();
 
-      // 验证状态已更新
-      final state = container.read(collationProvider);
-      expect(state.text2, '处处闻啼鸟');
+      verify(() => mockBloc.add(any(that: isA<UpdateText2Event>()))).called(1);
     });
 
-    testWidgets('同时输入两个文本应该都更新状态', (WidgetTester tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: TextInputPanel(),
-            ),
-          ),
-        ),
+    testWidgets('状态更新应该同步到文本框', (tester) async {
+      when(
+        () => mockBloc.state,
+      ).thenReturn(const CollationState(text1: '已有文本'));
+      whenListen(
+        mockBloc,
+        Stream<CollationState>.fromIterable([
+          const CollationState(text1: '已有文本'),
+        ]),
       );
 
-      // 输入文本1
-      final textField1 = find.byType(TextField).first;
-      await tester.enterText(textField1, '春眠不觉晓');
+      await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
-      // 输入文本2
-      final textField2 = find.byType(TextField).last;
-      await tester.enterText(textField2, '处处闻啼鸟');
-      await tester.pump();
-
-      // 验证状态已更新
-      final state = container.read(collationProvider);
-      expect(state.text1, '春眠不觉晓');
-      expect(state.text2, '处处闻啼鸟');
-    });
-
-    testWidgets('应该支持多行文本输入', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: TextInputPanel(),
-            ),
-          ),
-        ),
-      );
-
-      final textFields = find.byType(TextField);
-      for (final textField in textFields.evaluate()) {
-        final widget = textField.widget as TextField;
-        expect(widget.maxLines, null);
-        expect(widget.expands, true);
-      }
+      expect(find.text('已有文本'), findsOneWidget);
     });
   });
 }

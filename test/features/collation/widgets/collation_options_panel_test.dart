@@ -1,190 +1,107 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:guji_toolkit/features/collation/providers/collation_provider.dart';
+import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
 import 'package:guji_toolkit/features/collation/widgets/collation_options_panel.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockCollationBloc extends MockBloc<CollationEvent, CollationState>
+    implements CollationBloc {}
 
 void main() {
-  group('CollationOptionsPanel Widget Tests', () {
-    testWidgets('应该显示对校选项标题', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: CollationOptionsPanel(),
-            ),
-          ),
+  late MockCollationBloc mockBloc;
+
+  setUp(() {
+    mockBloc = MockCollationBloc();
+  });
+
+  Widget buildTestWidget() {
+    return MaterialApp(
+      home: Scaffold(
+        body: BlocProvider<CollationBloc>.value(
+          value: mockBloc,
+          child: const CollationOptionsPanel(),
         ),
-      );
+      ),
+    );
+  }
+
+  group('CollationOptionsPanel', () {
+    testWidgets('应该显示标题和两个选项', (tester) async {
+      when(() => mockBloc.state).thenReturn(const CollationState());
+
+      await tester.pumpWidget(buildTestWidget());
 
       expect(find.text('对校选项'), findsOneWidget);
-    });
-
-    testWidgets('应该显示两个复选框选项', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: CollationOptionsPanel(),
-            ),
-          ),
-        ),
-      );
-
       expect(find.text('忽略标点符号'), findsOneWidget);
       expect(find.text('繁简兼容'), findsOneWidget);
-      expect(find.byType(CheckboxListTile), findsNWidgets(2));
     });
 
-    testWidgets('应该显示选项说明文本', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: CollationOptionsPanel(),
-            ),
-          ),
-        ),
-      );
+    testWidgets('忽略标点选项应该根据状态显示勾选状态', (tester) async {
+      when(
+        () => mockBloc.state,
+      ).thenReturn(const CollationState(ignorePunctuation: true));
 
-      expect(find.text('对比时不考虑标点差异'), findsOneWidget);
-      expect(find.text('自动识别繁简体对应关系'), findsOneWidget);
+      await tester.pumpWidget(buildTestWidget());
+
+      final checkbox = tester.widget<CheckboxListTile>(
+        find.widgetWithText(CheckboxListTile, '忽略标点符号'),
+      );
+      expect(checkbox.value, true);
     });
 
-    testWidgets('初始状态应该显示默认选中状态', (WidgetTester tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    testWidgets('点击忽略标点选项应该触发事件', (tester) async {
+      when(() => mockBloc.state).thenReturn(const CollationState());
 
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: CollationOptionsPanel(),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestWidget());
+      await tester.tap(find.widgetWithText(CheckboxListTile, '忽略标点符号'));
 
-      final state = container.read(collationProvider);
-      expect(state.ignorePunctuation, true);
-      expect(state.ignoreTraditional, true);
-
-      // 验证复选框显示为选中状态
-      final checkboxes = tester.widgetList<CheckboxListTile>(
-        find.byType(CheckboxListTile),
-      );
-      for (final checkbox in checkboxes) {
-        expect(checkbox.value, true);
-      }
+      verify(
+        () => mockBloc.add(const ToggleIgnorePunctuationEvent(false)),
+      ).called(1);
     });
 
-    testWidgets('点击忽略标点复选框应该切换状态', (WidgetTester tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    testWidgets('点击繁简兼容选项应该触发事件', (tester) async {
+      when(() => mockBloc.state).thenReturn(const CollationState());
 
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: CollationOptionsPanel(),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestWidget());
+      await tester.tap(find.widgetWithText(CheckboxListTile, '繁简兼容'));
 
-      // 找到忽略标点选项
-      final punctuationCheckbox = find.ancestor(
-        of: find.text('忽略标点符号'),
-        matching: find.byType(CheckboxListTile),
-      );
-
-      // 点击取消选中
-      await tester.tap(punctuationCheckbox);
-      await tester.pump();
-
-      expect(container.read(collationProvider).ignorePunctuation, false);
-
-      // 再次点击恢复选中
-      await tester.tap(punctuationCheckbox);
-      await tester.pump();
-
-      expect(container.read(collationProvider).ignorePunctuation, true);
+      verify(
+        () => mockBloc.add(const ToggleIgnoreTraditionalEvent(false)),
+      ).called(1);
     });
 
-    testWidgets('点击繁简兼容复选框应该切换状态', (WidgetTester tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: CollationOptionsPanel(),
-            ),
-          ),
-        ),
+    testWidgets('OpenCC 加载中应该显示加载指示器', (tester) async {
+      when(() => mockBloc.state).thenReturn(
+        const CollationState(ignoreTraditional: true, isOpenCCLoading: true),
       );
 
-      // 找到繁简兼容选项
-      final traditionalCheckbox = find.ancestor(
-        of: find.text('繁简兼容'),
-        matching: find.byType(CheckboxListTile),
-      );
+      await tester.pumpWidget(buildTestWidget());
 
-      // 点击取消选中
-      await tester.tap(traditionalCheckbox);
-      await tester.pump();
-
-      expect(container.read(collationProvider).ignoreTraditional, false);
-
-      // 再次点击恢复选中
-      await tester.tap(traditionalCheckbox);
-      await tester.pump();
-
-      expect(container.read(collationProvider).ignoreTraditional, true);
+      expect(find.text('OpenCC 正在加载...'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('两个选项应该独立工作', (WidgetTester tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            home: Scaffold(
-              body: CollationOptionsPanel(),
-            ),
-          ),
-        ),
+    testWidgets('OpenCC 就绪应该显示就绪状态', (tester) async {
+      when(() => mockBloc.state).thenReturn(
+        const CollationState(ignoreTraditional: true, isOpenCCReady: true),
       );
 
-      // 取消选中忽略标点
-      final punctuationCheckbox = find.ancestor(
-        of: find.text('忽略标点符号'),
-        matching: find.byType(CheckboxListTile),
+      await tester.pumpWidget(buildTestWidget());
+
+      expect(find.text('自动识别繁简体对应关系 ✓'), findsOneWidget);
+    });
+
+    testWidgets('OpenCC 错误应该显示错误信息', (tester) async {
+      when(() => mockBloc.state).thenReturn(
+        const CollationState(ignoreTraditional: true, openCCError: '加载失败'),
       );
-      await tester.tap(punctuationCheckbox);
-      await tester.pump();
 
-      // 验证只有标点选项变化
-      expect(container.read(collationProvider).ignorePunctuation, false);
-      expect(container.read(collationProvider).ignoreTraditional, true);
+      await tester.pumpWidget(buildTestWidget());
 
-      // 取消选中繁简兼容
-      final traditionalCheckbox = find.ancestor(
-        of: find.text('繁简兼容'),
-        matching: find.byType(CheckboxListTile),
-      );
-      await tester.tap(traditionalCheckbox);
-      await tester.pump();
-
-      // 验证两个选项都为false
-      expect(container.read(collationProvider).ignorePunctuation, false);
-      expect(container.read(collationProvider).ignoreTraditional, false);
+      expect(find.textContaining('OpenCC 加载失败'), findsOneWidget);
     });
   });
 }
