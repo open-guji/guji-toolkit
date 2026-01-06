@@ -65,28 +65,46 @@ class _CollationPageContent extends StatelessWidget {
                         // 对比按钮
                         BlocBuilder<CollationBloc, CollationState>(
                           builder: (context, state) {
+                            final isDisabled = state.isButtonDisabled;
+                            String buttonText;
+                            Widget buttonIcon;
+
+                            if (state.isComparing) {
+                              buttonText = '对比中...';
+                              buttonIcon = const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              );
+                            } else if (state.ignoreTraditional &&
+                                state.isOpenCCLoading) {
+                              buttonText = 'OpenCC 加载中...';
+                              buttonIcon = const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              );
+                            } else {
+                              buttonText = '开始对比';
+                              buttonIcon = const Icon(Icons.compare_arrows);
+                            }
+
                             return SizedBox(
                               width: double.infinity,
                               child: FilledButton.icon(
-                                onPressed: state.isComparing
+                                onPressed: isDisabled
                                     ? null
                                     : () {
                                         context.read<CollationBloc>().add(
                                           const PerformCollationEvent(),
                                         );
                                       },
-                                icon: state.isComparing
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Icon(Icons.compare_arrows),
-                                label: Text(
-                                  state.isComparing ? '对比中...' : '开始对比',
-                                ),
+                                icon: buttonIcon,
+                                label: Text(buttonText),
                                 style: FilledButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 16,

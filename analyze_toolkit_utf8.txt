@@ -1,0 +1,9 @@
+﻿Analyzing guji-toolkit...                                       
+
+warning - The declaration '<unnamed>' isn't referenced - lib\features\collation\bloc\collation_bloc.dart:7:7 - unused_element
+  error - Expected a class member - lib\features\collation\bloc\collation_bloc.dart:109:7 - expected_class_member
+  error - Expected an identifier - lib\features\collation\bloc\collation_bloc.dart:109:13 - missing_identifier
+   info - Missing type annotation - lib\features\collation\bloc\collation_bloc.dart:109:14 - strict_top_level_inference
+  error - Undefined name 'state' - lib\features\collation\bloc\collation_bloc.dart:122:7 - undefined_identifier
+  error - Expected a method, getter, setter or operator declaration - lib\features\collation\bloc\collation_bloc.dart:144:1 - expected_executable
+

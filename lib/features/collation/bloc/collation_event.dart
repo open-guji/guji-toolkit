@@ -68,3 +68,8 @@ class LoadExampleEvent extends CollationEvent {
 class ClearResultEvent extends CollationEvent {
   const ClearResultEvent();
 }
+
+/// 检查 OpenCC 状态事件
+class CheckOpenCCStatusEvent extends CollationEvent {
+  const CheckOpenCCStatusEvent();
+}

@@ -36,7 +36,7 @@ class CollationOptionsPanel extends StatelessWidget {
                 ),
                 CheckboxListTile(
                   title: const Text('繁简兼容'),
-                  subtitle: const Text('自动识别繁简体对应关系'),
+                  subtitle: _buildTraditionalSubtitle(state),
                   value: state.ignoreTraditional,
                   onChanged: (value) {
                     context.read<CollationBloc>().add(
@@ -46,11 +46,56 @@ class CollationOptionsPanel extends StatelessWidget {
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                 ),
+                // OpenCC 加载状态指示器
+                if (state.ignoreTraditional && state.isOpenCCLoading)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'OpenCC 正在加载...',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // OpenCC 加载错误
+                if (state.openCCError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+                    child: Text(
+                      'OpenCC 加载失败: ${state.openCCError}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
         );
       },
     );
+  }
+
+  Widget _buildTraditionalSubtitle(CollationState state) {
+    if (state.isOpenCCLoading) {
+      return const Text('正在加载繁简转换引擎...');
+    } else if (state.isOpenCCReady) {
+      return const Text('自动识别繁简体对应关系 ✓');
+    } else if (state.openCCError != null) {
+      return const Text('繁简转换不可用');
+    } else {
+      return const Text('自动识别繁简体对应关系');
+    }
   }
 }

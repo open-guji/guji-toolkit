@@ -9,6 +9,11 @@ class CollationState extends Equatable {
   final bool isComparing;
   final CollationResult? result;
 
+  // OpenCC 加载状态
+  final bool isOpenCCLoading;
+  final bool isOpenCCReady;
+  final String? openCCError;
+
   const CollationState({
     this.text1 = '',
     this.text2 = '',
@@ -16,6 +21,9 @@ class CollationState extends Equatable {
     this.ignoreTraditional = true,
     this.isComparing = false,
     this.result,
+    this.isOpenCCLoading = false,
+    this.isOpenCCReady = false,
+    this.openCCError,
   });
 
   CollationState copyWith({
@@ -25,6 +33,9 @@ class CollationState extends Equatable {
     bool? ignoreTraditional,
     bool? isComparing,
     CollationResult? result,
+    bool? isOpenCCLoading,
+    bool? isOpenCCReady,
+    String? openCCError,
   }) {
     return CollationState(
       text1: text1 ?? this.text1,
@@ -33,18 +44,28 @@ class CollationState extends Equatable {
       ignoreTraditional: ignoreTraditional ?? this.ignoreTraditional,
       isComparing: isComparing ?? this.isComparing,
       result: result ?? this.result,
+      isOpenCCLoading: isOpenCCLoading ?? this.isOpenCCLoading,
+      isOpenCCReady: isOpenCCReady ?? this.isOpenCCReady,
+      openCCError: openCCError ?? this.openCCError,
     );
   }
 
+  /// 按钮是否应该被禁用
+  bool get isButtonDisabled =>
+      isComparing || (ignoreTraditional && isOpenCCLoading);
+
   @override
   List<Object?> get props => [
-        text1,
-        text2,
-        ignorePunctuation,
-        ignoreTraditional,
-        isComparing,
-        result,
-      ];
+    text1,
+    text2,
+    ignorePunctuation,
+    ignoreTraditional,
+    isComparing,
+    result,
+    isOpenCCLoading,
+    isOpenCCReady,
+    openCCError,
+  ];
 }
 
 /// 对校结果模型

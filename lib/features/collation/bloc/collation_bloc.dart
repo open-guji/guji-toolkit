@@ -14,6 +14,30 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     on<PerformCollationEvent>(_onPerformCollation);
     on<LoadExampleEvent>(_onLoadExample);
     on<ClearResultEvent>(_onClearResult);
+    on<CheckOpenCCStatusEvent>(_onCheckOpenCCStatus);
+
+    // 初始化时检查 OpenCC 状态
+    add(const CheckOpenCCStatusEvent());
+  }
+
+  /// 处理检查 OpenCC 状态事件
+  Future<void> _onCheckOpenCCStatus(
+    CheckOpenCCStatusEvent event,
+    Emitter<CollationState> emit,
+  ) async {
+    emit(state.copyWith(isOpenCCLoading: true));
+    try {
+      await TextNormalizer.ensureReady();
+      emit(state.copyWith(isOpenCCLoading: false, isOpenCCReady: true));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isOpenCCLoading: false,
+          isOpenCCReady: false,
+          openCCError: e.toString(),
+        ),
+      );
+    }
   }
 
   /// 处理加载示例事件
@@ -76,6 +100,11 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     emit(state.copyWith(isComparing: true));
 
     try {
+      // 如果启用了繁简兼容，确保 OpenCC 已就绪（特别是 Web 平台需要异步加载脚本）
+      if (state.ignoreTraditional && !state.isOpenCCReady) {
+        await TextNormalizer.ensureReady();
+      }
+
       // 创建对校选项
       final options = CollationOptions(
         ignorePunctuation: state.ignorePunctuation,
