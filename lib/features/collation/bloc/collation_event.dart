@@ -48,6 +48,16 @@ class ToggleIgnoreTraditionalEvent extends CollationEvent {
   List<Object?> get props => [value];
 }
 
+/// 切换异体字兼容选项事件
+class ToggleIgnoreVariantsEvent extends CollationEvent {
+  final bool value;
+
+  const ToggleIgnoreVariantsEvent(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
 // 执行对校事件
 class PerformCollationEvent extends CollationEvent {
   const PerformCollationEvent();

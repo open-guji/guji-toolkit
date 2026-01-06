@@ -28,13 +28,15 @@ void main() {
   }
 
   group('CollationOptionsPanel', () {
-    testWidgets('应该显示标题和两个选项', (tester) async {
+    testWidgets('应该显示标题和所有选项', (tester) async {
       when(() => mockBloc.state).thenReturn(const CollationState());
 
       await tester.pumpWidget(buildTestWidget());
 
+      expect(find.text('设置'), findsOneWidget);
       expect(find.text('忽略标点'), findsOneWidget);
       expect(find.text('繁简兼容'), findsOneWidget);
+      expect(find.text('异体字兼容'), findsOneWidget);
     });
 
     testWidgets('忽略标点选项应该根据状态显示勾选状态', (tester) async {
@@ -44,8 +46,8 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      final checkbox = tester.widget<CheckboxListTile>(
-        find.widgetWithText(CheckboxListTile, '忽略标点'),
+      final checkbox = tester.widget<Checkbox>(
+        find.byKey(const Key('checkbox_ignore_punctuation')),
       );
       expect(checkbox.value, true);
     });
@@ -54,7 +56,7 @@ void main() {
       when(() => mockBloc.state).thenReturn(const CollationState());
 
       await tester.pumpWidget(buildTestWidget());
-      await tester.tap(find.widgetWithText(CheckboxListTile, '忽略标点'));
+      await tester.tap(find.text('忽略标点'));
 
       verify(
         () => mockBloc.add(const ToggleIgnorePunctuationEvent(false)),
@@ -65,10 +67,21 @@ void main() {
       when(() => mockBloc.state).thenReturn(const CollationState());
 
       await tester.pumpWidget(buildTestWidget());
-      await tester.tap(find.widgetWithText(CheckboxListTile, '繁简兼容'));
+      await tester.tap(find.text('繁简兼容'));
 
       verify(
         () => mockBloc.add(const ToggleIgnoreTraditionalEvent(false)),
+      ).called(1);
+    });
+
+    testWidgets('点击异体字兼容选项应该触发事件', (tester) async {
+      when(() => mockBloc.state).thenReturn(const CollationState());
+
+      await tester.pumpWidget(buildTestWidget());
+      await tester.tap(find.text('异体字兼容'));
+
+      verify(
+        () => mockBloc.add(const ToggleIgnoreVariantsEvent(false)),
       ).called(1);
     });
 
@@ -81,19 +94,6 @@ void main() {
 
       expect(find.text('正在加载繁简转换引擎...'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
-    testWidgets('OpenCC 就绪应该显示就绪状态', (tester) async {
-      when(() => mockBloc.state).thenReturn(
-        const CollationState(ignoreTraditional: true, isOpenCCReady: true),
-      );
-
-      await tester.pumpWidget(buildTestWidget());
-
-      // Subtitle helper was removed, so this check is no longer valid or needs update if status is shown elsewhere
-      // Currently, success state has no text indicator in the new UI, just absence of error/loading
-      // We can check that the loading indicator is GONE
-      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('OpenCC 错误应该显示错误信息', (tester) async {

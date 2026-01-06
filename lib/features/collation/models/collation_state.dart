@@ -6,6 +6,7 @@ class CollationState extends Equatable {
   final String text2;
   final bool ignorePunctuation;
   final bool ignoreTraditional;
+  final bool ignoreVariants;
   final bool isComparing;
   final CollationResult? result;
 
@@ -19,6 +20,7 @@ class CollationState extends Equatable {
     this.text2 = '',
     this.ignorePunctuation = true,
     this.ignoreTraditional = true,
+    this.ignoreVariants = true,
     this.isComparing = false,
     this.result,
     this.isOpenCCLoading = false,
@@ -31,6 +33,7 @@ class CollationState extends Equatable {
     String? text2,
     bool? ignorePunctuation,
     bool? ignoreTraditional,
+    bool? ignoreVariants,
     bool? isComparing,
     CollationResult? result,
     bool? isOpenCCLoading,
@@ -42,6 +45,7 @@ class CollationState extends Equatable {
       text2: text2 ?? this.text2,
       ignorePunctuation: ignorePunctuation ?? this.ignorePunctuation,
       ignoreTraditional: ignoreTraditional ?? this.ignoreTraditional,
+      ignoreVariants: ignoreVariants ?? this.ignoreVariants,
       isComparing: isComparing ?? this.isComparing,
       result: result ?? this.result,
       isOpenCCLoading: isOpenCCLoading ?? this.isOpenCCLoading,
@@ -60,6 +64,7 @@ class CollationState extends Equatable {
     text2,
     ignorePunctuation,
     ignoreTraditional,
+    ignoreVariants,
     isComparing,
     result,
     isOpenCCLoading,

@@ -10,36 +10,61 @@ class CollationOptionsPanel extends StatelessWidget {
     return BlocBuilder<CollationBloc, CollationState>(
       builder: (context, state) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title
             Row(
               children: [
-                Expanded(
-                  child: CheckboxListTile(
-                    title: const Text('忽略标点'),
-                    value: state.ignorePunctuation,
-                    onChanged: (value) {
-                      context.read<CollationBloc>().add(
-                        ToggleIgnorePunctuationEvent(value ?? true),
-                      );
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  ),
+                Icon(
+                  Icons.settings,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                Expanded(
-                  child: CheckboxListTile(
-                    title: const Text('繁简兼容'),
-                    value: state.ignoreTraditional,
-                    onChanged: (value) {
-                      context.read<CollationBloc>().add(
-                        ToggleIgnoreTraditionalEvent(value ?? true),
-                      );
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  ),
+                const SizedBox(width: 8),
+                Text(
+                  '设置',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Options
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _OptionCheckbox(
+                  label: '忽略标点',
+                  value: state.ignorePunctuation,
+                  checkboxKey: const Key('checkbox_ignore_punctuation'),
+                  onChanged: (value) {
+                    context.read<CollationBloc>().add(
+                      ToggleIgnorePunctuationEvent(value ?? true),
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+                _OptionCheckbox(
+                  label: '繁简兼容',
+                  value: state.ignoreTraditional,
+                  checkboxKey: const Key('checkbox_ignore_traditional'),
+                  onChanged: (value) {
+                    context.read<CollationBloc>().add(
+                      ToggleIgnoreTraditionalEvent(value ?? true),
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+                _OptionCheckbox(
+                  label: '异体字兼容',
+                  value: state.ignoreVariants,
+                  checkboxKey: const Key('checkbox_ignore_variants'),
+                  onChanged: (value) {
+                    context.read<CollationBloc>().add(
+                      ToggleIgnoreVariantsEvent(value ?? true),
+                    );
+                  },
                 ),
               ],
             ),
@@ -85,5 +110,48 @@ class CollationOptionsPanel extends StatelessWidget {
       );
     }
     return const SizedBox.shrink();
+  }
+}
+
+class _OptionCheckbox extends StatelessWidget {
+  final String label;
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+  final Key? checkboxKey;
+
+  const _OptionCheckbox({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.checkboxKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: Checkbox(
+                key: checkboxKey,
+                value: value,
+                onChanged: onChanged,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(width: 8), // slightly more touch area
+          ],
+        ),
+      ),
+    );
   }
 }

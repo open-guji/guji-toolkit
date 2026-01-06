@@ -19,6 +19,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     on<UpdateText2Event>(_onUpdateText2);
     on<ToggleIgnorePunctuationEvent>(_onToggleIgnorePunctuation);
     on<ToggleIgnoreTraditionalEvent>(_onToggleIgnoreTraditional);
+    on<ToggleIgnoreVariantsEvent>(_onToggleIgnoreVariants);
     on<PerformCollationEvent>(_onPerformCollation);
     on<LoadExampleEvent>(_onLoadExample);
     on<ClearResultEvent>(_onClearResult);
@@ -85,6 +86,14 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     emit(state.copyWith(ignoreTraditional: event.value));
   }
 
+  /// 处理切换异体字兼容选项事件
+  void _onToggleIgnoreVariants(
+    ToggleIgnoreVariantsEvent event,
+    Emitter<CollationState> emit,
+  ) {
+    emit(state.copyWith(ignoreVariants: event.value));
+  }
+
   /// 处理执行对校事件
   Future<void> _onPerformCollation(
     PerformCollationEvent event,
@@ -117,6 +126,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       final options = CollationOptions(
         ignorePunctuation: state.ignorePunctuation,
         ignoreTraditional: state.ignoreTraditional,
+        ignoreVariants: state.ignoreVariants,
       );
 
       // 执行逐字对校

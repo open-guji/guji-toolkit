@@ -53,12 +53,20 @@ class _CollationPageContent extends StatelessWidget {
               const CollationOptionsPanel(),
               const SizedBox(height: 16),
 
-              // 示例面板 (作为辅助放在这里)
-              const CollationExamplesPanel(),
-              const SizedBox(height: 24),
-
-              // 2. 文本输入区 (上下排列)
-              const TextInputPanel(),
+              // 2. 文本输入区与示例 (左右排列)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 左侧：输入框
+                  const Expanded(flex: 3, child: TextInputPanel()),
+                  const SizedBox(width: 24),
+                  // 右侧：示例列表
+                  const Expanded(
+                    flex: 1,
+                    child: CollationExamplesPanel(isVertical: true),
+                  ),
+                ],
+              ),
               const SizedBox(height: 24),
 
               // 3. 对比按钮

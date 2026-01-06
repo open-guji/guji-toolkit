@@ -23,12 +23,12 @@ void main() {
     mockBloc = MockCollationBloc();
   });
 
-  Widget buildTestWidget() {
+  Widget buildTestWidget({bool isVertical = false}) {
     return MaterialApp(
       home: Scaffold(
         body: BlocProvider<CollationBloc>.value(
           value: mockBloc,
-          child: const CollationExamplesPanel(),
+          child: CollationExamplesPanel(isVertical: isVertical),
         ),
       ),
     );
@@ -40,7 +40,7 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('示例：'), findsOneWidget);
+      expect(find.text('示例'), findsOneWidget);
     });
 
     testWidgets('应该显示所有示例按钮', (tester) async {
@@ -73,6 +73,15 @@ void main() {
 
       // 验证 Tooltip 或描述存在
       expect(find.byType(ActionChip), findsWidgets);
+    });
+
+    testWidgets('垂直模式应该正确渲染', (tester) async {
+      when(() => mockBloc.state).thenReturn(const CollationState());
+
+      await tester.pumpWidget(buildTestWidget(isVertical: true));
+
+      expect(find.text('示例'), findsOneWidget);
+      expect(find.byType(Column), findsWidgets);
     });
   });
 }
