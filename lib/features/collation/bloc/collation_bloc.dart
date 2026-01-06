@@ -139,13 +139,45 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       // 计算相似度
       final similarity = SimilarityScorer.calculate(changes);
 
+      // 分析统计信息
+      int deleteCount = 0;
+      int insertCount = 0;
+      for (var change in changes) {
+        if (change.type == CollationType.delete) {
+          deleteCount += change.text.length;
+        } else if (change.type == CollationType.insert) {
+          insertCount += change.text.length;
+        }
+      }
+
+      // 提取高频改动模式
+      final patterns = ChangePatternAnalyzer.analyze(changes);
+
+      // 计算总改动量（以字符为单位）
+      // 改动量这里按 detected patterns 的总字符数算
+      int modifyCount = 0;
+      patterns.forEach((key, count) {
+        // key format is "A->B"
+        final parts = key.split('->');
+        if (parts.length == 2) {
+          modifyCount += parts[0].length * count;
+        }
+      });
+
       // 将差异列表转换为可读文本
       final diffText = _formatChanges(changes);
 
       emit(
         state.copyWith(
           isComparing: false,
-          result: CollationResult(diff: diffText, similarity: similarity),
+          result: CollationResult(
+            diff: diffText,
+            similarity: similarity,
+            deleteCount: deleteCount,
+            insertCount: insertCount,
+            modifyCount: modifyCount,
+            patterns: patterns,
+          ),
         ),
       );
     } catch (e) {

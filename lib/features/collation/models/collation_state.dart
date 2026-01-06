@@ -77,14 +77,30 @@ class CollationState extends Equatable {
 class CollationResult extends Equatable {
   final String diff;
   final double similarity;
+  final int insertCount;
+  final int deleteCount;
+  final int modifyCount;
+  final Map<String, int> patterns;
   final String? error;
 
   const CollationResult({
     required this.diff,
     required this.similarity,
+    this.insertCount = 0,
+    this.deleteCount = 0,
+    this.modifyCount = 0,
+    this.patterns = const {},
     this.error,
   });
 
   @override
-  List<Object?> get props => [diff, similarity, error];
+  List<Object?> get props => [
+    diff,
+    similarity,
+    insertCount,
+    deleteCount,
+    modifyCount,
+    patterns,
+    error,
+  ];
 }

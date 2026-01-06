@@ -48,18 +48,46 @@ void main() {
     expect(find.text('底本'), findsOneWidget);
     expect(find.text('校本'), findsOneWidget);
 
-    // 8. Interaction: Click an option
-    // Note: Clicking the text label or the Row containing it should work due to InkWell.
-    await tester.tap(find.text('忽略标点'));
+    // 8. Interaction: Click options
+    await tester.tap(find.text('繁简兼容')); // Toggle off FFI-dependent option
+    await tester.tap(find.text('异体字兼容')); // Toggle off FFI-dependent option
     await tester.pump();
 
     // 9. Interaction: Type text
-    // Fixed selectors: searching for hint text or by order
     await tester.enterText(find.byType(TextField).at(0), '比如');
     await tester.enterText(find.byType(TextField).at(1), '譬如');
     await tester.pump();
 
+    // 9.5 Wait for OpenCC to be ready (it might be loading)
+    // The loading text is "正在加载繁简转换引擎..."
+    int retry = 0;
+    while (find.text('正在加载繁简转换引擎...').evaluate().isNotEmpty && retry < 10) {
+      await tester.pump(const Duration(milliseconds: 100));
+      retry++;
+    }
+
     // 10. Interaction: Click Compare
-    // Result display might appear if logic runs.
+    final compareButton = find.text('开始对比');
+    expect(compareButton, findsOneWidget);
+    await tester.tap(compareButton);
+    await tester.pumpAndSettle();
+
+    // 11. Verify Results Tabs
+    if (find.text('文字对比').evaluate().isEmpty) {
+      // Check if there is an error message
+      final errorFinder = find.byType(
+        Container,
+      ); // The error container use BoxDecoration with error color
+      // Or just look for any text that isn't expected
+      print('Result tabs not found. Screen content:');
+      for (final widget in tester.allWidgets) {
+        if (widget is Text) {
+          print('Text: ${widget.data}');
+        }
+      }
+    }
+
+    expect(find.text('文字对比'), findsOneWidget);
+    expect(find.text('统计分析'), findsOneWidget);
   });
 }

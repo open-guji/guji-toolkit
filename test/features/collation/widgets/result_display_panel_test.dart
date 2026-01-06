@@ -36,16 +36,42 @@ void main() {
       expect(find.text('点击"开始对比"查看结果'), findsOneWidget);
     });
 
-    testWidgets('有结果时应该显示相似度', (tester) async {
+    testWidgets('应该显示标签页', (tester) async {
       when(() => mockBloc.state).thenReturn(
         const CollationState(
-          result: CollationResult(diff: '春眠不觉晓', similarity: 1.0),
+          result: CollationResult(diff: '测试', similarity: 1.0),
         ),
       );
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.textContaining('100'), findsOneWidget);
+      expect(find.text('文字对比'), findsOneWidget);
+      expect(find.text('统计分析'), findsOneWidget);
+    });
+
+    testWidgets('统计分析页应该显示相似度和计数', (tester) async {
+      when(() => mockBloc.state).thenReturn(
+        const CollationState(
+          result: CollationResult(
+            diff: '春眠不觉晓',
+            similarity: 0.95,
+            insertCount: 2,
+            deleteCount: 1,
+            modifyCount: 3,
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(buildTestWidget());
+
+      // 切换到统计分析标签
+      await tester.tap(find.text('统计分析'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('95%'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget); // insertCount
+      expect(find.text('1'), findsOneWidget); // deleteCount
+      expect(find.text('3'), findsOneWidget); // modifyCount
     });
 
     testWidgets('有错误时应该显示错误信息', (tester) async {
@@ -60,7 +86,7 @@ void main() {
       expect(find.textContaining('对校失败'), findsOneWidget);
     });
 
-    testWidgets('差异文本应该被渲染', (tester) async {
+    testWidgets('差异文本应该在文字对比页被渲染', (tester) async {
       when(() => mockBloc.state).thenReturn(
         const CollationState(
           result: CollationResult(diff: '春眠[-不-]觉晓', similarity: 0.8),
@@ -69,22 +95,9 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      // 验证 diff 渲染器被使用
+      // 默认显示文字对比
       expect(find.textContaining('春眠'), findsWidgets);
-    });
-
-    testWidgets('应该显示图例', (tester) async {
-      when(() => mockBloc.state).thenReturn(
-        const CollationState(
-          result: CollationResult(diff: '春眠不觉晓', similarity: 1.0),
-        ),
-      );
-
-      await tester.pumpWidget(buildTestWidget());
-
-      // 验证图例显示
       expect(find.text('[-删除-]'), findsOneWidget);
-      expect(find.text('[+添加+]'), findsOneWidget);
     });
   });
 }
