@@ -13,6 +13,8 @@ void main() {
               changes: [
                 CollationChange(type: CollationType.equal, text: '春眠不觉晓'),
               ],
+              resolutions: {},
+              onResolve: (index, resolution) {},
             ),
           ),
         ),
@@ -31,6 +33,8 @@ void main() {
                 CollationChange(type: CollationType.delete, text: '不'),
                 CollationChange(type: CollationType.equal, text: '觉晓'),
               ],
+              resolutions: {},
+              onResolve: (index, resolution) {},
             ),
           ),
         ),
@@ -49,6 +53,8 @@ void main() {
                 CollationChange(type: CollationType.insert, text: '不'),
                 CollationChange(type: CollationType.equal, text: '觉晓'),
               ],
+              resolutions: {},
+              onResolve: (index, resolution) {},
             ),
           ),
         ),
@@ -68,6 +74,8 @@ void main() {
                 CollationChange(type: CollationType.insert, text: '无'),
                 CollationChange(type: CollationType.equal, text: '觉晓'),
               ],
+              resolutions: {},
+              onResolve: (index, resolution) {},
             ),
           ),
         ),
@@ -78,8 +86,14 @@ void main() {
 
     testWidgets('空文本应该正常渲染', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: DiffTextRenderer(changes: [])),
+        MaterialApp(
+          home: Scaffold(
+            body: DiffTextRenderer(
+              changes: [],
+              resolutions: {},
+              onResolve: (index, resolution) {},
+            ),
+          ),
         ),
       );
 

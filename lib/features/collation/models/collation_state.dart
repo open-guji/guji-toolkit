@@ -1,6 +1,13 @@
 import 'package:equatable/equatable.dart';
 import 'package:guji_diff/guji_diff.dart';
 
+/// 差异解决状态
+enum DiffResolution {
+  unresolved, // 未解决 (默认)
+  acceptOriginal, // 保留底本 (Reject Change)
+  acceptNew, // 接受校本 (Accept Change)
+}
+
 /// 对校状态模型
 class CollationState extends Equatable {
   final String text1;
@@ -11,6 +18,9 @@ class CollationState extends Equatable {
   final bool isComparing;
   final CollationResult? result;
   final List<CollationChange>? changes;
+
+  // 交互式差异解决状态: key is index in changes list
+  final Map<int, DiffResolution> resolutions;
 
   // OpenCC 加载状态
   final bool isOpenCCLoading;
@@ -26,6 +36,7 @@ class CollationState extends Equatable {
     this.isComparing = false,
     this.result,
     this.changes,
+    this.resolutions = const {},
     this.isOpenCCLoading = false,
     this.isOpenCCReady = false,
     this.openCCError,
@@ -40,6 +51,7 @@ class CollationState extends Equatable {
     bool? isComparing,
     CollationResult? result,
     List<CollationChange>? changes,
+    Map<int, DiffResolution>? resolutions,
     bool? isOpenCCLoading,
     bool? isOpenCCReady,
     String? openCCError,
@@ -53,6 +65,7 @@ class CollationState extends Equatable {
       isComparing: isComparing ?? this.isComparing,
       result: result ?? this.result,
       changes: changes ?? this.changes,
+      resolutions: resolutions ?? this.resolutions,
       isOpenCCLoading: isOpenCCLoading ?? this.isOpenCCLoading,
       isOpenCCReady: isOpenCCReady ?? this.isOpenCCReady,
       openCCError: openCCError ?? this.openCCError,
@@ -73,6 +86,7 @@ class CollationState extends Equatable {
     isComparing,
     result,
     changes,
+    resolutions,
     isOpenCCLoading,
     isOpenCCReady,
     openCCError,

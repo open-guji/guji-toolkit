@@ -63,7 +63,7 @@ class ResultDisplayPanel extends StatelessWidget {
                 height: 400, // Fixed height or constrained
                 child: TabBarView(
                   children: [
-                    _buildMergedView(context, result),
+                    _buildMergedView(context, result, state.resolutions),
                     _buildStatisticalAnalysis(context, result),
                   ],
                 ),
@@ -96,7 +96,11 @@ class ResultDisplayPanel extends StatelessWidget {
   }
 
   /// 合并模式：显示合并后的文本，高亮差异
-  Widget _buildMergedView(BuildContext context, result) {
+  Widget _buildMergedView(
+    BuildContext context,
+    CollationResult result,
+    Map<int, DiffResolution> resolutions,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -113,10 +117,19 @@ class ResultDisplayPanel extends StatelessWidget {
               ),
             ),
             child: SingleChildScrollView(
-              child: DiffTextRenderer(changes: result.mergedView),
+              child: DiffTextRenderer(
+                changes: result.mergedView,
+                resolutions: resolutions,
+                onResolve: (index, resolution) {
+                  context.read<CollationBloc>().add(
+                    ResolveDiffEvent(index, resolution),
+                  );
+                },
+              ),
             ),
           ),
         ),
+
         const SizedBox(height: 12),
         const CollationLegend(),
       ],

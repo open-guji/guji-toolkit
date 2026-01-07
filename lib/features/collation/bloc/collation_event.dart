@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 /// 对校事件基类
+import 'package:guji_toolkit/features/collation/models/collation_state.dart';
+
 abstract class CollationEvent extends Equatable {
   const CollationEvent();
 
@@ -82,4 +84,15 @@ class ClearResultEvent extends CollationEvent {
 /// 检查 OpenCC 状态事件
 class CheckOpenCCStatusEvent extends CollationEvent {
   const CheckOpenCCStatusEvent();
+}
+
+/// 解决差异事件
+class ResolveDiffEvent extends CollationEvent {
+  final int index;
+  final DiffResolution resolution;
+
+  const ResolveDiffEvent(this.index, this.resolution);
+
+  @override
+  List<Object?> get props => [index, resolution];
 }

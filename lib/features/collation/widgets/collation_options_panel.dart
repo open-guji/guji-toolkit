@@ -34,6 +34,7 @@ class CollationOptionsPanel extends StatelessWidget {
                   label: '忽略标点',
                   value: state.ignorePunctuation,
                   checkboxKey: const Key('checkbox_ignore_punctuation'),
+                  disabled: state.isComparing,
                   onChanged: (value) {
                     context.read<CollationBloc>().add(
                       ToggleIgnorePunctuationEvent(value ?? true),
@@ -45,6 +46,7 @@ class CollationOptionsPanel extends StatelessWidget {
                   label: '繁简兼容',
                   value: state.ignoreTraditional,
                   checkboxKey: const Key('checkbox_ignore_traditional'),
+                  disabled: state.isComparing,
                   onChanged: (value) {
                     context.read<CollationBloc>().add(
                       ToggleIgnoreTraditionalEvent(value ?? true),
@@ -103,12 +105,14 @@ class _OptionCheckbox extends StatelessWidget {
   final bool value;
   final ValueChanged<bool?> onChanged;
   final Key? checkboxKey;
+  final bool disabled;
 
   const _OptionCheckbox({
     required this.label,
     required this.value,
     required this.onChanged,
     this.checkboxKey,
+    this.disabled = false,
   });
 
   @override

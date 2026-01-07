@@ -23,6 +23,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     on<PerformCollationEvent>(_onPerformCollation);
     on<LoadExampleEvent>(_onLoadExample);
     on<ClearResultEvent>(_onClearResult);
+    on<ResolveDiffEvent>(_onResolveDiff);
     on<CheckOpenCCStatusEvent>(_onCheckOpenCCStatus);
 
     // 初始化时检查 OpenCC 状态
@@ -57,6 +58,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
         text2: event.text2,
         result: const CollationResult(diff: '', similarity: 0.0),
         changes: const [], // 清空之前的对比结果
+        resolutions: const {}, // 清空之前的解决状态
       ),
     );
   }
@@ -184,6 +186,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
         state.copyWith(
           isComparing: false,
           changes: changes,
+          resolutions: const {}, // 新的对比开始，清空之前的解决状态
           result: CollationResult(
             text1View: fullResult.text1View,
             text2View: fullResult.text2View,
@@ -211,8 +214,18 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
   /// 处理清空结果事件
   void _onClearResult(ClearResultEvent event, Emitter<CollationState> emit) {
     emit(
-      state.copyWith(result: const CollationResult(diff: '', similarity: 0.0)),
+      state.copyWith(
+        result: const CollationResult(diff: '', similarity: 0.0),
+        resolutions: const {},
+      ),
     );
+  }
+
+  /// 处理解决差异事件
+  void _onResolveDiff(ResolveDiffEvent event, Emitter<CollationState> emit) {
+    final newResolutions = Map<int, DiffResolution>.from(state.resolutions);
+    newResolutions[event.index] = event.resolution;
+    emit(state.copyWith(resolutions: newResolutions));
   }
 
   /// 格式化差异列表为可读文本
