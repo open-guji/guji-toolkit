@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// 古籍工具包主题配置
 /// 采用古籍风格设计：宣纸色背景、墨黑色文字、朱砂红强调色
@@ -11,9 +10,24 @@ class AppTheme {
   static const Color lightInk = Color(0xFF666666); // 淡墨色
   static const Color borderColor = Color(0xFFD4CDB8); // 边框色
 
+  // 主体字体栈：优先使用系统自带的宋体/明体，实现"秒开"且零网络依赖
+  static const String mainFontFamily =
+      'SimSun, "Songti SC", "STSong", "Noto Serif SC", serif';
+
+  // 字体栈列表形式，用于 fallback (虽主要通过 font-family 字符串控制，但 Flutter 有时也需要 fallback 列表)
+  static const List<String> fontFallbacks = [
+    'SimSun',
+    'Songti SC',
+    'STSong',
+    'Noto Serif SC',
+    'serif',
+  ];
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+
+      // 直接指定字体族字符串，让浏览器/操作系统去匹配
       colorScheme: const ColorScheme.light(
         primary: vermilionRed,
         onPrimary: paperColor,
@@ -28,95 +42,125 @@ class AppTheme {
         onSurfaceVariant: lightInk,
       ),
 
-      // 文字主题 - 使用思源宋体
-      textTheme: GoogleFonts.notoSerifScTextTheme().copyWith(
-        displayLarge: GoogleFonts.notoSerifSc(
+      // 文字主题 - 全部使用系统宋体
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
           fontSize: 57,
           fontWeight: FontWeight.w400,
           color: inkBlack,
           letterSpacing: -0.25,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        displayMedium: GoogleFonts.notoSerifSc(
+        displayMedium: TextStyle(
           fontSize: 45,
           fontWeight: FontWeight.w400,
           color: inkBlack,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        displaySmall: GoogleFonts.notoSerifSc(
+        displaySmall: TextStyle(
           fontSize: 36,
           fontWeight: FontWeight.w400,
           color: inkBlack,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        headlineLarge: GoogleFonts.notoSerifSc(
+        headlineLarge: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.w500,
           color: inkBlack,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        headlineMedium: GoogleFonts.notoSerifSc(
+        headlineMedium: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w500,
           color: inkBlack,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        headlineSmall: GoogleFonts.notoSerifSc(
+        headlineSmall: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w500,
           color: inkBlack,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        titleLarge: GoogleFonts.notoSerifSc(
+        titleLarge: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
           color: inkBlack,
           letterSpacing: 0,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        titleMedium: GoogleFonts.notoSerifSc(
+        titleMedium: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: inkBlack,
           letterSpacing: 0.15,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        titleSmall: GoogleFonts.notoSerifSc(
+        titleSmall: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: inkBlack,
           letterSpacing: 0.1,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        bodyLarge: GoogleFonts.notoSerifSc(
+        bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: inkBlack,
           letterSpacing: 0.5,
           height: 1.8,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        bodyMedium: GoogleFonts.notoSerifSc(
+        bodyMedium: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: inkBlack,
           letterSpacing: 0.25,
           height: 1.8,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        bodySmall: GoogleFonts.notoSerifSc(
+        bodySmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
           color: lightInk,
           letterSpacing: 0.4,
           height: 1.6,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        labelLarge: GoogleFonts.notoSerifSc(
+        labelLarge: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: inkBlack,
           letterSpacing: 0.1,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        labelMedium: GoogleFonts.notoSerifSc(
+        labelMedium: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: inkBlack,
           letterSpacing: 0.5,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        labelSmall: GoogleFonts.notoSerifSc(
+        labelSmall: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: lightInk,
           letterSpacing: 0.5,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
       ),
 
@@ -126,11 +170,13 @@ class AppTheme {
         backgroundColor: paperColor,
         foregroundColor: inkBlack,
         elevation: 0,
-        titleTextStyle: GoogleFonts.notoSerifSc(
+        titleTextStyle: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: inkBlack,
           letterSpacing: 0.15,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
         iconTheme: const IconThemeData(color: vermilionRed),
       ),
@@ -153,14 +199,14 @@ class AppTheme {
           foregroundColor: paperColor,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: GoogleFonts.notoSerifSc(
+          textStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
+            fontFamily: 'SimSun',
+            fontFamilyFallback: fontFallbacks,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
 
@@ -169,14 +215,14 @@ class AppTheme {
           foregroundColor: vermilionRed,
           side: const BorderSide(color: vermilionRed, width: 1),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: GoogleFonts.notoSerifSc(
+          textStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
+            fontFamily: 'SimSun',
+            fontFamilyFallback: fontFallbacks,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
 
@@ -184,10 +230,12 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: vermilionRed,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          textStyle: GoogleFonts.notoSerifSc(
+          textStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.5,
+            fontFamily: 'SimSun',
+            fontFamilyFallback: fontFallbacks,
           ),
         ),
       ),
@@ -212,15 +260,22 @@ class AppTheme {
           borderRadius: BorderRadius.circular(4),
           borderSide: const BorderSide(color: vermilionRed),
         ),
-        labelStyle: GoogleFonts.notoSerifSc(
+        labelStyle: TextStyle(
           fontSize: 14,
           color: lightInk,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        hintStyle: GoogleFonts.notoSerifSc(
+        hintStyle: TextStyle(
           fontSize: 14,
           color: lightInk,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
 
       // Checkbox 主题
@@ -235,25 +290,26 @@ class AppTheme {
       ),
 
       // Divider 主题
-      dividerTheme: const DividerThemeData(
-        color: borderColor,
-        thickness: 1,
-      ),
+      dividerTheme: const DividerThemeData(color: borderColor, thickness: 1),
 
       // 导航栏主题
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: paperColor,
         selectedIconTheme: const IconThemeData(color: vermilionRed),
         unselectedIconTheme: IconThemeData(color: lightInk),
-        selectedLabelTextStyle: GoogleFonts.notoSerifSc(
+        selectedLabelTextStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: vermilionRed,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
-        unselectedLabelTextStyle: GoogleFonts.notoSerifSc(
+        unselectedLabelTextStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
           color: lightInk,
+          fontFamily: 'SimSun',
+          fontFamilyFallback: fontFallbacks,
         ),
       ),
     );

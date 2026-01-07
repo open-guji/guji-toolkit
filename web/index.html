@@ -30,8 +30,22 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>guji_toolkit</title>
+  <title>古籍工具箱</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Font pre-loading and fallback -->
+  <!-- Google Fonts preconnects removed to prioritize system fonts -->
+
+  <style>
+    /* 
+      Set a global serif fallback as early as possible.
+      This prevents the browser from defaulting to a sans-serif font (like Arial/Helvetica/Heiti)
+      before the Noto Serif SC font is downloaded.
+    */
+    body {
+      font-family: "Noto Serif SC", "SimSun", "Songti SC", "STSong", serif !important;
+    }
+  </style>
 </head>
 
 <body>

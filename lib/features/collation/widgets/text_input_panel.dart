@@ -11,8 +11,8 @@ class TextInputPanel extends StatefulWidget {
 }
 
 class _TextInputPanelState extends State<TextInputPanel> {
-  final TextEditingController _controller1 = TextEditingController();
-  final TextEditingController _controller2 = TextEditingController();
+  final HighlightEditingController _controller1 = HighlightEditingController();
+  final HighlightEditingController _controller2 = HighlightEditingController();
 
   @override
   void initState() {
@@ -49,11 +49,14 @@ class _TextInputPanelState extends State<TextInputPanel> {
         final hasResult =
             state.result != null && state.result!.text1View.isNotEmpty;
 
-        // 生成高亮文本 spans
-        final text1Spans = hasResult
+        // 更新控制器的显示状态
+        _controller1.showHighlight = hasResult;
+        _controller1.highlightSpans = hasResult
             ? HighlightedTextHelper.buildText1Spans(state.result!.text1View)
             : null;
-        final text2Spans = hasResult
+
+        _controller2.showHighlight = hasResult;
+        _controller2.highlightSpans = hasResult
             ? HighlightedTextHelper.buildText2Spans(state.result!.text2View)
             : null;
 
@@ -68,8 +71,6 @@ class _TextInputPanelState extends State<TextInputPanel> {
               onChanged: (value) {
                 context.read<CollationBloc>().add(UpdateText1Event(value));
               },
-              highlightSpans: text1Spans,
-              showHighlight: hasResult,
             ),
             const SizedBox(height: 16),
 
@@ -81,8 +82,6 @@ class _TextInputPanelState extends State<TextInputPanel> {
               onChanged: (value) {
                 context.read<CollationBloc>().add(UpdateText2Event(value));
               },
-              highlightSpans: text2Spans,
-              showHighlight: hasResult,
             ),
           ],
         );

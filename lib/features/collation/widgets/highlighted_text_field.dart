@@ -118,14 +118,34 @@ class HighlightedTextHelper {
   }
 }
 
+/// 自定义 TextEditingController，用于在输入框中直接渲染高亮文本
+class HighlightEditingController extends TextEditingController {
+  List<TextSpan>? highlightSpans;
+  bool showHighlight = false;
+
+  @override
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    if (showHighlight && highlightSpans != null && highlightSpans!.isNotEmpty) {
+      return TextSpan(children: highlightSpans, style: style);
+    }
+    return super.buildTextSpan(
+      context: context,
+      style: style,
+      withComposing: withComposing,
+    );
+  }
+}
+
 /// 可高亮差异的文本输入框
-class HighlightedTextField extends StatefulWidget {
+class HighlightedTextField extends StatelessWidget {
   final String label;
   final String hint;
-  final TextEditingController controller;
+  final HighlightEditingController controller;
   final Function(String) onChanged;
-  final List<TextSpan>? highlightSpans;
-  final bool showHighlight;
 
   const HighlightedTextField({
     super.key,
@@ -133,68 +153,32 @@ class HighlightedTextField extends StatefulWidget {
     required this.hint,
     required this.controller,
     required this.onChanged,
-    this.highlightSpans,
-    this.showHighlight = false,
   });
 
-  @override
-  State<HighlightedTextField> createState() => _HighlightedTextFieldState();
-}
-
-class _HighlightedTextFieldState extends State<HighlightedTextField> {
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.label,
+          label,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).primaryColor,
           ),
         ),
         const SizedBox(height: 8),
-        Stack(
-          children: [
-            // 原始输入框
-            TextField(
-              controller: widget.controller,
-              maxLines: 8,
-              minLines: 4,
-              decoration: InputDecoration(
-                hintText: widget.hint,
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.all(12),
-              ),
-              onChanged: widget.onChanged,
-              style: TextStyle(
-                // 当显示高亮时,让输入框文字透明
-                color: widget.showHighlight
-                    ? Colors.transparent
-                    : Colors.black87,
-              ),
-            ),
-            // 高亮层 (只在有结果时显示)
-            if (widget.showHighlight && widget.highlightSpans != null)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.transparent),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: SingleChildScrollView(
-                      child: SelectableText.rich(
-                        TextSpan(children: widget.highlightSpans!),
-                        style: const TextStyle(fontSize: 16, height: 1.5),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        TextField(
+          controller: controller,
+          maxLines: 8,
+          minLines: 4,
+          decoration: InputDecoration(
+            hintText: hint,
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.all(12),
+          ),
+          onChanged: onChanged,
+          style: const TextStyle(fontSize: 16, height: 1.5),
         ),
       ],
     );
