@@ -4,7 +4,7 @@ import 'diff_text_renderer.dart';
 import 'collation_legend.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
-import 'package:guji_diff/guji_diff.dart';
+import 'package:guji_toolkit/features/collation/services/collation_result_exporter.dart';
 
 class MergedResultView extends StatelessWidget {
   final CollationResult result;
@@ -18,8 +18,11 @@ class MergedResultView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 计算进度
-    final stats = _calculateProgress();
+    // 使用服务计算进度
+    final stats = CollationResultExporter.calculateProgress(
+      result,
+      resolutions,
+    );
     final total = stats.total;
     final resolved = stats.resolved;
     final allResolved = total > 0 && resolved == total;
@@ -110,98 +113,11 @@ class MergedResultView extends StatelessWidget {
     );
   }
 
-  _ProgressStats _calculateProgress() {
-    int total = 0;
-    int resolved = 0;
-    int i = 0;
-    final changes = result.mergedView;
-
-    while (i < changes.length) {
-      final change = changes[i];
-      bool isDiff = false;
-      bool isUnitResolved = false;
-
-      // 检查是否是修改模式 (Delete + Insert)
-      if (change.type == CollationType.delete && i + 1 < changes.length) {
-        final nextChange = changes[i + 1];
-        if (nextChange.type == CollationType.insert) {
-          isDiff = true;
-          // 修改模式下，只要其中一个有决议（通常是同步的）
-          isUnitResolved =
-              resolutions[i] != null &&
-              resolutions[i] != DiffResolution.unresolved;
-          i += 2;
-        } else {
-          isDiff = true;
-          isUnitResolved =
-              resolutions[i] != null &&
-              resolutions[i] != DiffResolution.unresolved;
-          i++;
-        }
-      } else if (change.type != CollationType.equal) {
-        isDiff = true;
-        isUnitResolved =
-            resolutions[i] != null &&
-            resolutions[i] != DiffResolution.unresolved;
-        i++;
-      } else {
-        i++;
-      }
-
-      if (isDiff) {
-        total++;
-        if (isUnitResolved) {
-          resolved++;
-        }
-      }
-    }
-    return _ProgressStats(total: total, resolved: resolved);
-  }
-
-  String _getResolvedText() {
-    final buffer = StringBuffer();
-    int i = 0;
-    final changes = result.mergedView;
-
-    while (i < changes.length) {
-      final change = changes[i];
-      final resolution = resolutions[i] ?? DiffResolution.unresolved;
-
-      if (change.type == CollationType.equal) {
-        buffer.write(change.text);
-        i++;
-      } else if (change.type == CollationType.delete &&
-          i + 1 < changes.length &&
-          changes[i + 1].type == CollationType.insert) {
-        // 修改模式
-        final insertChange = changes[i + 1];
-        if (resolution == DiffResolution.acceptNew) {
-          buffer.write(insertChange.text);
-        } else {
-          // 默认保留底本 (Original) 如果未解决或接受原件
-          buffer.write(change.text);
-        }
-        i += 2;
-      } else if (change.type == CollationType.delete) {
-        // 单独删除
-        if (resolution != DiffResolution.acceptNew) {
-          // 只有在未采纳删除（即保留原件）时才写入
-          buffer.write(change.text);
-        }
-        i++;
-      } else if (change.type == CollationType.insert) {
-        // 单独新增
-        if (resolution == DiffResolution.acceptNew) {
-          buffer.write(change.text);
-        }
-        i++;
-      }
-    }
-    return buffer.toString();
-  }
-
   void _handleExport(BuildContext context, {required bool isCopy}) {
-    final stats = _calculateProgress();
+    final stats = CollationResultExporter.calculateProgress(
+      result,
+      resolutions,
+    );
     if (stats.resolved < stats.total) {
       showDialog(
         context: context,
@@ -237,7 +153,7 @@ class MergedResultView extends StatelessWidget {
   }
 
   void _copyToClipboard(BuildContext context) {
-    final text = _getResolvedText();
+    final text = CollationResultExporter.getResolvedText(result, resolutions);
     Clipboard.setData(ClipboardData(text: text)).then((_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -251,7 +167,7 @@ class MergedResultView extends StatelessWidget {
   }
 
   void _saveAsFile(BuildContext context) {
-    final text = _getResolvedText();
+    final text = CollationResultExporter.getResolvedText(result, resolutions);
     // 简单的保存逻辑，打印并在提示中说明。
     // 在实际 Web 环境中，通常通过 js 触发下载。
     // 这里我们先显示一个提示。
@@ -269,10 +185,4 @@ class MergedResultView extends StatelessWidget {
     //   ..click();
     // html.Url.revokeObjectUrl(url);
   }
-}
-
-class _ProgressStats {
-  final int total;
-  final int resolved;
-  const _ProgressStats({required this.total, required this.resolved});
 }

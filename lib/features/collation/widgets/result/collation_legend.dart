@@ -8,8 +8,9 @@ class CollationLegend extends StatelessWidget {
     return Wrap(
       spacing: 16,
       children: [
-        _LegendItem(color: Colors.red.shade100, label: '[-删除-]'),
-        _LegendItem(color: Colors.green.shade100, label: '[+添加+]'),
+        _LegendItem(color: Colors.red.shade100, label: '删除'),
+        _LegendItem(color: Colors.green.shade100, label: '添加'),
+        _LegendItem(color: Colors.yellow.shade200, label: '已确认'),
       ],
     );
   }

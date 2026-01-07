@@ -145,6 +145,7 @@ class HighlightedTextField extends StatelessWidget {
   final String label;
   final String hint;
   final HighlightEditingController controller;
+  final ScrollController? scrollController;
   final Function(String) onChanged;
 
   const HighlightedTextField({
@@ -152,6 +153,7 @@ class HighlightedTextField extends StatelessWidget {
     required this.label,
     required this.hint,
     required this.controller,
+    this.scrollController,
     required this.onChanged,
   });
 
@@ -168,20 +170,22 @@ class HighlightedTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          maxLines: null, // Allow unlimited expansion
-          minLines: 12, // Increased height
-          decoration: InputDecoration(
-            hintText: hint,
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.all(12),
+        Expanded(
+          child: TextField(
+            controller: controller,
+            scrollController: scrollController,
+            maxLines: null,
+            minLines: null,
+            expands: true,
+            textAlignVertical: TextAlignVertical.top,
+            decoration: InputDecoration(
+              hintText: hint,
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.all(12),
+            ),
+            onChanged: onChanged,
+            style: const TextStyle(fontSize: 14, height: 1.5),
           ),
-          onChanged: onChanged,
-          style: const TextStyle(
-            fontSize: 14,
-            height: 1.5,
-          ), // Smaller font (was 16)
         ),
       ],
     );

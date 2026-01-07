@@ -34,32 +34,58 @@ class _CollationPageContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 标题区域
-              Text(
-                '古籍对校',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '比较两段古籍文本，输出差异分析结果',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '古籍对校',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '比较两段古籍文本，输出差异分析结果',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
 
-              // 1. 设置部分 (最优先显示)
-              const CollationOptionsPanel(),
-              const SizedBox(height: 16),
-
-              // 2. 文本输入区与示例 (响应式布局)
+              // 1. 设置与示例 (并排显示)
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // 屏幕较宽时左右排列，较窄时上下排列
-                  final isWide = constraints.maxWidth > 900;
+                  final isWide = constraints.maxWidth > 800;
+                  if (isWide) {
+                    return const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 2, child: CollationOptionsPanel()),
+                        SizedBox(width: 32),
+                        Expanded(flex: 3, child: CollationExamplesPanel()),
+                      ],
+                    );
+                  }
+                  return const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CollationOptionsPanel(),
+                      SizedBox(height: 12),
+                      CollationExamplesPanel(),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
 
-                  return _ResponsiveInputArea(isWide: isWide);
+              // 2. 文本输入区 (全宽)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth > 700;
+                  return TextInputPanel(isWide: isWide);
                 },
               ),
               const SizedBox(height: 24),
@@ -118,38 +144,6 @@ class _CollationPageContent extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ResponsiveInputArea extends StatelessWidget {
-  final bool isWide;
-
-  const _ResponsiveInputArea({required this.isWide});
-
-  @override
-  Widget build(BuildContext context) {
-    if (isWide) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Expanded(flex: 3, child: TextInputPanel(isWide: true)),
-          const SizedBox(width: 24),
-          const Expanded(
-            flex: 1,
-            child: CollationExamplesPanel(isVertical: true),
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const TextInputPanel(isWide: false),
-        const SizedBox(height: 16),
-        const CollationExamplesPanel(),
-      ],
     );
   }
 }
