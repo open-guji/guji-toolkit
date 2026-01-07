@@ -63,12 +63,16 @@ class MergedResultView extends StatelessWidget {
             // 进度指示器 (0/0 时不显示)
             if (total > 0)
               _buildProgressIndicator(context, resolved, total, allResolved)
-            else if (result.mergedView.isNotEmpty)
+            else if (result.mergedView.isNotEmpty &&
+                result.text1View.isNotEmpty &&
+                result.text2View.isNotEmpty)
               _buildPerfectMatchIndicator(context),
             const SizedBox(width: 16),
             // 操作按钮
             ElevatedButton.icon(
-              onPressed: () => _handleExport(context, isCopy: true),
+              onPressed: (result.text1View.isEmpty || result.text2View.isEmpty)
+                  ? null
+                  : () => _handleExport(context, isCopy: true),
               icon: const Icon(Icons.copy, size: 16),
               label: const Text('复制'),
               style: ElevatedButton.styleFrom(
@@ -77,7 +81,9 @@ class MergedResultView extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             ElevatedButton.icon(
-              onPressed: () => _handleExport(context, isCopy: false),
+              onPressed: (result.text1View.isEmpty || result.text2View.isEmpty)
+                  ? null
+                  : () => _handleExport(context, isCopy: false),
               icon: const Icon(Icons.save_alt, size: 16),
               label: const Text('保存'),
               style: ElevatedButton.styleFrom(
@@ -91,15 +97,16 @@ class MergedResultView extends StatelessWidget {
   }
 
   Widget _buildPerfectMatchIndicator(BuildContext context) {
+    const color = Colors.green;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.check_circle, color: Colors.green.shade600, size: 20),
+        const Icon(Icons.check_circle, color: color, size: 20),
         const SizedBox(width: 4),
         Text(
           '完全匹配',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.green.shade700,
+            color: color,
             fontWeight: FontWeight.bold,
           ),
         ),

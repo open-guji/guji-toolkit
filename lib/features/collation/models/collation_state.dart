@@ -30,9 +30,9 @@ class CollationState extends Equatable {
   const CollationState({
     this.text1 = '',
     this.text2 = '',
-    this.ignorePunctuation = true,
-    this.ignoreTraditional = true,
-    this.ignoreVariants = true,
+    this.ignorePunctuation = false,
+    this.ignoreTraditional = false,
+    this.ignoreVariants = false,
     this.isComparing = false,
     this.result,
     this.changes,

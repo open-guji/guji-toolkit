@@ -9,3 +9,4 @@ export 'result/collation_legend.dart';
 export 'result/merged_result_view.dart';
 export 'result/statistical_analysis_view.dart';
 export 'options/collation_options_panel.dart';
+export 'collation_action_button.dart';

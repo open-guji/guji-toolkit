@@ -8,8 +8,8 @@ void main() {
 
       expect(state.text1, '');
       expect(state.text2, '');
-      expect(state.ignorePunctuation, true);
-      expect(state.ignoreTraditional, true);
+      expect(state.ignorePunctuation, false);
+      expect(state.ignoreTraditional, false);
       expect(state.isComparing, false);
       expect(state.result, null);
     });
@@ -32,15 +32,12 @@ void main() {
 
     test('copyWith 应该更新指定字段', () {
       const state = CollationState();
-      final newState = state.copyWith(
-        text1: '新文本',
-        isComparing: true,
-      );
+      final newState = state.copyWith(text1: '新文本', isComparing: true);
 
       expect(newState.text1, '新文本');
       expect(newState.text2, ''); // 未改变
       expect(newState.isComparing, true);
-      expect(newState.ignorePunctuation, true); // 未改变
+      expect(newState.ignorePunctuation, false); // 未改变
     });
 
     test('copyWith 应该保留未指定的字段', () {

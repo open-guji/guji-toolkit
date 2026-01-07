@@ -9,9 +9,9 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SelectionArea(
-      child: Scaffold(
-        body: Row(
+    return Scaffold(
+      body: SelectionArea(
+        child: Row(
           children: [
             NavigationRail(
               selectedIndex: _getSelectedIndex(location),
@@ -22,6 +22,11 @@ class MainLayout extends StatelessWidget {
                   icon: Icon(Icons.home_outlined),
                   selectedIcon: Icon(Icons.home),
                   label: Text('首页'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.compare_arrows_outlined),
+                  selectedIcon: Icon(Icons.compare_arrows),
+                  label: Text('文本对校'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.edit_note_outlined),
@@ -49,9 +54,10 @@ class MainLayout extends StatelessWidget {
   }
 
   int _getSelectedIndex(String location) {
-    if (location.startsWith('/editor')) return 1;
-    if (location.startsWith('/scanner')) return 2;
-    if (location.startsWith('/settings')) return 3;
+    if (location.startsWith('/collation')) return 1;
+    if (location.startsWith('/editor')) return 2;
+    if (location.startsWith('/scanner')) return 3;
+    if (location.startsWith('/settings')) return 4;
     return 0;
   }
 
@@ -61,12 +67,15 @@ class MainLayout extends StatelessWidget {
         context.go('/');
         break;
       case 1:
-        context.go('/editor');
+        context.go('/collation');
         break;
       case 2:
-        context.go('/scanner');
+        context.go('/editor');
         break;
       case 3:
+        context.go('/scanner');
+        break;
+      case 4:
         context.go('/settings');
         break;
     }

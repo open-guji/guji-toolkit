@@ -161,6 +161,7 @@ class HighlightedTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
@@ -170,22 +171,20 @@ class HighlightedTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Flexible(
-          child: TextField(
-            controller: controller,
-            scrollController: scrollController,
-            maxLines: null,
-            minLines: 5,
-            expands: false,
-            textAlignVertical: TextAlignVertical.top,
-            decoration: InputDecoration(
-              hintText: hint,
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.all(12),
-            ),
-            onChanged: onChanged,
-            style: const TextStyle(fontSize: 14, height: 1.5),
+        TextField(
+          controller: controller,
+          scrollController: scrollController,
+          maxLines: null,
+          minLines: 5,
+          expands: false,
+          textAlignVertical: TextAlignVertical.top,
+          decoration: InputDecoration(
+            hintText: hint,
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.all(12),
           ),
+          onChanged: onChanged,
+          style: const TextStyle(fontSize: 14, height: 1.5),
         ),
       ],
     );

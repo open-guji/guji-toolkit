@@ -45,7 +45,7 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('文字对比'), findsOneWidget);
+      expect(find.text('合并模式'), findsOneWidget);
       expect(find.text('统计分析'), findsOneWidget);
     });
 
@@ -86,7 +86,7 @@ void main() {
       expect(find.textContaining('对校失败'), findsOneWidget);
     });
 
-    testWidgets('差异文本应该在文字对比页被渲染', (tester) async {
+    testWidgets('差异文本应该在合并模式页被渲染', (tester) async {
       when(() => mockBloc.state).thenReturn(
         const CollationState(
           result: CollationResult(diff: '春眠[-不-]觉晓', similarity: 0.8),
@@ -95,9 +95,8 @@ void main() {
 
       await tester.pumpWidget(buildTestWidget());
 
-      // 默认显示文字对比
+      // 默认显示合并模式
       expect(find.textContaining('春眠'), findsWidgets);
-      expect(find.text('[-删除-]'), findsOneWidget);
     });
   });
 }

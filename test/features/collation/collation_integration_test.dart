@@ -15,7 +15,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 2. Verify Title
-    expect(find.text('古籍对校'), findsOneWidget);
+    expect(find.text('文本对校'), findsOneWidget);
 
     // 3. Verify Settings Panel
     expect(find.text('设置'), findsOneWidget);

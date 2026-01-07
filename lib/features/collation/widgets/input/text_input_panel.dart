@@ -24,6 +24,15 @@ class _TextInputPanelState extends State<TextInputPanel> {
     super.initState();
     _scrollController1.addListener(_syncScroll1);
     _scrollController2.addListener(_syncScroll2);
+
+    // 同步初始状态
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final state = context.read<CollationBloc>().state;
+        _controller1.text = state.text1;
+        _controller2.text = state.text2;
+      }
+    });
   }
 
   void _syncScroll1() {
@@ -100,46 +109,42 @@ class _TextInputPanelState extends State<TextInputPanel> {
             },
           );
 
-        final input2 = HighlightedTextField(
-          label: '校本',
-          hint: '请输入校本内容（可对比多段文本）...',
-          controller: _controller2,
-          scrollController: _scrollController2,
-          onChanged: (value) {
-            context.read<CollationBloc>().add(UpdateText2Event(value));
-          },
-        );
-
-        Widget content;
-        if (widget.isWide) {
-          content = Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(child: input1),
-              const SizedBox(width: 16),
-              Flexible(child: input2),
-            ],
+          final input2 = HighlightedTextField(
+            label: '校本',
+            hint: '请输入校本内容（可对比多段文本）...',
+            controller: _controller2,
+            scrollController: _scrollController2,
+            onChanged: (value) {
+              context.read<CollationBloc>().add(UpdateText2Event(value));
+            },
           );
-        } else {
-          content = Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(child: input1),
-              const SizedBox(height: 16),
-              Flexible(child: input2),
-            ],
-          );
-        }
 
-        return ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: 100,
-            maxHeight: 450, // Limit maximum height
-          ),
-          child: content,
-        );
-      },
+          Widget content;
+          if (widget.isWide) {
+            content = Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: input1),
+                const SizedBox(width: 16),
+                Expanded(child: input2),
+              ],
+            );
+          } else {
+            content = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [input1, const SizedBox(height: 16), input2],
+            );
+          }
+
+          return ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: 450, // Limit maximum height
+            ),
+            child: SingleChildScrollView(child: content),
+          );
+        },
+      ),
     );
   }
 }

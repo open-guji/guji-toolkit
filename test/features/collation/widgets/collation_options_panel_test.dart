@@ -59,7 +59,7 @@ void main() {
       await tester.tap(find.text('忽略标点'));
 
       verify(
-        () => mockBloc.add(const ToggleIgnorePunctuationEvent(false)),
+        () => mockBloc.add(const ToggleIgnorePunctuationEvent(true)),
       ).called(1);
     });
 
@@ -70,7 +70,7 @@ void main() {
       await tester.tap(find.text('繁简兼容'));
 
       verify(
-        () => mockBloc.add(const ToggleIgnoreTraditionalEvent(false)),
+        () => mockBloc.add(const ToggleIgnoreTraditionalEvent(true)),
       ).called(1);
     });
 
@@ -81,7 +81,7 @@ void main() {
       await tester.tap(find.text('异体字兼容'));
 
       verify(
-        () => mockBloc.add(const ToggleIgnoreVariantsEvent(false)),
+        () => mockBloc.add(const ToggleIgnoreVariantsEvent(true)),
       ).called(1);
     });
 

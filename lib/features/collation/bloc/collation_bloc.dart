@@ -6,7 +6,7 @@ import 'package:guji_toolkit/features/collation/models/collation_state.dart';
 import 'package:guji_toolkit/features/collation/services/opencc_service.dart';
 import 'package:guji_toolkit/features/collation/services/collation_report_analyzer.dart';
 
-/// 古籍对校 BLoC
+/// 文本对校 BLoC
 class CollationBloc extends Bloc<CollationEvent, CollationState> {
   final VerbatimCollation _collation;
   final OpenCCService _openCCService;
