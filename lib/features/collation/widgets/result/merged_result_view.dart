@@ -31,26 +31,29 @@ class MergedResultView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Theme.of(context).dividerColor,
-                width: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 200),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).dividerColor,
+                  width: 1,
+                ),
               ),
-            ),
-            child: SingleChildScrollView(
-              child: DiffTextRenderer(
-                changes: result.mergedView,
-                resolutions: resolutions,
-                onResolve: (index, resolution) {
-                  context.read<CollationBloc>().add(
-                    ResolveDiffEvent(index, resolution),
-                  );
-                },
+              child: SingleChildScrollView(
+                child: DiffTextRenderer(
+                  changes: result.mergedView,
+                  resolutions: resolutions,
+                  onResolve: (index, resolution) {
+                    context.read<CollationBloc>().add(
+                      ResolveDiffEvent(index, resolution),
+                    );
+                  },
+                ),
               ),
             ),
           ),

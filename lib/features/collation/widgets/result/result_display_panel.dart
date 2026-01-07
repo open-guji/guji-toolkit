@@ -14,18 +14,7 @@ class ResultDisplayPanel extends StatelessWidget {
         final result = state.result;
 
         if (result == null) {
-          final hasInput = state.text1.isNotEmpty || state.text2.isNotEmpty;
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40.0),
-              child: Text(
-                hasInput ? '对比内容已改变，请重新进行对比' : '点击"开始对比"查看结果',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          );
+          return const SizedBox.shrink();
         }
 
         if (result.error != null) {
@@ -61,7 +50,7 @@ class ResultDisplayPanel extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 400, // Fixed height or constrained
+                height: 450,
                 child: TabBarView(
                   children: [
                     MergedResultView(
@@ -84,9 +73,7 @@ class ResultDisplayPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.errorContainer.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.errorContainer.withAlpha((255 * 0.1).toInt()),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Theme.of(context).colorScheme.error),
       ),

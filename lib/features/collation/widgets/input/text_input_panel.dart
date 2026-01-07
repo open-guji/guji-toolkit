@@ -24,15 +24,6 @@ class _TextInputPanelState extends State<TextInputPanel> {
     super.initState();
     _scrollController1.addListener(_syncScroll1);
     _scrollController2.addListener(_syncScroll2);
-
-    // 同步初始状态
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final state = context.read<CollationBloc>().state;
-        _controller1.text = state.text1;
-        _controller2.text = state.text2;
-      }
-    });
   }
 
   void _syncScroll1() {
@@ -64,87 +55,81 @@ class _TextInputPanelState extends State<TextInputPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CollationBloc, CollationState>(
-      listenWhen: (previous, current) =>
-          previous.text1 != current.text1 || previous.text2 != current.text2,
-      listener: (context, state) {
-        // 同步 state 到控制器,但只在文本真正不同时更新,避免光标跳转
+    return BlocBuilder<CollationBloc, CollationState>(
+      builder: (context, state) {
+        // 同步文本到控制器（仅当不同时）
         if (_controller1.text != state.text1) {
-          _controller1.value = _controller1.value.copyWith(
+          _controller1.value = TextEditingValue(
             text: state.text1,
             selection: TextSelection.collapsed(offset: state.text1.length),
           );
         }
         if (_controller2.text != state.text2) {
-          _controller2.value = _controller2.value.copyWith(
+          _controller2.value = TextEditingValue(
             text: state.text2,
             selection: TextSelection.collapsed(offset: state.text2.length),
           );
         }
-      },
-      child: BlocBuilder<CollationBloc, CollationState>(
-        builder: (context, state) {
-          // 检查是否有对比结果
-          final hasResult =
-              state.result != null && state.result!.text1View.isNotEmpty;
 
-          // 更新控制器的显示状态
-          _controller1.showHighlight = hasResult;
-          _controller1.highlightSpans = hasResult
-              ? HighlightedTextHelper.buildText1Spans(state.result!.text1View)
-              : null;
+        // 检查是否有对比结果
+        final hasResult =
+            state.result != null && state.result!.text1View.isNotEmpty;
 
-          _controller2.showHighlight = hasResult;
-          _controller2.highlightSpans = hasResult
-              ? HighlightedTextHelper.buildText2Spans(state.result!.text2View)
-              : null;
+        // 更新控制器的显示状态
+        _controller1.showHighlight = hasResult;
+        _controller1.highlightSpans = hasResult
+            ? HighlightedTextHelper.buildText1Spans(state.result!.text1View)
+            : null;
 
-          final input1 = HighlightedTextField(
-            label: '底本',
-            hint: '请输入底本内容...',
-            controller: _controller1,
-            scrollController: _scrollController1,
-            onChanged: (value) {
-              context.read<CollationBloc>().add(UpdateText1Event(value));
-            },
-          );
+        _controller2.showHighlight = hasResult;
+        _controller2.highlightSpans = hasResult
+            ? HighlightedTextHelper.buildText2Spans(state.result!.text2View)
+            : null;
 
-          final input2 = HighlightedTextField(
-            label: '校本',
-            hint: '请输入校本内容（可对比多段文本）...',
-            controller: _controller2,
-            scrollController: _scrollController2,
-            onChanged: (value) {
-              context.read<CollationBloc>().add(UpdateText2Event(value));
-            },
-          );
+        final input1 = HighlightedTextField(
+          label: '底本',
+          hint: '请输入底本内容...',
+          controller: _controller1,
+          scrollController: _scrollController1,
+          isExpanded: false,
+          onChanged: (value) {
+            context.read<CollationBloc>().add(UpdateText1Event(value));
+          },
+        );
 
-          Widget content;
-          if (widget.isWide) {
-            content = Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        final input2 = HighlightedTextField(
+          label: '校本',
+          hint: '请输入校本内容（可对比多段文本）...',
+          controller: _controller2,
+          scrollController: _scrollController2,
+          isExpanded: false,
+          onChanged: (value) {
+            context.read<CollationBloc>().add(UpdateText2Event(value));
+          },
+        );
+
+        Widget content;
+        if (widget.isWide) {
+          content = IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(child: input1),
                 const SizedBox(width: 16),
                 Expanded(child: input2),
               ],
-            );
-          } else {
-            content = Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [input1, const SizedBox(height: 16), input2],
-            );
-          }
-
-          return ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: 450, // Limit maximum height
             ),
-            child: SingleChildScrollView(child: content),
           );
-        },
-      ),
+        } else {
+          content = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [input1, const SizedBox(height: 16), input2],
+          );
+        }
+
+        return content;
+      },
     );
   }
 }

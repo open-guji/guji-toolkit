@@ -57,8 +57,8 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       state.copyWith(
         text1: event.text1,
         text2: event.text2,
-        result: null, // 清空之前的对比结果
-        changes: const [], // 清空之前的对比结果
+        result: () => null, // 清空之前的对比结果
+        changes: () => const [], // 清空之前的对比结果
         resolutions: const {}, // 清空之前的解决状态
       ),
     );
@@ -69,8 +69,8 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     emit(
       state.copyWith(
         text1: event.text,
-        result: null, // 清空对比结果
-        changes: const [],
+        result: () => null, // 清空对比结果
+        changes: () => const [],
         resolutions: const {},
       ),
     );
@@ -81,8 +81,8 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     emit(
       state.copyWith(
         text2: event.text,
-        result: null, // 清空对比结果
-        changes: const [],
+        result: () => null, // 清空对比结果
+        changes: () => const [],
         resolutions: const {},
       ),
     );
@@ -126,7 +126,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     if (state.text1.isEmpty || state.text2.isEmpty) {
       emit(
         state.copyWith(
-          result: const CollationResult(
+          result: () => const CollationResult(
             diff: '',
             similarity: 0.0,
             error: '请输入两段文本',
@@ -175,16 +175,16 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       emit(
         state.copyWith(
           isComparing: false,
-          changes: fullResult.mergedView,
+          changes: () => fullResult.mergedView,
           resolutions: const {}, // 新的对比开始，清空之前的解决状态
-          result: collationResult,
+          result: () => collationResult,
         ),
       );
     } catch (e) {
       emit(
         state.copyWith(
           isComparing: false,
-          result: CollationResult(diff: '', similarity: 0.0, error: '对校失败: $e'),
+          result: () => CollationResult(diff: '', similarity: 0.0, error: '对校失败: $e'),
         ),
       );
     }
@@ -193,7 +193,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
   /// 处理清空结果事件
   void _onClearResult(ClearResultEvent event, Emitter<CollationState> emit) {
     emit(
-      state.copyWith(result: null, changes: const [], resolutions: const {}),
+      state.copyWith(result: () => null, changes: () => const [], resolutions: const {}),
     );
   }
 

@@ -147,6 +147,7 @@ class HighlightedTextField extends StatelessWidget {
   final HighlightEditingController controller;
   final ScrollController? scrollController;
   final Function(String) onChanged;
+  final bool isExpanded;
 
   const HighlightedTextField({
     super.key,
@@ -155,13 +156,40 @@ class HighlightedTextField extends StatelessWidget {
     required this.controller,
     this.scrollController,
     required this.onChanged,
+    this.isExpanded = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final textField = TextField(
+      controller: controller,
+      scrollController: scrollController,
+      maxLines: isExpanded ? null : null, // must be null for expands
+      minLines: isExpanded ? null : 5,
+      expands: isExpanded,
+      textAlignVertical: TextAlignVertical.top,
+      decoration: InputDecoration(
+        hintText: hint,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.all(12),
+      ),
+      onChanged: onChanged,
+      style: const TextStyle(fontSize: 14, height: 1.5),
+    );
+
+    final wrappedTextField = isExpanded
+        ? Expanded(child: textField)
+        : ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: 200,
+              maxHeight: 450,
+            ),
+            child: textField,
+          );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: isExpanded ? MainAxisSize.max : MainAxisSize.min,
       children: [
         Text(
           label,
@@ -171,21 +199,7 @@ class HighlightedTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          scrollController: scrollController,
-          maxLines: null,
-          minLines: 5,
-          expands: false,
-          textAlignVertical: TextAlignVertical.top,
-          decoration: InputDecoration(
-            hintText: hint,
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.all(12),
-          ),
-          onChanged: onChanged,
-          style: const TextStyle(fontSize: 14, height: 1.5),
-        ),
+        wrappedTextField,
       ],
     );
   }
