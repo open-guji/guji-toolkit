@@ -34,6 +34,9 @@ class DiffSpanBuilder {
         i++;
       }
     }
+    // Append an invisible zero-width space at the end to force the last span
+    // to be rendered (prevents Flutter from trimming trailing whitespace-only spans).
+    spans.add(const TextSpan(text: '\u200B'));
     return spans;
   }
 
