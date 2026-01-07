@@ -150,27 +150,39 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       final similarity = SimilarityScorer.calculate(changes);
 
       // 分析统计信息
+      // 分析统计信息
       int deleteCount = 0;
       int insertCount = 0;
-      for (var change in changes) {
+      int modifyCount = 0;
+      int i = 0;
+      while (i < changes.length) {
+        final change = changes[i];
+
+        // Check for modification (Delete + Insert pair)
+        if (change.type == CollationType.delete && i + 1 < changes.length) {
+          final nextChange = changes[i + 1];
+          if (nextChange.type == CollationType.insert) {
+            // Found modification: Count as "modify", not add/delete
+            // We use the length of the original text (delete part) as the modification amount
+            modifyCount += change.text.length;
+            i += 2; // Skip both
+            continue;
+          }
+        }
+
+        // Handle isolated changes
         if (change.type == CollationType.delete) {
           deleteCount += change.text.length;
         } else if (change.type == CollationType.insert) {
           insertCount += change.text.length;
         }
+        i++;
       }
 
-      // 提取高频改动模式
+      // 提取高频改动模式 (Patterns) - Analyzed separately
       final patterns = ChangePatternAnalyzer.analyze(changes);
 
-      // 计算总改动量（以字符为单位）
-      int modifyCount = 0;
-      patterns.forEach((key, count) {
-        final parts = key.split('->');
-        if (parts.length == 2) {
-          modifyCount += parts[0].length * count;
-        }
-      });
+      // Removed old pattern-based modifyCount calculation as it was inconsistent with the new logic
 
       // 将差异列表转换为可读文本 (保持兼容性)
       final diffText = _formatChanges(changes);

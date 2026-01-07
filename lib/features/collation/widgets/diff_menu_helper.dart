@@ -14,8 +14,12 @@ class DiffMenuHelper {
   }) async {
     final RenderBox overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
+    // Adjust position to be below the text (approx line height + padding)
+    // The user wants it "further down" to not block text.
+    final Offset targetPosition = globalPosition + const Offset(0, 24);
+
     final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(globalPosition, globalPosition),
+      Rect.fromPoints(targetPosition, targetPosition),
       Offset.zero & overlay.size,
     );
 
