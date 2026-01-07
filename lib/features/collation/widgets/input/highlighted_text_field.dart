@@ -170,13 +170,13 @@ class HighlightedTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Expanded(
+        Flexible(
           child: TextField(
             controller: controller,
             scrollController: scrollController,
             maxLines: null,
-            minLines: null,
-            expands: true,
+            minLines: 5,
+            expands: false,
             textAlignVertical: TextAlignVertical.top,
             decoration: InputDecoration(
               hintText: hint,

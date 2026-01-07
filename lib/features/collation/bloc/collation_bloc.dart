@@ -57,7 +57,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       state.copyWith(
         text1: event.text1,
         text2: event.text2,
-        result: const CollationResult(diff: '', similarity: 0.0),
+        result: null, // 清空之前的对比结果
         changes: const [], // 清空之前的对比结果
         resolutions: const {}, // 清空之前的解决状态
       ),
@@ -66,12 +66,26 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
 
   /// 处理更新文本1事件
   void _onUpdateText1(UpdateText1Event event, Emitter<CollationState> emit) {
-    emit(state.copyWith(text1: event.text));
+    emit(
+      state.copyWith(
+        text1: event.text,
+        result: null, // 清空对比结果
+        changes: const [],
+        resolutions: const {},
+      ),
+    );
   }
 
   /// 处理更新文本2事件
   void _onUpdateText2(UpdateText2Event event, Emitter<CollationState> emit) {
-    emit(state.copyWith(text2: event.text));
+    emit(
+      state.copyWith(
+        text2: event.text,
+        result: null, // 清空对比结果
+        changes: const [],
+        resolutions: const {},
+      ),
+    );
   }
 
   /// 处理切换忽略标点选项事件
@@ -179,10 +193,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
   /// 处理清空结果事件
   void _onClearResult(ClearResultEvent event, Emitter<CollationState> emit) {
     emit(
-      state.copyWith(
-        result: const CollationResult(diff: '', similarity: 0.0),
-        resolutions: const {},
-      ),
+      state.copyWith(result: null, changes: const [], resolutions: const {}),
     );
   }
 

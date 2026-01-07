@@ -62,7 +62,9 @@ class MergedResultView extends StatelessWidget {
             const Spacer(),
             // 进度指示器 (0/0 时不显示)
             if (total > 0)
-              _buildProgressIndicator(context, resolved, total, allResolved),
+              _buildProgressIndicator(context, resolved, total, allResolved)
+            else if (result.mergedView.isNotEmpty)
+              _buildPerfectMatchIndicator(context),
             const SizedBox(width: 16),
             // 操作按钮
             ElevatedButton.icon(
@@ -83,6 +85,23 @@ class MergedResultView extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPerfectMatchIndicator(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.check_circle, color: Colors.green.shade600, size: 20),
+        const SizedBox(width: 4),
+        Text(
+          '完全匹配',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Colors.green.shade700,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

@@ -55,8 +55,10 @@ class _TextInputPanelState extends State<TextInputPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CollationBloc, CollationState>(
-      builder: (context, state) {
+    return BlocListener<CollationBloc, CollationState>(
+      listenWhen: (previous, current) =>
+          previous.text1 != current.text1 || previous.text2 != current.text2,
+      listener: (context, state) {
         // 同步 state 到控制器,但只在文本真正不同时更新,避免光标跳转
         if (_controller1.text != state.text1) {
           _controller1.value = _controller1.value.copyWith(
@@ -70,31 +72,33 @@ class _TextInputPanelState extends State<TextInputPanel> {
             selection: TextSelection.collapsed(offset: state.text2.length),
           );
         }
+      },
+      child: BlocBuilder<CollationBloc, CollationState>(
+        builder: (context, state) {
+          // 检查是否有对比结果
+          final hasResult =
+              state.result != null && state.result!.text1View.isNotEmpty;
 
-        // 检查是否有对比结果
-        final hasResult =
-            state.result != null && state.result!.text1View.isNotEmpty;
+          // 更新控制器的显示状态
+          _controller1.showHighlight = hasResult;
+          _controller1.highlightSpans = hasResult
+              ? HighlightedTextHelper.buildText1Spans(state.result!.text1View)
+              : null;
 
-        // 更新控制器的显示状态
-        _controller1.showHighlight = hasResult;
-        _controller1.highlightSpans = hasResult
-            ? HighlightedTextHelper.buildText1Spans(state.result!.text1View)
-            : null;
+          _controller2.showHighlight = hasResult;
+          _controller2.highlightSpans = hasResult
+              ? HighlightedTextHelper.buildText2Spans(state.result!.text2View)
+              : null;
 
-        _controller2.showHighlight = hasResult;
-        _controller2.highlightSpans = hasResult
-            ? HighlightedTextHelper.buildText2Spans(state.result!.text2View)
-            : null;
-
-        final input1 = HighlightedTextField(
-          label: '底本',
-          hint: '请输入底本内容...',
-          controller: _controller1,
-          scrollController: _scrollController1,
-          onChanged: (value) {
-            context.read<CollationBloc>().add(UpdateText1Event(value));
-          },
-        );
+          final input1 = HighlightedTextField(
+            label: '底本',
+            hint: '请输入底本内容...',
+            controller: _controller1,
+            scrollController: _scrollController1,
+            onChanged: (value) {
+              context.read<CollationBloc>().add(UpdateText1Event(value));
+            },
+          );
 
         final input2 = HighlightedTextField(
           label: '校本',
@@ -109,27 +113,28 @@ class _TextInputPanelState extends State<TextInputPanel> {
         Widget content;
         if (widget.isWide) {
           content = Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: input1),
+              Flexible(child: input1),
               const SizedBox(width: 16),
-              Expanded(child: input2),
+              Flexible(child: input2),
             ],
           );
         } else {
           content = Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(child: input1),
+              Flexible(child: input1),
               const SizedBox(height: 16),
-              Expanded(child: input2),
+              Flexible(child: input2),
             ],
           );
         }
 
         return ConstrainedBox(
           constraints: const BoxConstraints(
-            minHeight: 200,
+            minHeight: 100,
             maxHeight: 450, // Limit maximum height
           ),
           child: content,

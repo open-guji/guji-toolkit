@@ -88,8 +88,7 @@ class _CollationPageContent extends StatelessWidget {
                   return TextInputPanel(isWide: isWide);
                 },
               ),
-              const SizedBox(height: 24),
-
+              const SizedBox(height: 24), // Fixed spacing after text panel
               // 3. 对比按钮
               BlocBuilder<CollationBloc, CollationState>(
                 builder: (context, state) {

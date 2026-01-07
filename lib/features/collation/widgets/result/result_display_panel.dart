@@ -14,11 +14,12 @@ class ResultDisplayPanel extends StatelessWidget {
         final result = state.result;
 
         if (result == null) {
+          final hasInput = state.text1.isNotEmpty || state.text2.isNotEmpty;
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 40.0),
               child: Text(
-                '点击"开始对比"查看结果',
+                hasInput ? '对比内容已改变，请重新进行对比' : '点击"开始对比"查看结果',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
