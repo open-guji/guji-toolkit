@@ -4,6 +4,7 @@ import 'package:guji_toolkit/features/collation/bloc/collation_event.dart';
 import 'package:guji_toolkit/features/collation/models/collation_state.dart';
 
 import 'package:guji_toolkit/features/collation/services/opencc_service.dart';
+import 'package:guji_toolkit/features/collation/services/collation_report_analyzer.dart';
 
 /// 古籍对校 BLoC
 class CollationBloc extends Bloc<CollationEvent, CollationState> {
@@ -144,73 +145,25 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
         options: options,
       );
 
-      final changes = fullResult.mergedView;
-
-      // 计算相似度
-      final similarity = SimilarityScorer.calculate(changes);
-
-      // 分析统计信息
-      // 分析统计信息
-      int deleteCount = 0;
-      int insertCount = 0;
-      int modifyCount = 0;
-      int i = 0;
-      while (i < changes.length) {
-        final change = changes[i];
-
-        // Check for modification (Delete + Insert pair)
-        if (change.type == CollationType.delete && i + 1 < changes.length) {
-          final nextChange = changes[i + 1];
-          if (nextChange.type == CollationType.insert) {
-            // Found modification: Count as "modify", not add/delete
-            // We use the length of the original text (delete part) as the modification amount
-            modifyCount += change.text.length;
-            i += 2; // Skip both
-            continue;
-          }
-        }
-
-        // Handle isolated changes
-        if (change.type == CollationType.delete) {
-          deleteCount += change.text.length;
-        } else if (change.type == CollationType.insert) {
-          insertCount += change.text.length;
-        }
-        i++;
-      }
-
-      // 提取高频改动模式 (Patterns) - Analyzed separately
-      final patterns = ChangePatternAnalyzer.analyze(changes);
-
-      // Removed old pattern-based modifyCount calculation as it was inconsistent with the new logic
-
-      // 将差异列表转换为可读文本 (保持兼容性)
-      final diffText = _formatChanges(changes);
-
-      // 生成 unified diff 格式
-      final unifiedDiffText = _formatUnifiedDiff(
-        changes,
-        state.text1,
-        state.text2,
+      // 使用分析服务生成最终报告
+      final collationResult = CollationReportAnalyzer.analyze(
+        text1View: fullResult.text1View,
+        text2View: fullResult.text2View,
+        mergedView: fullResult.mergedView,
+        diff: _formatChanges(fullResult.mergedView),
+        unifiedDiff: _formatUnifiedDiff(
+          fullResult.mergedView,
+          state.text1,
+          state.text2,
+        ),
       );
 
       emit(
         state.copyWith(
           isComparing: false,
-          changes: changes,
+          changes: fullResult.mergedView,
           resolutions: const {}, // 新的对比开始，清空之前的解决状态
-          result: CollationResult(
-            text1View: fullResult.text1View,
-            text2View: fullResult.text2View,
-            mergedView: fullResult.mergedView,
-            diff: diffText,
-            unifiedDiff: unifiedDiffText,
-            similarity: similarity,
-            deleteCount: deleteCount,
-            insertCount: insertCount,
-            modifyCount: modifyCount,
-            patterns: patterns,
-          ),
+          result: collationResult,
         ),
       );
     } catch (e) {

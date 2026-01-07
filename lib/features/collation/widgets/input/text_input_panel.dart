@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
-import 'package:guji_toolkit/features/collation/widgets/highlighted_text_field.dart';
+import 'highlighted_text_field.dart';
 
 class TextInputPanel extends StatefulWidget {
   final bool isWide;

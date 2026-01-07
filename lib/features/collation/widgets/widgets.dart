@@ -1,6 +1,11 @@
-export 'collation_examples_panel.dart';
-export 'collation_options_panel.dart';
-export 'result_display_panel.dart';
-export 'text_input_panel.dart';
-export 'diff_text_renderer.dart';
-export 'collation_legend.dart';
+export 'input/text_input_panel.dart';
+export 'input/highlighted_text_field.dart';
+export 'input/collation_examples_panel.dart';
+export 'result/result_display_panel.dart';
+export 'result/diff_text_renderer.dart';
+export 'result/diff_span_builder.dart';
+export 'result/diff_menu_helper.dart';
+export 'result/collation_legend.dart';
+export 'result/merged_result_view.dart';
+export 'result/statistical_analysis_view.dart';
+export 'options/collation_options_panel.dart';

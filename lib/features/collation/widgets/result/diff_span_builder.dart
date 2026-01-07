@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:guji_diff/guji_diff.dart';
 import 'package:guji_toolkit/features/collation/models/collation_state.dart';
-import 'package:guji_toolkit/features/collation/widgets/diff_menu_helper.dart';
+import 'diff_menu_helper.dart';
 
 class DiffSpanBuilder {
   final BuildContext context;

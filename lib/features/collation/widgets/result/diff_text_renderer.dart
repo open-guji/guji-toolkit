@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:guji_diff/guji_diff.dart';
 import 'package:guji_toolkit/features/collation/models/collation_state.dart';
-import 'package:guji_toolkit/features/collation/widgets/diff_menu_helper.dart';
-import 'package:guji_toolkit/features/collation/widgets/diff_span_builder.dart';
+import 'diff_menu_helper.dart';
+import 'diff_span_builder.dart';
 
 /// 渲染可交互的差异文本
 class DiffTextRenderer extends StatelessWidget {

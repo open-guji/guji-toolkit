@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
 import 'package:guji_toolkit/features/collation/models/collation_example.dart';
-import 'package:guji_toolkit/features/collation/widgets/collation_examples_panel.dart';
+import 'package:guji_toolkit/features/collation/widgets/widgets.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockCollationBloc extends MockBloc<CollationEvent, CollationState>

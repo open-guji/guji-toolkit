@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:guji_diff/guji_diff.dart';
-import 'package:guji_toolkit/features/collation/widgets/diff_text_renderer.dart';
+import 'package:guji_toolkit/features/collation/widgets/widgets.dart';
 
 void main() {
   group('DiffTextRenderer', () {
