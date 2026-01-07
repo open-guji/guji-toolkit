@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:guji_diff/guji_diff.dart';
 
 /// 对校状态模型
 class CollationState extends Equatable {
@@ -9,6 +10,7 @@ class CollationState extends Equatable {
   final bool ignoreVariants;
   final bool isComparing;
   final CollationResult? result;
+  final List<CollationChange>? changes;
 
   // OpenCC 加载状态
   final bool isOpenCCLoading;
@@ -23,6 +25,7 @@ class CollationState extends Equatable {
     this.ignoreVariants = true,
     this.isComparing = false,
     this.result,
+    this.changes,
     this.isOpenCCLoading = false,
     this.isOpenCCReady = false,
     this.openCCError,
@@ -36,6 +39,7 @@ class CollationState extends Equatable {
     bool? ignoreVariants,
     bool? isComparing,
     CollationResult? result,
+    List<CollationChange>? changes,
     bool? isOpenCCLoading,
     bool? isOpenCCReady,
     String? openCCError,
@@ -48,6 +52,7 @@ class CollationState extends Equatable {
       ignoreVariants: ignoreVariants ?? this.ignoreVariants,
       isComparing: isComparing ?? this.isComparing,
       result: result ?? this.result,
+      changes: changes ?? this.changes,
       isOpenCCLoading: isOpenCCLoading ?? this.isOpenCCLoading,
       isOpenCCReady: isOpenCCReady ?? this.isOpenCCReady,
       openCCError: openCCError ?? this.openCCError,
@@ -67,6 +72,7 @@ class CollationState extends Equatable {
     ignoreVariants,
     isComparing,
     result,
+    changes,
     isOpenCCLoading,
     isOpenCCReady,
     openCCError,
@@ -75,7 +81,11 @@ class CollationState extends Equatable {
 
 /// 对校结果模型
 class CollationResult extends Equatable {
-  final String diff;
+  final List<CollationChange> text1View;
+  final List<CollationChange> text2View;
+  final List<CollationChange> mergedView;
+  final String diff; // 原有的 diff 文本，兼容旧代码
+  final String unifiedDiff;
   final double similarity;
   final int insertCount;
   final int deleteCount;
@@ -84,7 +94,11 @@ class CollationResult extends Equatable {
   final String? error;
 
   const CollationResult({
+    this.text1View = const [],
+    this.text2View = const [],
+    this.mergedView = const [],
     required this.diff,
+    this.unifiedDiff = '',
     required this.similarity,
     this.insertCount = 0,
     this.deleteCount = 0,
@@ -95,7 +109,11 @@ class CollationResult extends Equatable {
 
   @override
   List<Object?> get props => [
+    text1View,
+    text2View,
+    mergedView,
     diff,
+    unifiedDiff,
     similarity,
     insertCount,
     deleteCount,

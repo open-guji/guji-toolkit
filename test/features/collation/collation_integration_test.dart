@@ -73,21 +73,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // 11. Verify Results Tabs
-    if (find.text('文字对比').evaluate().isEmpty) {
-      // Check if there is an error message
-      final errorFinder = find.byType(
-        Container,
-      ); // The error container use BoxDecoration with error color
-      // Or just look for any text that isn't expected
-      print('Result tabs not found. Screen content:');
-      for (final widget in tester.allWidgets) {
-        if (widget is Text) {
-          print('Text: ${widget.data}');
-        }
-      }
+    if (find.text('合并模式').evaluate().isEmpty) {
+      // Result tabs not found.
     }
 
-    expect(find.text('文字对比'), findsOneWidget);
+    expect(find.text('合并模式'), findsOneWidget);
+    expect(find.text('差异模式'), findsOneWidget);
     expect(find.text('统计分析'), findsOneWidget);
   });
 }

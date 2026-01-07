@@ -42,23 +42,24 @@ class CollationOptionsPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 _OptionCheckbox(
+                  label: '异体字兼容',
+                  value: state.ignoreVariants,
+                  disabled: state.ignoreTraditional, // 如果选了繁简，则强制选异体字且不可更改
+                  checkboxKey: const Key('checkbox_ignore_variants'),
+                  onChanged: (value) {
+                    context.read<CollationBloc>().add(
+                      ToggleIgnoreVariantsEvent(value ?? true),
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+                _OptionCheckbox(
                   label: '繁简兼容',
                   value: state.ignoreTraditional,
                   checkboxKey: const Key('checkbox_ignore_traditional'),
                   onChanged: (value) {
                     context.read<CollationBloc>().add(
                       ToggleIgnoreTraditionalEvent(value ?? true),
-                    );
-                  },
-                ),
-                const SizedBox(width: 16),
-                _OptionCheckbox(
-                  label: '异体字兼容',
-                  value: state.ignoreVariants,
-                  checkboxKey: const Key('checkbox_ignore_variants'),
-                  onChanged: (value) {
-                    context.read<CollationBloc>().add(
-                      ToggleIgnoreVariantsEvent(value ?? true),
                     );
                   },
                 ),
@@ -112,12 +113,14 @@ class CollationOptionsPanel extends StatelessWidget {
 class _OptionCheckbox extends StatelessWidget {
   final String label;
   final bool value;
+  final bool disabled;
   final ValueChanged<bool?> onChanged;
   final Key? checkboxKey;
 
   const _OptionCheckbox({
     required this.label,
     required this.value,
+    this.disabled = false,
     required this.onChanged,
     this.checkboxKey,
   });
@@ -125,7 +128,7 @@ class _OptionCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onChanged(!value),
+      onTap: disabled ? null : () => onChanged(!value),
       borderRadius: BorderRadius.circular(4),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
@@ -138,12 +141,17 @@ class _OptionCheckbox extends StatelessWidget {
               child: Checkbox(
                 key: checkboxKey,
                 value: value,
-                onChanged: onChanged,
+                onChanged: disabled ? null : onChanged,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
             const SizedBox(width: 4),
-            Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: disabled ? Theme.of(context).disabledColor : null,
+              ),
+            ),
             const SizedBox(width: 8), // slightly more touch area
           ],
         ),

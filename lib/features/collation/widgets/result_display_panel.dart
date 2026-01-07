@@ -32,27 +32,37 @@ class ResultDisplayPanel extends StatelessWidget {
         }
 
         return DefaultTabController(
-          length: 2,
+          length: 3,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TabBar(
                 isScrollable: true,
+                tabAlignment: TabAlignment.start,
                 labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                 unselectedLabelStyle: const TextStyle(
                   fontWeight: FontWeight.normal,
                 ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
                 tabs: const [
-                  Tab(text: '文字对比'),
+                  Tab(text: '合并模式'),
+                  Tab(text: '差异模式'),
                   Tab(text: '统计分析'),
                 ],
+              ),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: Theme.of(context).dividerColor,
               ),
               const SizedBox(height: 16),
               SizedBox(
                 height: 400, // Fixed height or constrained
                 child: TabBarView(
                   children: [
-                    _buildTextualAnalysis(context, result),
+                    _buildMergedView(context, result),
+                    _buildDiffOnlyView(context, result),
                     _buildStatisticalAnalysis(context, result),
                   ],
                 ),
@@ -69,7 +79,9 @@ class ResultDisplayPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.1),
+        color: Theme.of(
+          context,
+        ).colorScheme.errorContainer.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Theme.of(context).colorScheme.error),
       ),
@@ -82,7 +94,8 @@ class ResultDisplayPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildTextualAnalysis(BuildContext context, result) {
+  /// 合并模式：显示合并后的文本，高亮差异
+  Widget _buildMergedView(BuildContext context, result) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -93,14 +106,144 @@ class ResultDisplayPanel extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
             ),
             child: SingleChildScrollView(
-              child: DiffTextRenderer(diff: result.diff),
+              child: DiffTextRenderer(changes: result.mergedView),
             ),
           ),
         ),
         const SizedBox(height: 12),
         const CollationLegend(),
+      ],
+    );
+  }
+
+  /// 差异模式：只显示不同之处（Unified Diff 格式）
+  Widget _buildDiffOnlyView(BuildContext context, result) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
+            ),
+            child: SingleChildScrollView(
+              child: _buildUnifiedDiffText(result.unifiedDiff),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            _buildDiffLegendItem(context, '-', '删除', Colors.red),
+            const SizedBox(width: 16),
+            _buildDiffLegendItem(context, '+', '新增', Colors.green),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// 构建 Unified Diff 文本显示
+  Widget _buildUnifiedDiffText(String? unifiedDiff) {
+    // 处理空值情况
+    if (unifiedDiff == null || unifiedDiff.isEmpty) {
+      return const SelectableText(
+        '(暂无差异信息)',
+        style: TextStyle(fontSize: 14, height: 1.6, color: Colors.grey),
+      );
+    }
+
+    final lines = unifiedDiff.split('\n');
+    final spans = <TextSpan>[];
+
+    for (var line in lines) {
+      TextStyle style;
+      if (line.startsWith('---') || line.startsWith('+++')) {
+        // 文件头
+        style = const TextStyle(
+          color: Colors.grey,
+          fontWeight: FontWeight.bold,
+        );
+      } else if (line.startsWith('@@')) {
+        // 位置信息
+        style = TextStyle(
+          color: Colors.blue.shade700,
+          fontWeight: FontWeight.bold,
+        );
+      } else if (line.startsWith('-')) {
+        // 删除的内容
+        style = TextStyle(
+          backgroundColor: Colors.red.shade100,
+          color: Colors.red.shade900,
+        );
+      } else if (line.startsWith('+')) {
+        // 添加的内容
+        style = TextStyle(
+          backgroundColor: Colors.green.shade100,
+          color: Colors.green.shade900,
+        );
+      } else {
+        // 普通内容
+        style = const TextStyle(color: Colors.black87);
+      }
+
+      spans.add(TextSpan(text: '$line\n', style: style));
+    }
+
+    return SelectableText.rich(
+      TextSpan(children: spans),
+      style: const TextStyle(
+        fontSize: 14,
+        height: 1.6,
+        fontFamily: 'monospace',
+      ),
+    );
+  }
+
+  /// 构建差异图例项
+  Widget _buildDiffLegendItem(
+    BuildContext context,
+    String symbol,
+    String label,
+    Color color,
+  ) {
+    final darkColor = color == Colors.red
+        ? Colors.red.shade900
+        : Colors.green.shade900;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            symbol,
+            style: TextStyle(
+              color: darkColor,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -135,7 +278,7 @@ class ResultDisplayPanel extends StatelessWidget {
                   label: Text('${entry.key} (${entry.value})'),
                   backgroundColor: Theme.of(
                     context,
-                  ).colorScheme.primaryContainer.withOpacity(0.3),
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                   side: BorderSide.none,
                   labelStyle: Theme.of(context).textTheme.bodySmall,
                 );
@@ -154,7 +297,9 @@ class ResultDisplayPanel extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.2),
+      color: Theme.of(
+        context,
+      ).colorScheme.secondaryContainer.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(

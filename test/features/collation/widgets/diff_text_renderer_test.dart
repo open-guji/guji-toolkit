@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:guji_diff/guji_diff.dart';
 import 'package:guji_toolkit/features/collation/widgets/diff_text_renderer.dart';
 
 void main() {
   group('DiffTextRenderer', () {
     testWidgets('应该渲染普通文本', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: DiffTextRenderer(diff: '春眠不觉晓')),
+        MaterialApp(
+          home: Scaffold(
+            body: DiffTextRenderer(
+              changes: [
+                CollationChange(type: CollationType.equal, text: '春眠不觉晓'),
+              ],
+            ),
+          ),
         ),
       );
 
@@ -16,19 +23,34 @@ void main() {
 
     testWidgets('应该渲染删除标记', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: DiffTextRenderer(diff: '春眠[-不-]觉晓')),
+        MaterialApp(
+          home: Scaffold(
+            body: DiffTextRenderer(
+              changes: [
+                CollationChange(type: CollationType.equal, text: '春眠'),
+                CollationChange(type: CollationType.delete, text: '不'),
+                CollationChange(type: CollationType.equal, text: '觉晓'),
+              ],
+            ),
+          ),
         ),
       );
 
-      // 验证 RichText 被渲染
       expect(find.byType(SelectableText), findsOneWidget);
     });
 
     testWidgets('应该渲染新增标记', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: DiffTextRenderer(diff: '春眠[+不+]觉晓')),
+        MaterialApp(
+          home: Scaffold(
+            body: DiffTextRenderer(
+              changes: [
+                CollationChange(type: CollationType.equal, text: '春眠'),
+                CollationChange(type: CollationType.insert, text: '不'),
+                CollationChange(type: CollationType.equal, text: '觉晓'),
+              ],
+            ),
+          ),
         ),
       );
 
@@ -37,8 +59,17 @@ void main() {
 
     testWidgets('应该处理混合标记', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: DiffTextRenderer(diff: '春眠[-不-][+无+]觉晓')),
+        MaterialApp(
+          home: Scaffold(
+            body: DiffTextRenderer(
+              changes: [
+                CollationChange(type: CollationType.equal, text: '春眠'),
+                CollationChange(type: CollationType.delete, text: '不'),
+                CollationChange(type: CollationType.insert, text: '无'),
+                CollationChange(type: CollationType.equal, text: '觉晓'),
+              ],
+            ),
+          ),
         ),
       );
 
@@ -48,11 +79,11 @@ void main() {
     testWidgets('空文本应该正常渲染', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(body: DiffTextRenderer(diff: '')),
+          home: Scaffold(body: DiffTextRenderer(changes: [])),
         ),
       );
 
-      expect(find.byType(SelectableText), findsOneWidget);
+      expect(find.byType(SelectableText), findsNothing);
     });
   });
 }

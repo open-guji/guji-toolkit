@@ -55,7 +55,8 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       state.copyWith(
         text1: event.text1,
         text2: event.text2,
-        result: const CollationResult(diff: '', similarity: 0),
+        result: const CollationResult(diff: '', similarity: 0.0),
+        changes: const [], // 清空之前的对比结果
       ),
     );
   }
@@ -83,7 +84,12 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     ToggleIgnoreTraditionalEvent event,
     Emitter<CollationState> emit,
   ) {
-    emit(state.copyWith(ignoreTraditional: event.value));
+    if (event.value) {
+      // 如果开启了繁简兼容，则强制开启异体字兼容
+      emit(state.copyWith(ignoreTraditional: true, ignoreVariants: true));
+    } else {
+      emit(state.copyWith(ignoreTraditional: false));
+    }
   }
 
   /// 处理切换异体字兼容选项事件
@@ -105,7 +111,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
         state.copyWith(
           result: const CollationResult(
             diff: '',
-            similarity: 0,
+            similarity: 0.0,
             error: '请输入两段文本',
           ),
         ),
@@ -130,11 +136,13 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       );
 
       // 执行逐字对校
-      final changes = _collation.compare(
+      final fullResult = _collation.compareWithFullContext(
         state.text1,
         state.text2,
         options: options,
       );
+
+      final changes = fullResult.mergedView;
 
       // 计算相似度
       final similarity = SimilarityScorer.calculate(changes);
@@ -154,24 +162,34 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       final patterns = ChangePatternAnalyzer.analyze(changes);
 
       // 计算总改动量（以字符为单位）
-      // 改动量这里按 detected patterns 的总字符数算
       int modifyCount = 0;
       patterns.forEach((key, count) {
-        // key format is "A->B"
         final parts = key.split('->');
         if (parts.length == 2) {
           modifyCount += parts[0].length * count;
         }
       });
 
-      // 将差异列表转换为可读文本
+      // 将差异列表转换为可读文本 (保持兼容性)
       final diffText = _formatChanges(changes);
+
+      // 生成 unified diff 格式
+      final unifiedDiffText = _formatUnifiedDiff(
+        changes,
+        state.text1,
+        state.text2,
+      );
 
       emit(
         state.copyWith(
           isComparing: false,
+          changes: changes,
           result: CollationResult(
+            text1View: fullResult.text1View,
+            text2View: fullResult.text2View,
+            mergedView: fullResult.mergedView,
             diff: diffText,
+            unifiedDiff: unifiedDiffText,
             similarity: similarity,
             deleteCount: deleteCount,
             insertCount: insertCount,
@@ -184,7 +202,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       emit(
         state.copyWith(
           isComparing: false,
-          result: CollationResult(diff: '', similarity: 0, error: '对校失败: $e'),
+          result: CollationResult(diff: '', similarity: 0.0, error: '对校失败: $e'),
         ),
       );
     }
@@ -193,7 +211,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
   /// 处理清空结果事件
   void _onClearResult(ClearResultEvent event, Emitter<CollationState> emit) {
     emit(
-      state.copyWith(result: const CollationResult(diff: '', similarity: 0)),
+      state.copyWith(result: const CollationResult(diff: '', similarity: 0.0)),
     );
   }
 
@@ -213,6 +231,36 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
           break;
       }
     }
+    return buffer.toString();
+  }
+
+  /// 格式化差异列表为 Unified Diff 格式（只显示不同的部分）
+  String _formatUnifiedDiff(
+    List<CollationChange> changes,
+    String text1,
+    String text2,
+  ) {
+    final buffer = StringBuffer();
+    buffer.writeln('--- 底本');
+    buffer.writeln('+++ 校本');
+    buffer.writeln('@@ 文本差异 @@');
+
+    bool hasChanges = false;
+
+    for (var change in changes) {
+      if (change.type == CollationType.delete) {
+        hasChanges = true;
+        buffer.writeln('-${change.text}');
+      } else if (change.type == CollationType.insert) {
+        hasChanges = true;
+        buffer.writeln('+${change.text}');
+      }
+    }
+
+    if (!hasChanges) {
+      buffer.writeln('(没有差异)');
+    }
+
     return buffer.toString();
   }
 }
