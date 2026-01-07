@@ -4,7 +4,8 @@ import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
 import 'package:guji_toolkit/features/collation/widgets/highlighted_text_field.dart';
 
 class TextInputPanel extends StatefulWidget {
-  const TextInputPanel({super.key});
+  final bool isWide;
+  const TextInputPanel({super.key, this.isWide = false});
 
   @override
   State<TextInputPanel> createState() => _TextInputPanelState();
@@ -60,30 +61,38 @@ class _TextInputPanelState extends State<TextInputPanel> {
             ? HighlightedTextHelper.buildText2Spans(state.result!.text2View)
             : null;
 
+        final input1 = HighlightedTextField(
+          label: '底本',
+          hint: '请输入底本内容...',
+          controller: _controller1,
+          onChanged: (value) {
+            context.read<CollationBloc>().add(UpdateText1Event(value));
+          },
+        );
+
+        final input2 = HighlightedTextField(
+          label: '校本',
+          hint: '请输入校本内容（可对比多段文本）...',
+          controller: _controller2,
+          onChanged: (value) {
+            context.read<CollationBloc>().add(UpdateText2Event(value));
+          },
+        );
+
+        if (widget.isWide) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: input1),
+              const SizedBox(width: 16),
+              Expanded(child: input2),
+            ],
+          );
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 底本输入框
-            HighlightedTextField(
-              label: '底本',
-              hint: '请输入底本内容...',
-              controller: _controller1,
-              onChanged: (value) {
-                context.read<CollationBloc>().add(UpdateText1Event(value));
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // 校本输入框
-            HighlightedTextField(
-              label: '校本',
-              hint: '请输入校本内容（可对比多段文本）...',
-              controller: _controller2,
-              onChanged: (value) {
-                context.read<CollationBloc>().add(UpdateText2Event(value));
-              },
-            ),
-          ],
+          children: [input1, const SizedBox(height: 16), input2],
         );
       },
     );

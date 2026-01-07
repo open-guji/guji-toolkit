@@ -63,21 +63,23 @@ class DiffSpanBuilder {
       insertChange = c1;
     }
 
-    // Better way: use i and i+1 based on type
     final int delIdx = c1.type == CollationType.delete ? i : i + 1;
     final int insIdx = c1.type == CollationType.insert ? i : i + 1;
 
-    // Use resolution of the first item (i) as the "group" resolution
     final currentResolution = resolutions[i] ?? DiffResolution.unresolved;
 
-    void showMenu(TapUpDetails details) {
+    void showMenu(PointerEnterEvent event) {
       menuHelper.showModificationMenu(
-        details.globalPosition,
+        event.position,
         delIdx,
         deleteChange.text,
         insIdx,
         insertChange.text,
       );
+    }
+
+    void onExit(PointerExitEvent event) {
+      menuHelper.onSpanExit();
     }
 
     if (currentResolution == DiffResolution.acceptOriginal) {
@@ -89,7 +91,8 @@ class DiffSpanBuilder {
             color: Colors.black87,
             backgroundColor: Colors.yellow.shade200,
           ),
-          recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+          onEnter: showMenu,
+          onExit: onExit,
         ),
       );
     } else if (currentResolution == DiffResolution.acceptNew) {
@@ -101,7 +104,8 @@ class DiffSpanBuilder {
             color: Colors.black87,
             backgroundColor: Colors.yellow.shade200,
           ),
-          recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+          onEnter: showMenu,
+          onExit: onExit,
         ),
       );
     } else {
@@ -114,7 +118,8 @@ class DiffSpanBuilder {
             color: Colors.red.shade900,
             decoration: TextDecoration.lineThrough,
           ),
-          recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+          onEnter: showMenu,
+          onExit: onExit,
         ),
       );
       spans.add(
@@ -125,7 +130,8 @@ class DiffSpanBuilder {
             color: Colors.green.shade900,
             fontWeight: FontWeight.bold,
           ),
-          recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+          onEnter: showMenu,
+          onExit: onExit,
         ),
       );
     }
@@ -147,9 +153,13 @@ class DiffSpanBuilder {
       return;
     }
 
+    void onExit(PointerExitEvent event) {
+      menuHelper.onSpanExit();
+    }
+
     if (change.type == CollationType.delete) {
-      void showMenu(TapUpDetails details) {
-        menuHelper.showDeleteMenu(details.globalPosition, i, change.text);
+      void showMenu(PointerEnterEvent event) {
+        menuHelper.showDeleteMenu(event.position, i, change.text);
       }
 
       if (resolution == DiffResolution.acceptOriginal) {
@@ -161,16 +171,18 @@ class DiffSpanBuilder {
               color: Colors.black87,
               backgroundColor: Colors.yellow.shade200,
             ),
-            recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+            onEnter: showMenu,
+            onExit: onExit,
           ),
         );
       } else if (resolution == DiffResolution.acceptNew) {
-        // Deleted (Placeholder) - User wants a chance to undo
+        // Deleted (Placeholder)
         spans.add(
           TextSpan(
             text: '\u3000', // Full-width space placeholder
             style: TextStyle(backgroundColor: Colors.yellow.shade200),
-            recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+            onEnter: showMenu,
+            onExit: onExit,
           ),
         );
       } else {
@@ -183,13 +195,14 @@ class DiffSpanBuilder {
               color: Colors.red.shade900,
               decoration: TextDecoration.lineThrough,
             ),
-            recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+            onEnter: showMenu,
+            onExit: onExit,
           ),
         );
       }
     } else if (change.type == CollationType.insert) {
-      void showMenu(TapUpDetails details) {
-        menuHelper.showInsertMenu(details.globalPosition, i, change.text);
+      void showMenu(PointerEnterEvent event) {
+        menuHelper.showInsertMenu(event.position, i, change.text);
       }
 
       if (resolution == DiffResolution.acceptNew) {
@@ -201,7 +214,8 @@ class DiffSpanBuilder {
               color: Colors.black87,
               backgroundColor: Colors.yellow.shade200,
             ),
-            recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+            onEnter: showMenu,
+            onExit: onExit,
           ),
         );
       } else if (resolution == DiffResolution.acceptOriginal) {
@@ -210,7 +224,8 @@ class DiffSpanBuilder {
           TextSpan(
             text: '\u3000', // Full-width space placeholder
             style: TextStyle(backgroundColor: Colors.yellow.shade200),
-            recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+            onEnter: showMenu,
+            onExit: onExit,
           ),
         );
       } else {
@@ -223,7 +238,8 @@ class DiffSpanBuilder {
               color: Colors.green.shade900,
               fontWeight: FontWeight.bold,
             ),
-            recognizer: TapGestureRecognizer()..onTapUp = showMenu,
+            onEnter: showMenu,
+            onExit: onExit,
           ),
         );
       }

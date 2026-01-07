@@ -170,15 +170,18 @@ class HighlightedTextField extends StatelessWidget {
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          maxLines: 8,
-          minLines: 4,
+          maxLines: null, // Allow unlimited expansion
+          minLines: 12, // Increased height
           decoration: InputDecoration(
             hintText: hint,
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.all(12),
           ),
           onChanged: onChanged,
-          style: const TextStyle(fontSize: 16, height: 1.5),
+          style: const TextStyle(
+            fontSize: 14,
+            height: 1.5,
+          ), // Smaller font (was 16)
         ),
       ],
     );

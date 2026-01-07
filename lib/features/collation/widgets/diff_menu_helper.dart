@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:guji_toolkit/features/collation/models/collation_state.dart';
 
@@ -5,43 +6,87 @@ class DiffMenuHelper {
   final BuildContext context;
   final Function(int index, DiffResolution resolution) onResolve;
 
+  // Hover state
+  static OverlayEntry? _overlayEntry;
+  static Timer? _closeTimer;
+
   DiffMenuHelper(this.context, this.onResolve);
 
-  Future<void> showMenuAt({
+  void hideOverlay() {
+    _closeTimer?.cancel();
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _scheduleClose() {
+    _closeTimer?.cancel();
+    _closeTimer = Timer(const Duration(milliseconds: 300), () {
+      hideOverlay();
+    });
+  }
+
+  void _cancelClose() {
+    _closeTimer?.cancel();
+  }
+
+  void showHoverMenu({
     required Offset globalPosition,
     required List<Widget> children,
     bool isVertical = false,
-  }) async {
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
-    // Adjust position to be below the text (approx line height + padding)
-    // The user wants it "further down" to not block text.
-    final Offset targetPosition = globalPosition + const Offset(0, 24);
+  }) {
+    // If an overlay is already showing, remove it immediately
+    hideOverlay();
 
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(targetPosition, targetPosition),
-      Offset.zero & overlay.size,
-    );
+    final overlayState = Overlay.of(context);
 
-    await showMenu(
-      context: context,
-      position: position,
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      items: [
-        PopupMenuItem(
-          enabled: false,
-          child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.bodyMedium!,
-            child: _AdaptiveMenuLayout(
-              isVertical: isVertical,
-              children: children,
+    // Position below the cursor/text, centered horizontally
+    // Assuming a max width of 160 for a single-item-like look,
+    // but the actual container has constraints.
+    // We'll subtract 60 (half of minWidth) to best-effort center it.
+    final double left = globalPosition.dx - 60;
+    final double top = globalPosition.dy + 20;
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          left: left,
+          top: top,
+          child: MouseRegion(
+            onEnter: (_) => _cancelClose(),
+            onExit: (_) => _scheduleClose(),
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 300, minWidth: 120),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: _AdaptiveMenuLayout(
+                    isVertical: isVertical,
+                    children: children,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
+
+    overlayState.insert(_overlayEntry!);
   }
+
+  // --- Specialized Menus ---
 
   void showModificationMenu(
     Offset position,
@@ -50,11 +95,9 @@ class DiffMenuHelper {
     int insertIndex,
     String insertText,
   ) {
-    // User requested: Short -> Left/Right, Long -> Top/Bottom
-    // Threshold: 4 characters
     final bool isLong = deleteText.length > 4 || insertText.length > 4;
 
-    showMenuAt(
+    showHoverMenu(
       globalPosition: position,
       isVertical: isLong,
       children: [
@@ -66,7 +109,7 @@ class DiffMenuHelper {
           onTap: () {
             onResolve(deleteIndex, DiffResolution.acceptOriginal);
             onResolve(insertIndex, DiffResolution.acceptOriginal);
-            Navigator.pop(context);
+            hideOverlay();
           },
         ),
         _buildOptionItem(
@@ -77,7 +120,7 @@ class DiffMenuHelper {
           onTap: () {
             onResolve(deleteIndex, DiffResolution.acceptNew);
             onResolve(insertIndex, DiffResolution.acceptNew);
-            Navigator.pop(context);
+            hideOverlay();
           },
         ),
       ],
@@ -87,28 +130,28 @@ class DiffMenuHelper {
   void showDeleteMenu(Offset position, int index, String text) {
     final bool isLong = text.length > 4;
 
-    showMenuAt(
+    showHoverMenu(
       globalPosition: position,
       isVertical: isLong,
       children: [
         _buildOptionItem(
           icon: Icons.undo,
-          label: '保留 (恢复)',
+          label: '保留',
           textPreview: text,
           color: Colors.grey.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptOriginal);
-            Navigator.pop(context);
+            hideOverlay();
           },
         ),
         _buildOptionItem(
           icon: Icons.check,
-          label: '确认删除',
+          label: '删除',
           textPreview: '(删除)',
           color: Colors.red.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptNew);
-            Navigator.pop(context);
+            hideOverlay();
           },
         ),
       ],
@@ -118,32 +161,43 @@ class DiffMenuHelper {
   void showInsertMenu(Offset position, int index, String text) {
     final bool isLong = text.length > 4;
 
-    showMenuAt(
+    showHoverMenu(
       globalPosition: position,
       isVertical: isLong,
       children: [
         _buildOptionItem(
           icon: Icons.close,
-          label: '移除 (拒绝)',
+          label: '移除',
           textPreview: '(移除)',
           color: Colors.grey.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptOriginal);
-            Navigator.pop(context);
+            hideOverlay();
           },
         ),
         _buildOptionItem(
           icon: Icons.check,
-          label: '确认新增',
+          label: '新增',
           textPreview: text,
           color: Colors.green.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptNew);
-            Navigator.pop(context);
+            hideOverlay();
           },
         ),
       ],
     );
+  }
+
+  // --- Helpers for Span Interaction ---
+
+  void onSpanEnter(Offset globalPosition, Function showMenuCallback) {
+    _cancelClose();
+    showMenuCallback();
+  }
+
+  void onSpanExit() {
+    _scheduleClose();
   }
 
   Widget _buildOptionItem({
@@ -153,8 +207,6 @@ class DiffMenuHelper {
     required Color color,
     required VoidCallback onTap,
   }) {
-    // Show full text if short, truncate if very long but keep enough context
-    // If vertical, we can show more line width.
     final displayPreview = textPreview.length > 10
         ? '${textPreview.substring(0, 8)}...'
         : textPreview;
@@ -162,25 +214,27 @@ class DiffMenuHelper {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(4),
+      onHover: (hovering) {
+        if (hovering) _cancelClose();
+      },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+        padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 10.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 2),
             Text(
               displayPreview,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 14,
                 color: color,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 2),
             Text(
               label,
               style: const TextStyle(fontSize: 10, color: Colors.grey),

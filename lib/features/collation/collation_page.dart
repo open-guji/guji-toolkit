@@ -53,19 +53,14 @@ class _CollationPageContent extends StatelessWidget {
               const CollationOptionsPanel(),
               const SizedBox(height: 16),
 
-              // 2. 文本输入区与示例 (左右排列)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 左侧：输入框
-                  const Expanded(flex: 6, child: TextInputPanel()),
-                  const SizedBox(width: 8),
-                  // 右侧：示例列表
-                  const Expanded(
-                    flex: 1,
-                    child: CollationExamplesPanel(isVertical: true),
-                  ),
-                ],
+              // 2. 文本输入区与示例 (响应式布局)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // 屏幕较宽时左右排列，较窄时上下排列
+                  final isWide = constraints.maxWidth > 900;
+
+                  return _ResponsiveInputArea(isWide: isWide);
+                },
               ),
               const SizedBox(height: 24),
 
@@ -123,6 +118,38 @@ class _CollationPageContent extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ResponsiveInputArea extends StatelessWidget {
+  final bool isWide;
+
+  const _ResponsiveInputArea({required this.isWide});
+
+  @override
+  Widget build(BuildContext context) {
+    if (isWide) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Expanded(flex: 3, child: TextInputPanel(isWide: true)),
+          const SizedBox(width: 24),
+          const Expanded(
+            flex: 1,
+            child: CollationExamplesPanel(isVertical: true),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const TextInputPanel(isWide: false),
+        const SizedBox(height: 16),
+        const CollationExamplesPanel(),
+      ],
     );
   }
 }

@@ -31,7 +31,7 @@ class DiffTextRenderer extends StatelessWidget {
 
     return SelectableText.rich(
       TextSpan(children: spanBuilder.build()),
-      style: const TextStyle(fontSize: 16, height: 1.8),
+      style: const TextStyle(fontSize: 14, height: 1.5),
     );
   }
 }
