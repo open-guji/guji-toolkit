@@ -295,6 +295,7 @@ class AppTheme {
       // 导航栏主题
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: paperColor,
+        indicatorColor: Colors.grey.withAlpha(30),
         selectedIconTheme: const IconThemeData(color: vermilionRed),
         unselectedIconTheme: IconThemeData(color: lightInk),
         selectedLabelTextStyle: TextStyle(

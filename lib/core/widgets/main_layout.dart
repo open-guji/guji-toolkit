@@ -38,12 +38,35 @@ class MainLayout extends StatelessWidget {
                   selectedIcon: Icon(Icons.scanner),
                   label: Text('扫描'),
                 ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings),
-                  label: Text('设置'),
-                ),
               ],
+              trailing: Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: () => context.go('/settings'),
+                      icon: Icon(
+                        location.startsWith('/settings')
+                            ? Icons.settings
+                            : Icons.settings_outlined,
+                      ),
+                      color: location.startsWith('/settings')
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '设置',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: location.startsWith('/settings')
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
             ),
             const VerticalDivider(thickness: 1, width: 1),
             Expanded(child: child),
@@ -53,12 +76,12 @@ class MainLayout extends StatelessWidget {
     );
   }
 
-  int _getSelectedIndex(String location) {
+  int? _getSelectedIndex(String location) {
+    if (location == '/') return 0;
     if (location.startsWith('/collation')) return 1;
     if (location.startsWith('/editor')) return 2;
     if (location.startsWith('/scanner')) return 3;
-    if (location.startsWith('/settings')) return 4;
-    return 0;
+    return null;
   }
 
   void _onItemTapped(int index, BuildContext context) {

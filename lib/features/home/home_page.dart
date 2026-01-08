@@ -16,7 +16,7 @@ class HomePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '欢迎使用古籍工具箱',
+                '欢迎使用古籍助手',
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,
@@ -45,12 +45,14 @@ class HomePage extends StatelessWidget {
                     description: '直接修改和校勘文本。',
                     icon: Icons.edit,
                     onTap: () => context.go('/editor'),
+                    isComingSoon: true,
                   ),
                   _ActionCard(
                     title: '导入扫描件',
                     description: '上传图片进行 OCR 识别和处理。',
                     icon: Icons.upload_file,
                     onTap: () => context.go('/scanner'),
+                    isComingSoon: true,
                   ),
                 ],
               ),
@@ -67,47 +69,83 @@ class _ActionCard extends StatelessWidget {
   final String description;
   final IconData icon;
   final VoidCallback onTap;
+  final bool isComingSoon;
 
   const _ActionCard({
     required this.title,
     required this.description,
     required this.icon,
     required this.onTap,
+    this.isComingSoon = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 2,
+      elevation: isComingSoon ? 0 : 2,
+      color: isComingSoon
+          ? Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(128)
+          : null,
       child: InkWell(
-        onTap: onTap,
+        onTap: isComingSoon ? null : onTap,
         child: Container(
           width: 300,
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                icon,
-                size: 40,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+          child: Opacity(
+            opacity: isComingSoon ? 0.6 : 1.0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 40,
+                      color: isComingSoon
+                          ? Theme.of(context).colorScheme.outline
+                          : Theme.of(context).colorScheme.primary,
+                    ),
+                    if (isComingSoon)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '敬请期待',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
