@@ -5,7 +5,7 @@ import 'collation_legend.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
 import 'package:guji_toolkit/features/collation/services/collation_result_exporter.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_saver/file_saver.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
@@ -200,17 +200,28 @@ class MergedResultView extends StatelessWidget {
 
     try {
       final String fileName =
-          'collation_result_${DateTime.now().millisecondsSinceEpoch}.txt';
+          'collation_result_${DateTime.now().millisecondsSinceEpoch}';
 
-      // Use FilePicker to let user choose location (or just download on Web)
-      final result = await FilePicker.platform.saveFile(
-        fileName: fileName,
-        bytes: bytes,
-        type: FileType.custom,
-        allowedExtensions: ['txt'],
-      );
+      // Use FileSaver for a more robust implementation across Web and Desktop
+      if (kIsWeb) {
+        // saveAs is not implemented on web yet, use saveFile which triggers download
+        await FileSaver.instance.saveFile(
+          name: fileName,
+          bytes: bytes,
+          fileExtension: 'txt',
+          mimeType: MimeType.text,
+        );
+      } else {
+        // saveAs triggers a dialog where user can choose location (on Desktop)
+        await FileSaver.instance.saveAs(
+          name: fileName,
+          bytes: bytes,
+          fileExtension: 'txt',
+          mimeType: MimeType.text,
+        );
+      }
 
-      if (result != null && context.mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('文件保存成功')));
