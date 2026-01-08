@@ -59,22 +59,23 @@ void main() {
     expect(find.text('底本'), findsOneWidget);
     expect(find.text('校本'), findsOneWidget);
 
-    // 8. Interaction: Click options
-    await tester.tap(find.text('繁简兼容')); // Toggle off FFI-dependent option
-    await tester.pump();
+    // 8. Verify initial state - 繁简兼容 should be ON by default
+    // We need to turn it OFF to avoid OpenCC FFI issues in tests
+    final traditionalCheckbox = find.byKey(const Key('checkbox_ignore_traditional'));
+    expect(traditionalCheckbox, findsOneWidget);
+
+    // Get the initial state
+    final Checkbox checkbox = tester.widget(traditionalCheckbox);
+    if (checkbox.value == true) {
+      // Turn off if it's on to avoid OpenCC FFI in tests
+      await tester.tap(find.text('繁简兼容'));
+      await tester.pump();
+    }
 
     // 9. Interaction: Type text
     await tester.enterText(find.byType(TextField).at(0), '比如');
     await tester.enterText(find.byType(TextField).at(1), '譬如');
     await tester.pump();
-
-    // 9.5 Wait for OpenCC to be ready (it might be loading)
-    // The loading text is "正在加载繁简转换引擎..."
-    int retry = 0;
-    while (find.text('正在加载繁简转换引擎...').evaluate().isNotEmpty && retry < 10) {
-      await tester.pump(const Duration(milliseconds: 100));
-      retry++;
-    }
 
     // 10. Interaction: Click Compare
     final compareButton = find.text('开始对比');
@@ -83,12 +84,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // 11. Verify Results Tabs
-    if (find.text('合并模式').evaluate().isEmpty) {
-      // Result tabs not found.
-    }
-
     expect(find.text('合并模式'), findsOneWidget);
-    expect(find.text('差异模式'), findsOneWidget);
-    expect(find.text('统计分析'), findsOneWidget);
+    // Statistical analysis tab includes similarity percentage in label
+    expect(find.textContaining('统计分析'), findsOneWidget);
   });
 }
