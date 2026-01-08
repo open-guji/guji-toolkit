@@ -57,7 +57,7 @@ class DiffMenuHelper {
             child: Material(
               color: Colors.transparent,
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 300, minWidth: 120),
+                constraints: const BoxConstraints(maxWidth: 300),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
@@ -70,7 +70,7 @@ class DiffMenuHelper {
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(4.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                   child: _AdaptiveMenuLayout(
                     isVertical: isVertical,
                     children: children,

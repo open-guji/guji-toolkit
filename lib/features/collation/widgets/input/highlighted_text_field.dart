@@ -179,13 +179,7 @@ class HighlightedTextField extends StatelessWidget {
 
     final wrappedTextField = isExpanded
         ? Expanded(child: textField)
-        : ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: 200,
-              maxHeight: 450,
-            ),
-            child: textField,
-          );
+        : textField;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

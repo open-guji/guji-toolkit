@@ -29,31 +29,33 @@ class MergedResultView extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Theme.of(context).dividerColor,
+              width: 1,
+            ),
+          ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 200),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor,
-                  width: 1,
-                ),
-              ),
-              child: SingleChildScrollView(
-                child: DiffTextRenderer(
-                  changes: result.mergedView,
-                  resolutions: resolutions,
-                  onResolve: (index, resolution) {
-                    context.read<CollationBloc>().add(
-                      ResolveDiffEvent(index, resolution),
-                    );
-                  },
-                ),
+            constraints: const BoxConstraints(
+              minHeight: 150,
+              maxHeight: 400,
+            ),
+            child: SingleChildScrollView(
+              child: DiffTextRenderer(
+                changes: result.mergedView,
+                resolutions: resolutions,
+                onResolve: (index, resolution) {
+                  context.read<CollationBloc>().add(
+                    ResolveDiffEvent(index, resolution),
+                  );
+                },
               ),
             ),
           ),

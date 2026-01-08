@@ -39,7 +39,7 @@ class _CollationPageContent extends StatelessWidget {
             _InputSection(),
             SizedBox(height: 12),
             CollationActionButton(),
-            SizedBox(height: 32),
+            SizedBox(height: 16),
             ResultDisplayPanel(),
             SizedBox(height: 48),
           ],

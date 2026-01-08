@@ -53,11 +53,15 @@ class ResultDisplayPanel extends StatelessWidget {
                 height: 450,
                 child: TabBarView(
                   children: [
-                    MergedResultView(
-                      result: result,
-                      resolutions: state.resolutions,
+                    SingleChildScrollView(
+                      child: MergedResultView(
+                        result: result,
+                        resolutions: state.resolutions,
+                      ),
                     ),
-                    StatisticalAnalysisView(result: result),
+                    SingleChildScrollView(
+                      child: StatisticalAnalysisView(result: result),
+                    ),
                   ],
                 ),
               ),

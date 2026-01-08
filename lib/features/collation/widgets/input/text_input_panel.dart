@@ -110,15 +110,13 @@ class _TextInputPanelState extends State<TextInputPanel> {
 
         Widget content;
         if (widget.isWide) {
-          content = IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: input1),
-                const SizedBox(width: 16),
-                Expanded(child: input2),
-              ],
-            ),
+          content = Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: input1),
+              const SizedBox(width: 16),
+              Expanded(child: input2),
+            ],
           );
         } else {
           content = Column(
