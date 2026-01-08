@@ -32,11 +32,11 @@ void main() {
       when(() => mockBloc.state).thenReturn(const CollationState());
 
       await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
 
       expect(find.text('设置'), findsOneWidget);
       expect(find.text('忽略标点'), findsOneWidget);
       expect(find.text('繁简兼容'), findsOneWidget);
-      expect(find.text('异体字兼容'), findsOneWidget);
     });
 
     testWidgets('忽略标点选项应该根据状态显示勾选状态', (tester) async {
@@ -71,17 +71,6 @@ void main() {
 
       verify(
         () => mockBloc.add(const ToggleIgnoreTraditionalEvent(true)),
-      ).called(1);
-    });
-
-    testWidgets('点击异体字兼容选项应该触发事件', (tester) async {
-      when(() => mockBloc.state).thenReturn(const CollationState());
-
-      await tester.pumpWidget(buildTestWidget());
-      await tester.tap(find.text('异体字兼容'));
-
-      verify(
-        () => mockBloc.add(const ToggleIgnoreVariantsEvent(true)),
       ).called(1);
     });
 

@@ -100,6 +100,7 @@ class HighlightedTextField extends StatelessWidget {
   final ScrollController? scrollController;
   final Function(String) onChanged;
   final bool isExpanded;
+  final bool syncHeight;
 
   const HighlightedTextField({
     super.key,
@@ -109,6 +110,7 @@ class HighlightedTextField extends StatelessWidget {
     this.scrollController,
     required this.onChanged,
     this.isExpanded = false,
+    this.syncHeight = false,
   });
 
   @override
@@ -116,9 +118,9 @@ class HighlightedTextField extends StatelessWidget {
     final textField = TextField(
       controller: controller,
       scrollController: scrollController,
-      maxLines: isExpanded ? null : null, // must be null for expands
-      minLines: isExpanded ? null : 5,
-      expands: isExpanded,
+      maxLines: (isExpanded || syncHeight) ? null : 15,
+      minLines: (isExpanded || syncHeight) ? null : 5,
+      expands: isExpanded || syncHeight,
       textAlignVertical: TextAlignVertical.top,
       decoration: InputDecoration(
         hintText: hint,
@@ -129,13 +131,13 @@ class HighlightedTextField extends StatelessWidget {
       style: const TextStyle(fontSize: 14, height: 1.5),
     );
 
-    final wrappedTextField = isExpanded
+    final wrappedTextField = (isExpanded || syncHeight)
         ? Expanded(child: textField)
         : textField;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: isExpanded ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize: (isExpanded || syncHeight) ? MainAxisSize.max : MainAxisSize.min,
       children: [
         Text(
           label,

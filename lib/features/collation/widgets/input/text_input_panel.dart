@@ -92,12 +92,16 @@ class _TextInputPanelState extends State<TextInputPanel> {
             : null;
       },
       builder: (context, state) {
+        // In wide layout, sync height between the two text fields
+        final shouldSyncHeight = widget.isWide;
+
         final input1 = HighlightedTextField(
           label: '底本',
           hint: '请输入底本内容...',
           controller: _controller1,
           scrollController: _scrollController1,
           isExpanded: false,
+          syncHeight: shouldSyncHeight,
           onChanged: (value) {
             context.read<CollationBloc>().add(UpdateText1Event(value));
           },
@@ -109,6 +113,7 @@ class _TextInputPanelState extends State<TextInputPanel> {
           controller: _controller2,
           scrollController: _scrollController2,
           isExpanded: false,
+          syncHeight: shouldSyncHeight,
           onChanged: (value) {
             context.read<CollationBloc>().add(UpdateText2Event(value));
           },
@@ -116,13 +121,23 @@ class _TextInputPanelState extends State<TextInputPanel> {
 
         Widget content;
         if (widget.isWide) {
-          content = Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: input1),
-              const SizedBox(width: 16),
-              Expanded(child: input2),
-            ],
+          // Use IntrinsicHeight to make both text fields match the height of the taller one
+          // Wrap with ConstrainedBox to set min/max height
+          content = ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: 150, // Minimum height ~5 lines at 14px font * 1.5 line height
+              maxHeight: 450, // Maximum height ~15 lines
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: input1),
+                  const SizedBox(width: 16),
+                  Expanded(child: input2),
+                ],
+              ),
+            ),
           );
         } else {
           content = Column(
