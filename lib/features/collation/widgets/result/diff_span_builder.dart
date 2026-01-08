@@ -1,8 +1,8 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:guji_diff/guji_diff.dart';
 import 'package:guji_toolkit/features/collation/models/collation_state.dart';
 import 'diff_menu_helper.dart';
+import 'hoverable_text_widget.dart';
 
 class DiffSpanBuilder {
   final BuildContext context;
@@ -17,8 +17,8 @@ class DiffSpanBuilder {
     required this.menuHelper,
   });
 
-  List<TextSpan> build() {
-    final List<TextSpan> spans = [];
+  List<InlineSpan> build() {
+    final List<InlineSpan> spans = [];
     int i = 0;
     while (i < changes.length) {
       final change = changes[i];
@@ -50,7 +50,7 @@ class DiffSpanBuilder {
         (c1.type == CollationType.insert && c2.type == CollationType.delete);
   }
 
-  void _addModificationSpans(List<TextSpan> spans, int i) {
+  void _addModificationSpans(List<InlineSpan> spans, int i) {
     // Identify which is which
     final c1 = changes[i];
     final c2 = changes[i + 1];
@@ -71,77 +71,99 @@ class DiffSpanBuilder {
 
     final currentResolution = resolutions[i] ?? DiffResolution.unresolved;
 
-    void showMenu(PointerEnterEvent event) {
-      menuHelper.showModificationMenu(
-        event.position,
-        delIdx,
-        deleteChange.text,
-        insIdx,
-        insertChange.text,
-      );
-    }
-
-    void onExit(PointerExitEvent event) {
-      menuHelper.onSpanExit();
-    }
-
     if (currentResolution == DiffResolution.acceptOriginal) {
       // Keep Original (Yellow)
       spans.add(
-        TextSpan(
-          text: deleteChange.text,
-          style: TextStyle(
-            color: Colors.black87,
-            backgroundColor: Colors.yellow.shade200,
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: HoverableTextWidget(
+            text: deleteChange.text,
+            style: TextStyle(
+              color: Colors.black87,
+              backgroundColor: Colors.yellow.shade200,
+            ),
+            menuBuilder: (context, close) => menuHelper.buildModificationMenu(
+              deleteIndex: delIdx,
+              deleteText: deleteChange.text,
+              insertIndex: insIdx,
+              insertText: insertChange.text,
+              close: close,
+            ),
           ),
-          onEnter: showMenu,
-          onExit: onExit,
         ),
       );
     } else if (currentResolution == DiffResolution.acceptNew) {
       // Accept New (Yellow)
       spans.add(
-        TextSpan(
-          text: insertChange.text,
-          style: TextStyle(
-            color: Colors.black87,
-            backgroundColor: Colors.yellow.shade200,
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: HoverableTextWidget(
+            text: insertChange.text,
+            style: TextStyle(
+              color: Colors.black87,
+              backgroundColor: Colors.yellow.shade200,
+            ),
+            menuBuilder: (context, close) => menuHelper.buildModificationMenu(
+              deleteIndex: delIdx,
+              deleteText: deleteChange.text,
+              insertIndex: insIdx,
+              insertText: insertChange.text,
+              close: close,
+            ),
           ),
-          onEnter: showMenu,
-          onExit: onExit,
         ),
       );
     } else {
       // Unresolved: Red Del + Green Ins
       spans.add(
-        TextSpan(
-          text: deleteChange.text,
-          style: TextStyle(
-            backgroundColor: Colors.red.shade100,
-            color: Colors.red.shade900,
-            decoration: TextDecoration.lineThrough,
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: HoverableTextWidget(
+            text: deleteChange.text,
+            style: TextStyle(
+              backgroundColor: Colors.red.shade100,
+              color: Colors.red.shade900,
+              decoration: TextDecoration.lineThrough,
+            ),
+            menuBuilder: (context, close) => menuHelper.buildModificationMenu(
+              deleteIndex: delIdx,
+              deleteText: deleteChange.text,
+              insertIndex: insIdx,
+              insertText: insertChange.text,
+              close: close,
+            ),
           ),
-          onEnter: showMenu,
-          onExit: onExit,
         ),
       );
       spans.add(
-        TextSpan(
-          text: insertChange.text,
-          style: TextStyle(
-            backgroundColor: Colors.green.shade100,
-            color: Colors.green.shade900,
-            fontWeight: FontWeight.bold,
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: HoverableTextWidget(
+            text: insertChange.text,
+            style: TextStyle(
+              backgroundColor: Colors.green.shade100,
+              color: Colors.green.shade900,
+              fontWeight: FontWeight.bold,
+            ),
+            menuBuilder: (context, close) => menuHelper.buildModificationMenu(
+              deleteIndex: delIdx,
+              deleteText: deleteChange.text,
+              insertIndex: insIdx,
+              insertText: insertChange.text,
+              close: close,
+            ),
           ),
-          onEnter: showMenu,
-          onExit: onExit,
         ),
       );
     }
   }
 
   void _addSingleSpan(
-    List<TextSpan> spans,
+    List<InlineSpan> spans,
     int i,
     CollationChange change,
     DiffResolution resolution,
@@ -156,93 +178,123 @@ class DiffSpanBuilder {
       return;
     }
 
-    void onExit(PointerExitEvent event) {
-      menuHelper.onSpanExit();
-    }
-
     if (change.type == CollationType.delete) {
-      void showMenu(PointerEnterEvent event) {
-        menuHelper.showDeleteMenu(event.position, i, change.text);
-      }
-
       if (resolution == DiffResolution.acceptOriginal) {
         // Restored (Yellow)
         spans.add(
-          TextSpan(
-            text: change.text,
-            style: TextStyle(
-              color: Colors.black87,
-              backgroundColor: Colors.yellow.shade200,
+          WidgetSpan(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: HoverableTextWidget(
+              text: change.text,
+              style: TextStyle(
+                color: Colors.black87,
+                backgroundColor: Colors.yellow.shade200,
+              ),
+              menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
+                index: i,
+                text: change.text,
+                close: close,
+              ),
             ),
-            onEnter: showMenu,
-            onExit: onExit,
           ),
         );
       } else if (resolution == DiffResolution.acceptNew) {
         // Deleted (Placeholder)
         spans.add(
-          TextSpan(
-            text: '\u3000', // Full-width space placeholder
-            style: TextStyle(backgroundColor: Colors.yellow.shade200),
-            onEnter: showMenu,
-            onExit: onExit,
+          WidgetSpan(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: HoverableTextWidget(
+              text: '\u3000', // Full-width space placeholder
+              style: TextStyle(backgroundColor: Colors.yellow.shade200),
+              menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
+                index: i,
+                text: change.text,
+                close: close,
+              ),
+            ),
           ),
         );
       } else {
         // Unresolved (Red Strike)
         spans.add(
-          TextSpan(
-            text: change.text,
-            style: TextStyle(
-              backgroundColor: Colors.red.shade100,
-              color: Colors.red.shade900,
-              decoration: TextDecoration.lineThrough,
+          WidgetSpan(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: HoverableTextWidget(
+              text: change.text,
+              style: TextStyle(
+                backgroundColor: Colors.red.shade100,
+                color: Colors.red.shade900,
+                decoration: TextDecoration.lineThrough,
+              ),
+              menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
+                index: i,
+                text: change.text,
+                close: close,
+              ),
             ),
-            onEnter: showMenu,
-            onExit: onExit,
           ),
         );
       }
     } else if (change.type == CollationType.insert) {
-      void showMenu(PointerEnterEvent event) {
-        menuHelper.showInsertMenu(event.position, i, change.text);
-      }
-
       if (resolution == DiffResolution.acceptNew) {
         // Accepted (Yellow)
         spans.add(
-          TextSpan(
-            text: change.text,
-            style: TextStyle(
-              color: Colors.black87,
-              backgroundColor: Colors.yellow.shade200,
+          WidgetSpan(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: HoverableTextWidget(
+              text: change.text,
+              style: TextStyle(
+                color: Colors.black87,
+                backgroundColor: Colors.yellow.shade200,
+              ),
+              menuBuilder: (context, close) => menuHelper.buildInsertMenu(
+                index: i,
+                text: change.text,
+                close: close,
+              ),
             ),
-            onEnter: showMenu,
-            onExit: onExit,
           ),
         );
       } else if (resolution == DiffResolution.acceptOriginal) {
         // Rejected (Placeholder)
         spans.add(
-          TextSpan(
-            text: '\u3000', // Full-width space placeholder
-            style: TextStyle(backgroundColor: Colors.yellow.shade200),
-            onEnter: showMenu,
-            onExit: onExit,
+          WidgetSpan(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: HoverableTextWidget(
+              text: '\u3000', // Full-width space placeholder
+              style: TextStyle(backgroundColor: Colors.yellow.shade200),
+              menuBuilder: (context, close) => menuHelper.buildInsertMenu(
+                index: i,
+                text: change.text,
+                close: close,
+              ),
+            ),
           ),
         );
       } else {
         // Unresolved (Green Bold)
         spans.add(
-          TextSpan(
-            text: change.text,
-            style: TextStyle(
-              backgroundColor: Colors.green.shade100,
-              color: Colors.green.shade900,
-              fontWeight: FontWeight.bold,
+          WidgetSpan(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: HoverableTextWidget(
+              text: change.text,
+              style: TextStyle(
+                backgroundColor: Colors.green.shade100,
+                color: Colors.green.shade900,
+                fontWeight: FontWeight.bold,
+              ),
+              menuBuilder: (context, close) => menuHelper.buildInsertMenu(
+                index: i,
+                text: change.text,
+                close: close,
+              ),
             ),
-            onEnter: showMenu,
-            onExit: onExit,
           ),
         );
       }

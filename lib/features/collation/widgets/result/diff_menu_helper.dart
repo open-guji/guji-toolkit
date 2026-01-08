@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:guji_toolkit/features/collation/models/collation_state.dart';
 
@@ -6,99 +5,20 @@ class DiffMenuHelper {
   final BuildContext context;
   final Function(int index, DiffResolution resolution) onResolve;
 
-  // Hover state
-  static OverlayEntry? _overlayEntry;
-  static Timer? _closeTimer;
-
   DiffMenuHelper(this.context, this.onResolve);
-
-  void hideOverlay() {
-    _closeTimer?.cancel();
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-  }
-
-  void _scheduleClose() {
-    _closeTimer?.cancel();
-    _closeTimer = Timer(const Duration(milliseconds: 300), () {
-      hideOverlay();
-    });
-  }
-
-  void _cancelClose() {
-    _closeTimer?.cancel();
-  }
-
-  void showHoverMenu({
-    required Offset globalPosition,
-    required List<Widget> children,
-    bool isVertical = false,
-  }) {
-    // If an overlay is already showing, remove it immediately
-    hideOverlay();
-
-    final overlayState = Overlay.of(context);
-
-    // Position below the cursor/text, centered horizontally
-    // Assuming a max width of 160 for a single-item-like look,
-    // but the actual container has constraints.
-    // We'll subtract 60 (half of minWidth) to best-effort center it.
-    final double left = globalPosition.dx - 60;
-    final double top = globalPosition.dy + 20;
-
-    _overlayEntry = OverlayEntry(
-      builder: (context) {
-        return Positioned(
-          left: left,
-          top: top,
-          child: MouseRegion(
-            onEnter: (_) => _cancelClose(),
-            onExit: (_) => _scheduleClose(),
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 300),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                  child: _AdaptiveMenuLayout(
-                    isVertical: isVertical,
-                    children: children,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-
-    overlayState.insert(_overlayEntry!);
-  }
 
   // --- Specialized Menus ---
 
-  void showModificationMenu(
-    Offset position,
-    int deleteIndex,
-    String deleteText,
-    int insertIndex,
-    String insertText,
-  ) {
+  Widget buildModificationMenu({
+    required int deleteIndex,
+    required String deleteText,
+    required int insertIndex,
+    required String insertText,
+    required VoidCallback close,
+  }) {
     final bool isLong = deleteText.length > 4 || insertText.length > 4;
 
-    showHoverMenu(
-      globalPosition: position,
+    return _AdaptiveMenuLayout(
       isVertical: isLong,
       children: [
         _buildOptionItem(
@@ -109,7 +29,7 @@ class DiffMenuHelper {
           onTap: () {
             onResolve(deleteIndex, DiffResolution.acceptOriginal);
             onResolve(insertIndex, DiffResolution.acceptOriginal);
-            hideOverlay();
+            close();
           },
         ),
         _buildOptionItem(
@@ -120,18 +40,21 @@ class DiffMenuHelper {
           onTap: () {
             onResolve(deleteIndex, DiffResolution.acceptNew);
             onResolve(insertIndex, DiffResolution.acceptNew);
-            hideOverlay();
+            close();
           },
         ),
       ],
     );
   }
 
-  void showDeleteMenu(Offset position, int index, String text) {
+  Widget buildDeleteMenu({
+    required int index,
+    required String text,
+    required VoidCallback close,
+  }) {
     final bool isLong = text.length > 4;
 
-    showHoverMenu(
-      globalPosition: position,
+    return _AdaptiveMenuLayout(
       isVertical: isLong,
       children: [
         _buildOptionItem(
@@ -141,7 +64,7 @@ class DiffMenuHelper {
           color: Colors.grey.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptOriginal);
-            hideOverlay();
+            close();
           },
         ),
         _buildOptionItem(
@@ -151,18 +74,21 @@ class DiffMenuHelper {
           color: Colors.red.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptNew);
-            hideOverlay();
+            close();
           },
         ),
       ],
     );
   }
 
-  void showInsertMenu(Offset position, int index, String text) {
+  Widget buildInsertMenu({
+    required int index,
+    required String text,
+    required VoidCallback close,
+  }) {
     final bool isLong = text.length > 4;
 
-    showHoverMenu(
-      globalPosition: position,
+    return _AdaptiveMenuLayout(
       isVertical: isLong,
       children: [
         _buildOptionItem(
@@ -172,7 +98,7 @@ class DiffMenuHelper {
           color: Colors.grey.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptOriginal);
-            hideOverlay();
+            close();
           },
         ),
         _buildOptionItem(
@@ -182,7 +108,7 @@ class DiffMenuHelper {
           color: Colors.green.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptNew);
-            hideOverlay();
+            close();
           },
         ),
       ],
@@ -190,15 +116,6 @@ class DiffMenuHelper {
   }
 
   // --- Helpers for Span Interaction ---
-
-  void onSpanEnter(Offset globalPosition, Function showMenuCallback) {
-    _cancelClose();
-    showMenuCallback();
-  }
-
-  void onSpanExit() {
-    _scheduleClose();
-  }
 
   Widget _buildOptionItem({
     required IconData icon,
@@ -214,9 +131,7 @@ class DiffMenuHelper {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(4),
-      onHover: (hovering) {
-        if (hovering) _cancelClose();
-      },
+      onHover: (_) {},
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 10.0),
         child: Column(
