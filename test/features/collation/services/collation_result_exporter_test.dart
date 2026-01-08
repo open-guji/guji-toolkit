@@ -6,7 +6,7 @@ import 'package:guji_toolkit/features/collation/services/collation_result_export
 void main() {
   group('CollationResultExporter', () {
     test('getResolvedText with no changes', () {
-      final result = const CollationResult(
+      final result = CollationResult(
         diff: 'hello',
         mergedView: [CollationChange(text: 'hello', type: CollationType.equal)],
         similarity: 1.0,
@@ -16,7 +16,7 @@ void main() {
     });
 
     test('getResolvedText with resolved insertion', () {
-      final result = const CollationResult(
+      final result = CollationResult(
         diff: 'he[+] llo',
         mergedView: [
           CollationChange(text: 'he', type: CollationType.equal),
@@ -34,7 +34,7 @@ void main() {
     test(
       'getResolvedText with unresolved insertion defaults to empty (base text)',
       () {
-        final result = const CollationResult(
+        final result = CollationResult(
           diff: 'he[+] llo',
           mergedView: [
             CollationChange(text: 'he', type: CollationType.equal),
@@ -48,7 +48,7 @@ void main() {
     );
 
     test('getResolvedText with resolved deletion', () {
-      final result = const CollationResult(
+      final result = CollationResult(
         diff: 'he[-] llo',
         mergedView: [
           CollationChange(text: 'he', type: CollationType.equal),
@@ -64,7 +64,7 @@ void main() {
     });
 
     test('getResolvedText with unresolved deletion defaults to base text', () {
-      final result = const CollationResult(
+      final result = CollationResult(
         diff: 'he[-] llo',
         mergedView: [
           CollationChange(text: 'he', type: CollationType.equal),
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('getResolvedText with resolved modification (Del+Ins)', () {
-      final result = const CollationResult(
+      final result = CollationResult(
         diff: 'appl[-] e [+] y',
         mergedView: [
           CollationChange(text: 'appl', type: CollationType.equal),
@@ -97,7 +97,7 @@ void main() {
     test(
       'getResolvedText with unresolved modification defaults to original',
       () {
-        final result = const CollationResult(
+        final result = CollationResult(
           diff: 'appl[-] e [+] y',
           mergedView: [
             CollationChange(text: 'appl', type: CollationType.equal),
@@ -112,7 +112,7 @@ void main() {
     );
 
     test('calculateProgress identifies modifications correctly', () {
-      final result = const CollationResult(
+      final result = CollationResult(
         diff: 'appl[-] e [+] y',
         mergedView: [
           CollationChange(text: 'appl', type: CollationType.equal),
@@ -129,7 +129,7 @@ void main() {
     });
 
     test('calculateProgress with multiple changes', () {
-      final result = const CollationResult(
+      final result = CollationResult(
         diff: 'a [-] b [+] x  [-] c [+] d',
         mergedView: [
           CollationChange(text: 'a ', type: CollationType.equal),

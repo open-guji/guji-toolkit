@@ -1,6 +1,6 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
-// ignore: avoid_web_libraries_in_dart, avoid_web_libraries_in_flutter
+// ignore: avoid_web_libraries_in_dart, avoid_web_libraries_in_flutter, deprecated_member_use
 import 'dart:html' as html;
 
 class LinkLauncher {
