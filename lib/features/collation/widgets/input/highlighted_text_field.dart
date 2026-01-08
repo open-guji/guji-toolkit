@@ -3,8 +3,14 @@ import 'package:guji_diff/guji_diff.dart';
 
 /// 辅助类:从 CollationChange 列表生成高亮文本
 class HighlightedTextHelper {
-  /// 为底本生成高亮文本 (显示删除的部分)
-  static List<TextSpan> buildText1Spans(List<CollationChange> changes) {
+  /// 生成特定类型的高亮文本
+  /// [showDelete] 是否显示删除 (text1 或 merged)
+  /// [showInsert] 是否显示新增 (text2 或 merged)
+  static List<TextSpan> buildSpans(
+    List<CollationChange> changes, {
+    bool showDelete = true,
+    bool showInsert = true,
+  }) {
     final spans = <TextSpan>[];
 
     for (var change in changes) {
@@ -18,19 +24,32 @@ class HighlightedTextHelper {
           );
           break;
         case CollationType.delete:
-          spans.add(
-            TextSpan(
-              text: change.text,
-              style: TextStyle(
-                backgroundColor: Colors.red.shade100,
-                color: Colors.red.shade900,
-                decoration: TextDecoration.lineThrough,
+          if (showDelete) {
+            spans.add(
+              TextSpan(
+                text: change.text,
+                style: TextStyle(
+                  backgroundColor: Colors.red.shade100,
+                  color: Colors.red.shade900,
+                  decoration: TextDecoration.lineThrough,
+                ),
               ),
-            ),
-          );
+            );
+          }
           break;
         case CollationType.insert:
-          // text1View 不应该包含 insert
+          if (showInsert) {
+            spans.add(
+              TextSpan(
+                text: change.text,
+                style: TextStyle(
+                  backgroundColor: Colors.green.shade100,
+                  color: Colors.green.shade900,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          }
           break;
       }
     }
@@ -38,84 +57,17 @@ class HighlightedTextHelper {
     return spans;
   }
 
-  /// 为校本生成高亮文本 (显示新增的部分)
-  static List<TextSpan> buildText2Spans(List<CollationChange> changes) {
-    final spans = <TextSpan>[];
+  /// 为底本生成高亮文本 (仅显示删除部分)
+  static List<TextSpan> buildText1Spans(List<CollationChange> changes) =>
+      buildSpans(changes, showInsert: false);
 
-    for (var change in changes) {
-      switch (change.type) {
-        case CollationType.equal:
-          spans.add(
-            TextSpan(
-              text: change.text,
-              style: const TextStyle(color: Colors.black87),
-            ),
-          );
-          break;
-        case CollationType.delete:
-          // text2View 不应该包含 delete
-          break;
-        case CollationType.insert:
-          spans.add(
-            TextSpan(
-              text: change.text,
-              style: TextStyle(
-                backgroundColor: Colors.green.shade100,
-                color: Colors.green.shade900,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          );
-          break;
-      }
-    }
-
-    return spans;
-  }
+  /// 为校本生成高亮文本 (仅显示新增部分)
+  static List<TextSpan> buildText2Spans(List<CollationChange> changes) =>
+      buildSpans(changes, showDelete: false);
 
   /// 为合并视图生成高亮文本 (显示删除和新增)
-  static List<TextSpan> buildMergedSpans(List<CollationChange> changes) {
-    final spans = <TextSpan>[];
-
-    for (var change in changes) {
-      switch (change.type) {
-        case CollationType.equal:
-          spans.add(
-            TextSpan(
-              text: change.text,
-              style: const TextStyle(color: Colors.black87),
-            ),
-          );
-          break;
-        case CollationType.delete:
-          spans.add(
-            TextSpan(
-              text: change.text,
-              style: TextStyle(
-                backgroundColor: Colors.red.shade100,
-                color: Colors.red.shade900,
-                decoration: TextDecoration.lineThrough,
-              ),
-            ),
-          );
-          break;
-        case CollationType.insert:
-          spans.add(
-            TextSpan(
-              text: change.text,
-              style: TextStyle(
-                backgroundColor: Colors.green.shade100,
-                color: Colors.green.shade900,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          );
-          break;
-      }
-    }
-
-    return spans;
-  }
+  static List<TextSpan> buildMergedSpans(List<CollationChange> changes) =>
+      buildSpans(changes);
 }
 
 /// 自定义 TextEditingController，用于在输入框中直接渲染高亮文本

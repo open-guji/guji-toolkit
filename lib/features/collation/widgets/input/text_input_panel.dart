@@ -55,8 +55,13 @@ class _TextInputPanelState extends State<TextInputPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CollationBloc, CollationState>(
-      builder: (context, state) {
+    return BlocConsumer<CollationBloc, CollationState>(
+      listenWhen: (previous, current) {
+        return previous.text1 != current.text1 ||
+            previous.text2 != current.text2 ||
+            previous.result != current.result;
+      },
+      listener: (context, state) {
         // 同步文本到控制器（仅当不同时）
         if (_controller1.text != state.text1) {
           _controller1.value = TextEditingValue(
@@ -85,7 +90,8 @@ class _TextInputPanelState extends State<TextInputPanel> {
         _controller2.highlightSpans = hasResult
             ? HighlightedTextHelper.buildText2Spans(state.result!.text2View)
             : null;
-
+      },
+      builder: (context, state) {
         final input1 = HighlightedTextField(
           label: '底本',
           hint: '请输入底本内容...',
