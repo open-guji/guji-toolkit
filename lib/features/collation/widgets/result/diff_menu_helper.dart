@@ -16,10 +16,7 @@ class DiffMenuHelper {
     required String insertText,
     required VoidCallback close,
   }) {
-    final bool isLong = deleteText.length > 4 || insertText.length > 4;
-
     return _AdaptiveMenuLayout(
-      isVertical: isLong,
       children: [
         _buildOptionItem(
           icon: Icons.undo,
@@ -52,10 +49,7 @@ class DiffMenuHelper {
     required String text,
     required VoidCallback close,
   }) {
-    final bool isLong = text.length > 4;
-
     return _AdaptiveMenuLayout(
-      isVertical: isLong,
       children: [
         _buildOptionItem(
           icon: Icons.undo,
@@ -68,10 +62,10 @@ class DiffMenuHelper {
           },
         ),
         _buildOptionItem(
-          icon: Icons.check,
-          label: '删除',
-          textPreview: '(删除)',
-          color: Colors.red.shade700,
+          icon: Icons.close,
+          label: '移除',
+          textPreview: '\u2423',
+          color: Colors.grey.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptNew);
             close();
@@ -86,15 +80,12 @@ class DiffMenuHelper {
     required String text,
     required VoidCallback close,
   }) {
-    final bool isLong = text.length > 4;
-
     return _AdaptiveMenuLayout(
-      isVertical: isLong,
       children: [
         _buildOptionItem(
           icon: Icons.close,
           label: '移除',
-          textPreview: '(移除)',
+          textPreview: '\u2423',
           color: Colors.grey.shade700,
           onTap: () {
             onResolve(index, DiffResolution.acceptOriginal);
@@ -124,35 +115,37 @@ class DiffMenuHelper {
     required Color color,
     required VoidCallback onTap,
   }) {
-    final displayPreview = textPreview.length > 10
-        ? '${textPreview.substring(0, 8)}...'
-        : textPreview;
-
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(4),
       onHover: (_) {},
-      child: Padding(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 200),
         padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 10.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: color, size: 20),
-            const SizedBox(height: 2),
-            Text(
-              displayPreview,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: color,
+            if (textPreview.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                textPreview,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: color,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            ],
+            const SizedBox(height: 2),
             Text(
               label,
               style: const TextStyle(fontSize: 10, color: Colors.grey),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -163,21 +156,11 @@ class DiffMenuHelper {
 
 class _AdaptiveMenuLayout extends StatelessWidget {
   final List<Widget> children;
-  final bool isVertical;
 
-  const _AdaptiveMenuLayout({required this.children, this.isVertical = false});
+  const _AdaptiveMenuLayout({required this.children});
 
   @override
   Widget build(BuildContext context) {
-    if (isVertical) {
-      return IntrinsicWidth(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        ),
-      );
-    }
     return IntrinsicWidth(
       child: Row(mainAxisSize: MainAxisSize.min, children: children),
     );

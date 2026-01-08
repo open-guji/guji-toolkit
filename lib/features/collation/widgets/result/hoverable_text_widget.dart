@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 
 /// A widget that displays text with a hoverable tooltip-style menu
 class HoverableTextWidget extends StatefulWidget {
-  final String text;
+  final String? text;
   final TextStyle? style;
+  final Widget? child;
   final Widget Function(BuildContext context, VoidCallback close) menuBuilder;
   final LayerLink? anchorLink; // Optional anchor link for menu positioning
   final bool isAnchor; // Whether this widget is the anchor (creates the target)
 
   const HoverableTextWidget({
     super.key,
-    required this.text,
+    this.text,
     this.style,
+    this.child,
     required this.menuBuilder,
     this.anchorLink,
     this.isAnchor = false,
@@ -37,25 +39,31 @@ class _HoverableTextWidgetState extends State<HoverableTextWidget> {
     final linkToUse = widget.anchorLink ?? _layerLink;
 
     _overlayEntry = OverlayEntry(
-      builder: (context) => CompositedTransformFollower(
-        link: linkToUse,
-        targetAnchor: Alignment.bottomLeft,
-        followerAnchor: Alignment.topLeft,
-        offset: const Offset(0, 4),
-        child: Material(
-          elevation: 8,
-          borderRadius: BorderRadius.circular(8),
-          child: MouseRegion(
-            onEnter: (_) => _cancelHide(),
-            onExit: (_) => _scheduleHide(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IntrinsicWidth(
-                child: widget.menuBuilder(context, _hideMenu),
+      builder: (context) => Align(
+        alignment: Alignment.topLeft,
+        child: CompositedTransformFollower(
+          link: linkToUse,
+          targetAnchor: Alignment.bottomLeft,
+          followerAnchor: Alignment.topLeft,
+          offset: const Offset(0, 0),
+          child: Material(
+            elevation: 8,
+            borderRadius: BorderRadius.circular(8),
+            child: MouseRegion(
+              onEnter: (_) => _cancelHide(),
+              onExit: (_) => _scheduleHide(),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 500),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IntrinsicWidth(
+                  child: IntrinsicHeight(
+                    child: widget.menuBuilder(context, _hideMenu),
+                  ),
+                ),
               ),
             ),
           ),
@@ -92,13 +100,14 @@ class _HoverableTextWidgetState extends State<HoverableTextWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final displayWidget =
+        widget.child ?? Text(widget.text ?? '', style: widget.style);
+
     final textWidget = MouseRegion(
       onEnter: (_) => _showMenu(),
       onExit: (_) => _scheduleHide(),
-      child: Text(widget.text, style: widget.style),
-    );
-
-    // If this is the anchor, wrap with CompositedTransformTarget
+      child: displayWidget,
+    ); // If this is the anchor, wrap with CompositedTransformTarget
     if (widget.isAnchor || widget.anchorLink == null) {
       return CompositedTransformTarget(link: _layerLink, child: textWidget);
     }

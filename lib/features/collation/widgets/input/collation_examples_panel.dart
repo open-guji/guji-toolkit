@@ -33,7 +33,7 @@ class _CollationExamplesPanelState extends State<CollationExamplesPanel> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      _isExpanded ? Icons.expand_less : Icons.expand_more,
+                      Icons.lightbulb_outline,
                       size: 16,
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -44,9 +44,9 @@ class _CollationExamplesPanelState extends State<CollationExamplesPanel> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(width: 2),
+                    const SizedBox(width: 4),
                     Icon(
-                      Icons.lightbulb_outline,
+                      _isExpanded ? Icons.expand_less : Icons.expand_more,
                       size: 16,
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -77,75 +77,79 @@ class _CollationExamplesPanelState extends State<CollationExamplesPanel> {
       );
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 32,
-          child: IconButton(
-            onPressed: () => setState(() => _isExpanded = !_isExpanded),
-            icon: Icon(
-              _isExpanded ? Icons.chevron_right : Icons.chevron_left,
-              size: 20,
-            ),
-            tooltip: _isExpanded ? '收起示例' : '展开示例',
-            visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.all(4),
-            constraints: const BoxConstraints(),
-          ),
-        ),
-        if (_isExpanded)
-          Flexible(
+    return SizedBox(
+      height: 32,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Expand/Collapse Toggle Icon
+          Transform.translate(
+            offset: const Offset(4, 0), // Subtle shift towards the label
             child: SizedBox(
-              height: 32,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                reverse: true,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: CollationExamples.examples.map((example) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 4.0),
-                      child: _ExampleButton(
-                        label: example.name.split('：').last,
-                        text1: example.text1,
-                        text2: example.text2,
-                      ),
-                    );
-                  }).toList(),
+              width: 24, // Reduced from 32
+              child: IconButton(
+                onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                icon: Icon(
+                  _isExpanded ? Icons.chevron_right : Icons.chevron_left,
+                  size: 20,
                 ),
+                tooltip: _isExpanded ? '收起示例' : '展开示例',
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
             ),
           ),
-        SizedBox(
-          height: 32,
-          child: InkWell(
+          // Scrollable Example Buttons
+          if (_isExpanded)
+            Flexible(
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true, // Wrap content width
+                reverse: false, // Start from the left
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                itemCount: CollationExamples.examples.length,
+                itemBuilder: (context, index) {
+                  final example = CollationExamples.examples[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
+                    child: _ExampleButton(
+                      label: example.name.split('：').last,
+                      text1: example.text1,
+                      text2: example.text2,
+                    ),
+                  );
+                },
+              ),
+            ),
+          // Removed the SizedBox(width: 2) for extra tightness
+          // "Examples" Header Label
+          InkWell(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
             borderRadius: BorderRadius.circular(4),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Icon(
+                    Icons.lightbulb_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 4),
                   Text(
                     '示例',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
                 ],
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -163,16 +167,31 @@ class _ExampleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(
-      label: Text(label, maxLines: 1, overflow: TextOverflow.visible),
-      onPressed: () {
-        context.read<CollationBloc>().add(
-          LoadExampleEvent(text1: text1, text2: text2),
-        );
-      },
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-      labelPadding: EdgeInsets.zero,
+    return Center(
+      child: InkWell(
+        onTap: () {
+          context.read<CollationBloc>().add(
+            LoadExampleEvent(text1: text1, text2: text2),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            maxLines: 1,
+          ),
+        ),
+      ),
     );
   }
 }

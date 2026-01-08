@@ -5,6 +5,9 @@ import 'collation_legend.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
 import 'package:guji_toolkit/features/collation/services/collation_result_exporter.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 class MergedResultView extends StatelessWidget {
   final CollationResult result;
@@ -37,16 +40,10 @@ class MergedResultView extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Theme.of(context).dividerColor,
-              width: 1,
-            ),
+            border: Border.all(color: Theme.of(context).dividerColor, width: 1),
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: 150,
-              maxHeight: 400,
-            ),
+            constraints: const BoxConstraints(minHeight: 150, maxHeight: 400),
             child: SingleChildScrollView(
               child: DiffTextRenderer(
                 changes: result.mergedView,
@@ -197,23 +194,36 @@ class MergedResultView extends StatelessWidget {
     });
   }
 
-  void _saveAsFile(BuildContext context) {
+  void _saveAsFile(BuildContext context) async {
     final text = CollationResultExporter.getResolvedText(result, resolutions);
-    // 简单的保存逻辑，打印并在提示中说明。
-    // 在实际 Web 环境中，通常通过 js 触发下载。
-    // 这里我们先显示一个提示。
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('正在保存为文件... (功能实现中)')));
+    final bytes = utf8.encode(text);
 
-    debugPrint('Resolved text length: ${text.length}');
-    // For Web platform, you can use:
-    // import 'dart:html' as html;
-    // final blob = html.Blob([text]);
-    // final url = html.Url.createObjectUrlFromBlob(blob);
-    // final anchor = html.AnchorElement(href: url)
-    //   ..setAttribute("download", "collation_result.txt")
-    //   ..click();
-    // html.Url.revokeObjectUrl(url);
+    try {
+      final String fileName =
+          'collation_result_${DateTime.now().millisecondsSinceEpoch}.txt';
+
+      // Use FilePicker to let user choose location (or just download on Web)
+      final result = await FilePicker.platform.saveFile(
+        fileName: fileName,
+        bytes: bytes,
+        type: FileType.custom,
+        allowedExtensions: ['txt'],
+      );
+
+      if (result != null && context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('文件保存成功')));
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving file: $e');
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+      }
+    }
   }
 }

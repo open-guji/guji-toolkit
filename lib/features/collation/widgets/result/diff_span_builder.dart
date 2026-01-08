@@ -71,95 +71,62 @@ class DiffSpanBuilder {
 
     final currentResolution = resolutions[i] ?? DiffResolution.unresolved;
 
-    if (currentResolution == DiffResolution.acceptOriginal) {
-      // Keep Original (Yellow)
-      spans.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.baseline,
-          baseline: TextBaseline.alphabetic,
-          child: HoverableTextWidget(
-            text: deleteChange.text,
-            style: TextStyle(
-              color: Colors.black87,
-              backgroundColor: Colors.yellow.shade200,
-            ),
-            menuBuilder: (context, close) => menuHelper.buildModificationMenu(
-              deleteIndex: delIdx,
-              deleteText: deleteChange.text,
-              insertIndex: insIdx,
-              insertText: insertChange.text,
-              close: close,
+    // Wrap both in a single hover unit to ensure alignment with the first (original/delete) element
+    spans.add(
+      WidgetSpan(
+        alignment: PlaceholderAlignment.baseline,
+        baseline: TextBaseline.alphabetic,
+        child: HoverableTextWidget(
+          menuBuilder: (context, close) => menuHelper.buildModificationMenu(
+            deleteIndex: delIdx,
+            deleteText: deleteChange.text,
+            insertIndex: insIdx,
+            insertText: insertChange.text,
+            close: close,
+          ),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                if (currentResolution == DiffResolution.acceptOriginal)
+                  TextSpan(
+                    text: deleteChange.text,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      backgroundColor: Colors.yellow.shade200,
+                    ),
+                  )
+                else if (currentResolution == DiffResolution.acceptNew)
+                  TextSpan(
+                    text: insertChange.text,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      backgroundColor: Colors.yellow.shade200,
+                    ),
+                  )
+                else ...[
+                  TextSpan(
+                    text: deleteChange.text,
+                    style: TextStyle(
+                      backgroundColor: Colors.red.shade100,
+                      color: Colors.red.shade900,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                  TextSpan(
+                    text: insertChange.text,
+                    style: TextStyle(
+                      backgroundColor: Colors.green.shade100,
+                      color: Colors.green.shade900,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ),
-      );
-    } else if (currentResolution == DiffResolution.acceptNew) {
-      // Accept New (Yellow)
-      spans.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.baseline,
-          baseline: TextBaseline.alphabetic,
-          child: HoverableTextWidget(
-            text: insertChange.text,
-            style: TextStyle(
-              color: Colors.black87,
-              backgroundColor: Colors.yellow.shade200,
-            ),
-            menuBuilder: (context, close) => menuHelper.buildModificationMenu(
-              deleteIndex: delIdx,
-              deleteText: deleteChange.text,
-              insertIndex: insIdx,
-              insertText: insertChange.text,
-              close: close,
-            ),
-          ),
-        ),
-      );
-    } else {
-      // Unresolved: Red Del + Green Ins
-      spans.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.baseline,
-          baseline: TextBaseline.alphabetic,
-          child: HoverableTextWidget(
-            text: deleteChange.text,
-            style: TextStyle(
-              backgroundColor: Colors.red.shade100,
-              color: Colors.red.shade900,
-              decoration: TextDecoration.lineThrough,
-            ),
-            menuBuilder: (context, close) => menuHelper.buildModificationMenu(
-              deleteIndex: delIdx,
-              deleteText: deleteChange.text,
-              insertIndex: insIdx,
-              insertText: insertChange.text,
-              close: close,
-            ),
-          ),
-        ),
-      );
-      spans.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.baseline,
-          baseline: TextBaseline.alphabetic,
-          child: HoverableTextWidget(
-            text: insertChange.text,
-            style: TextStyle(
-              backgroundColor: Colors.green.shade100,
-              color: Colors.green.shade900,
-              fontWeight: FontWeight.bold,
-            ),
-            menuBuilder: (context, close) => menuHelper.buildModificationMenu(
-              deleteIndex: delIdx,
-              deleteText: deleteChange.text,
-              insertIndex: insIdx,
-              insertText: insertChange.text,
-              close: close,
-            ),
-          ),
-        ),
-      );
-    }
+      ),
+    );
   }
 
   void _addSingleSpan(
@@ -206,8 +173,11 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: '\u3000', // Full-width space placeholder
-              style: TextStyle(backgroundColor: Colors.yellow.shade200),
+              text: '\u2423', // Open box space symbol
+              style: TextStyle(
+                backgroundColor: Colors.yellow.shade200,
+                color: Colors.yellow.shade900.withValues(alpha: 0.5),
+              ),
               menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
                 index: i,
                 text: change.text,
@@ -266,8 +236,11 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: '\u3000', // Full-width space placeholder
-              style: TextStyle(backgroundColor: Colors.yellow.shade200),
+              text: '\u2423', // Open box space symbol
+              style: TextStyle(
+                backgroundColor: Colors.yellow.shade200,
+                color: Colors.yellow.shade900.withValues(alpha: 0.5),
+              ),
               menuBuilder: (context, close) => menuHelper.buildInsertMenu(
                 index: i,
                 text: change.text,
