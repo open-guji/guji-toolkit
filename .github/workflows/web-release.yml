@@ -1,0 +1,46 @@
+name: Build and Deploy Web
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # --- Step 1: Build for GitHub Pages ---
+      - name: Build for GitHub Pages
+        run: flutter build web --release --base-href "/guji-toolkit/" --output build/gh-pages
+
+      # --- Step 2: Build for EdgeOne ---
+      - name: Build for EdgeOne
+        run: flutter build web --release --base-href "/" --output build/edgeone
+
+      # --- Step 3: Deploy to GitHub Pages ---
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/gh-pages
+          branch: gh-pages
+
+      # --- Step 4: Deploy to EdgeOne ---
+      - name: Deploy to EdgeOne
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/edgeone
+          branch: edgeone-release
