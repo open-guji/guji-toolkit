@@ -117,33 +117,36 @@ class _OptionCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => onChanged(!value),
-      borderRadius: BorderRadius.circular(4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: Checkbox(
-                key: checkboxKey,
-                value: value,
-                onChanged: disabled ? null : onChanged,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onChanged(!value),
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Checkbox(
+                  key: checkboxKey,
+                  value: value,
+                  onChanged: disabled ? null : onChanged,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
               ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: disabled ? Theme.of(context).disabledColor : null,
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: disabled ? Theme.of(context).disabledColor : null,
+                ),
               ),
-            ),
-            const SizedBox(width: 8), // slightly more touch area
-          ],
+              const SizedBox(width: 8), // slightly more touch area
+            ],
+          ),
         ),
       ),
     );

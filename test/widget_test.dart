@@ -16,6 +16,6 @@ void main() {
 
     // Verify core structure.
     expect(find.byType(NavigationRail), findsOneWidget);
-    expect(find.text('欢迎使用古籍工具箱'), findsOneWidget);
+    expect(find.text('欢迎使用古籍助手'), findsOneWidget);
   });
 }

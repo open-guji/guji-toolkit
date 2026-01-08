@@ -14,58 +14,67 @@ class ResultDisplayPanel extends StatelessWidget {
         final result = state.result;
 
         if (result == null) {
-          return const SizedBox.shrink();
+          return Center(
+            child: Text(
+              '点击"开始对比"查看结果',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha((255 * 0.6).toInt()),
+                  ),
+            ),
+          );
         }
 
         if (result.error != null) {
           return _buildErrorResult(context, result.error!);
         }
 
-        return DefaultTabController(
-          length: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TabBar(
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                unselectedLabelStyle: const TextStyle(
-                  fontWeight: FontWeight.normal,
-                ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                tabs: [
-                  const Tab(text: '合并模式'),
-                  Tab(
-                    text:
-                        '统计分析${result.similarity > 0 ? ' (${(result.similarity * 100).toInt()}%)' : ''}',
+        return Material(
+          child: DefaultTabController(
+            length: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  unselectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.normal,
                   ),
-                ],
-              ),
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: Theme.of(context).dividerColor,
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 450,
-                child: TabBarView(
-                  children: [
-                    SingleChildScrollView(
-                      child: MergedResultView(
-                        result: result,
-                        resolutions: state.resolutions,
-                      ),
-                    ),
-                    SingleChildScrollView(
-                      child: StatisticalAnalysisView(result: result),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  tabs: [
+                    const Tab(text: '合并模式'),
+                    Tab(
+                      text:
+                          '统计分析${result.similarity > 0 ? ' (${(result.similarity * 100).toInt()}%)' : ''}',
                     ),
                   ],
                 ),
-              ),
-            ],
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Theme.of(context).dividerColor,
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 450,
+                  child: TabBarView(
+                    children: [
+                      SingleChildScrollView(
+                        child: MergedResultView(
+                          result: result,
+                          resolutions: state.resolutions,
+                        ),
+                      ),
+                      SingleChildScrollView(
+                        child: StatisticalAnalysisView(result: result),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

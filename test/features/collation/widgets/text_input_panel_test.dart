@@ -84,11 +84,11 @@ void main() {
     testWidgets('状态更新应该同步到文本框', (tester) async {
       when(
         () => mockBloc.state,
-      ).thenReturn(const CollationState(text1: '已有文本'));
+      ).thenReturn(const CollationState()); // Start with empty state
       whenListen(
         mockBloc,
         Stream<CollationState>.fromIterable([
-          const CollationState(text1: '已有文本'),
+          const CollationState(text1: '已有文本'), // Emit state with text
         ]),
       );
 

@@ -116,8 +116,8 @@ class HighlightedTextField extends StatelessWidget {
     final textField = TextField(
       controller: controller,
       scrollController: scrollController,
-      maxLines: isExpanded ? null : null, // must be null for expands
-      minLines: isExpanded ? null : 5,
+      maxLines: isExpanded ? null : 15, // limit to 10 lines, enable scrollbar
+      minLines: isExpanded ? null : 5, // start with 5 lines
       expands: isExpanded,
       textAlignVertical: TextAlignVertical.top,
       decoration: InputDecoration(

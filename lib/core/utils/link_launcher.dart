@@ -1,17 +1,9 @@
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/foundation.dart';
-// ignore: avoid_web_libraries_in_dart, avoid_web_libraries_in_flutter, deprecated_member_use
-import 'dart:html' as html;
+import 'link_launcher_stub.dart'
+    if (dart.library.html) 'link_launcher_web.dart'
+    if (dart.library.io) 'link_launcher_io.dart';
 
 class LinkLauncher {
   static Future<void> launch(String url) async {
-    if (kIsWeb) {
-      html.window.open(url, '_blank');
-    } else {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    }
+    await launchUrlImpl(url);
   }
 }

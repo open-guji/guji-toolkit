@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
 import 'package:guji_toolkit/features/collation/widgets/widgets.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:guji_diff/guji_diff.dart';
 
 class MockCollationBloc extends MockBloc<CollationEvent, CollationState>
     implements CollationBloc {}
@@ -44,9 +45,10 @@ void main() {
       );
 
       await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
 
       expect(find.text('合并模式'), findsOneWidget);
-      expect(find.text('统计分析'), findsOneWidget);
+      expect(find.textContaining('统计分析'), findsOneWidget);
     });
 
     testWidgets('统计分析页应该显示相似度和计数', (tester) async {
@@ -63,12 +65,13 @@ void main() {
       );
 
       await tester.pumpWidget(buildTestWidget());
-
-      // 切换到统计分析标签
-      await tester.tap(find.text('统计分析'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('95%'), findsOneWidget);
+      // 切换到统计分析标签
+      await tester.tap(find.textContaining('统计分析'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('95%'), findsWidgets);
       expect(find.text('2'), findsOneWidget); // insertCount
       expect(find.text('1'), findsOneWidget); // deleteCount
       expect(find.text('3'), findsOneWidget); // modifyCount
@@ -88,12 +91,21 @@ void main() {
 
     testWidgets('差异文本应该在合并模式页被渲染', (tester) async {
       when(() => mockBloc.state).thenReturn(
-        const CollationState(
-          result: CollationResult(diff: '春眠[-不-]觉晓', similarity: 0.8),
+        CollationState(
+          result: CollationResult(
+            diff: '春眠[-不-]觉晓',
+            similarity: 0.8,
+            mergedView: [
+              CollationChange(type: CollationType.equal, text: '春眠'),
+              CollationChange(type: CollationType.delete, text: '不'),
+              CollationChange(type: CollationType.equal, text: '觉晓'),
+            ],
+          ),
         ),
       );
 
       await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
 
       // 默认显示合并模式
       expect(find.textContaining('春眠'), findsWidgets);

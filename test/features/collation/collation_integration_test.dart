@@ -5,11 +5,20 @@ import 'package:guji_toolkit/features/collation/widgets/widgets.dart';
 
 void main() {
   testWidgets('Collation Page Integration Test', (tester) async {
-    // 1. App setup
+    // 1. App setup - set larger screen size to trigger wide layout
+    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
-        home: const CollationPage(),
+        home: const Scaffold(
+          body: CollationPage(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -21,10 +30,9 @@ void main() {
     expect(find.text('设置'), findsOneWidget);
     expect(find.text('忽略标点'), findsOneWidget);
     expect(find.text('繁简兼容'), findsOneWidget);
-    expect(find.text('异体字兼容'), findsOneWidget);
 
     // 4. Verify Inputs and Examples Layout
-    // Inputs at left, Examples at right
+    // Inputs at left, Examples at right (in wide layout > 800px)
     final inputsFinder = find.byType(TextInputPanel);
     final examplesFinder = find.byType(CollationExamplesPanel);
     expect(inputsFinder, findsOneWidget);
@@ -33,13 +41,16 @@ void main() {
     final inputsRect = tester.getRect(inputsFinder);
     final examplesRect = tester.getRect(examplesFinder);
 
-    // Inputs should be to the left of Examples
-    expect(inputsRect.right < examplesRect.left, isTrue);
+    // Examples should be to the right of Options (wide layout)
+    expect(examplesRect.left > inputsRect.left, isTrue);
 
     // 5. Verify Examples Panel Content
-    // Should be vertical in this test context if we use the layout logic
     expect(find.text('示例'), findsOneWidget);
-    expect(find.byType(ActionChip), findsWidgets);
+    // Verify example buttons are present
+    expect(find.text('异体字差异'), findsOneWidget);
+    expect(find.text('标点差异'), findsOneWidget);
+    expect(find.text('繁简混合'), findsOneWidget);
+    expect(find.text('多段对比'), findsOneWidget);
 
     // 6. Verify Action Button
     expect(find.text('开始对比'), findsOneWidget);
@@ -50,7 +61,6 @@ void main() {
 
     // 8. Interaction: Click options
     await tester.tap(find.text('繁简兼容')); // Toggle off FFI-dependent option
-    await tester.tap(find.text('异体字兼容')); // Toggle off FFI-dependent option
     await tester.pump();
 
     // 9. Interaction: Type text

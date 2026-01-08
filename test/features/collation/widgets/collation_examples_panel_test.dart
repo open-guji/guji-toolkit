@@ -66,13 +66,18 @@ void main() {
       verify(() => mockBloc.add(any(that: isA<LoadExampleEvent>()))).called(1);
     });
 
-    testWidgets('示例按钮应该显示描述tooltip', (tester) async {
+    testWidgets('示例按钮应该正确渲染', (tester) async {
       when(() => mockBloc.state).thenReturn(const CollationState());
 
       await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
 
-      // 验证 Tooltip 或描述存在
-      expect(find.byType(ActionChip), findsWidgets);
+      // 验证按钮渲染正确
+      expect(find.byType(InkWell), findsWidgets);
+      // 验证所有示例按钮都存在
+      for (final example in CollationExamples.examples) {
+        expect(find.text(example.name.split('：').last), findsOneWidget);
+      }
     });
 
     testWidgets('垂直模式应该正确渲染', (tester) async {
