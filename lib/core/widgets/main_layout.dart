@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:guji_toolkit/core/utils/link_launcher.dart';
 
 class MainLayout extends StatelessWidget {
   final Widget child;
@@ -43,6 +44,20 @@ class MainLayout extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    IconButton(
+                      onPressed: () =>
+                          LinkLauncher.launch('https://www.kaiyuanguji.com/'),
+                      icon: const Icon(Icons.open_in_new),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '开源古籍',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     IconButton(
                       onPressed: () => context.go('/settings'),
                       icon: Icon(

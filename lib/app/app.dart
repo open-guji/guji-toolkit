@@ -12,6 +12,7 @@ class GujiApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: '古籍助手',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
