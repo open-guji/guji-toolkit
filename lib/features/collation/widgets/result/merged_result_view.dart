@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'diff_text_renderer.dart';
 import 'collation_legend.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
-import 'package:guji_toolkit/features/collation/services/collation_result_exporter.dart';
-import 'package:file_saver/file_saver.dart';
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import '../../bloc/bloc.dart';
+import '../../services/collation_result_exporter.dart';
+import 'components/merge_hint_box.dart';
+import 'components/merge_progress_indicator.dart';
+import 'components/merge_actions.dart';
 
 class MergedResultView extends StatelessWidget {
   final CollationResult result;
@@ -34,6 +33,7 @@ class MergedResultView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        const MergeHintBox(),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -64,177 +64,21 @@ class MergedResultView extends StatelessWidget {
             const Spacer(),
             // 进度指示器 (0/0 时不显示)
             if (total > 0)
-              _buildProgressIndicator(context, resolved, total, allResolved)
+              MergeProgressIndicator(
+                resolved: resolved,
+                total: total,
+                allResolved: allResolved,
+              )
             else if (result.mergedView.isNotEmpty &&
                 result.text1View.isNotEmpty &&
                 result.text2View.isNotEmpty)
-              _buildPerfectMatchIndicator(context),
+              const MergePerfectMatchIndicator(),
             const SizedBox(width: 16),
             // 操作按钮
-            ElevatedButton.icon(
-              onPressed: (result.text1View.isEmpty || result.text2View.isEmpty)
-                  ? null
-                  : () => _handleExport(context, isCopy: true),
-              icon: const Icon(Icons.copy, size: 16),
-              label: const Text('复制'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton.icon(
-              onPressed: (result.text1View.isEmpty || result.text2View.isEmpty)
-                  ? null
-                  : () => _handleExport(context, isCopy: false),
-              icon: const Icon(Icons.save_alt, size: 16),
-              label: const Text('保存'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-            ),
+            MergeActions(result: result, resolutions: resolutions),
           ],
         ),
       ],
     );
-  }
-
-  Widget _buildPerfectMatchIndicator(BuildContext context) {
-    const color = Colors.green;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.check_circle, color: color, size: 20),
-        const SizedBox(width: 4),
-        Text(
-          '完全匹配',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProgressIndicator(
-    BuildContext context,
-    int resolved,
-    int total,
-    bool allResolved,
-  ) {
-    final color = allResolved ? Colors.green : Colors.orange;
-    final icon = allResolved ? Icons.check_circle : Icons.warning_amber_rounded;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(width: 4),
-        Text(
-          '已确认: $resolved / $total',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _handleExport(BuildContext context, {required bool isCopy}) {
-    final stats = CollationResultExporter.calculateProgress(
-      result,
-      resolutions,
-    );
-    if (stats.resolved < stats.total) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('确认导出'),
-          content: const Text('还有未确认的差异，未确认的部分将默认保留"底本"内容。是否继续？'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                if (isCopy) {
-                  _copyToClipboard(context);
-                } else {
-                  _saveAsFile(context);
-                }
-              },
-              child: const Text('继续'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      if (isCopy) {
-        _copyToClipboard(context);
-      } else {
-        _saveAsFile(context);
-      }
-    }
-  }
-
-  void _copyToClipboard(BuildContext context) {
-    final text = CollationResultExporter.getResolvedText(result, resolutions);
-    Clipboard.setData(ClipboardData(text: text)).then((_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('已复制到剪贴板'),
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }
-    });
-  }
-
-  void _saveAsFile(BuildContext context) async {
-    final text = CollationResultExporter.getResolvedText(result, resolutions);
-    final bytes = utf8.encode(text);
-
-    try {
-      final String fileName =
-          'collation_result_${DateTime.now().millisecondsSinceEpoch}';
-
-      // Use FileSaver for a more robust implementation across Web and Desktop
-      if (kIsWeb) {
-        // saveAs is not implemented on web yet, use saveFile which triggers download
-        await FileSaver.instance.saveFile(
-          name: fileName,
-          bytes: bytes,
-          fileExtension: 'txt',
-          mimeType: MimeType.text,
-        );
-      } else {
-        // saveAs triggers a dialog where user can choose location (on Desktop)
-        await FileSaver.instance.saveAs(
-          name: fileName,
-          bytes: bytes,
-          fileExtension: 'txt',
-          mimeType: MimeType.text,
-        );
-      }
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('文件保存成功')));
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error saving file: $e');
-      }
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
-      }
-    }
   }
 }

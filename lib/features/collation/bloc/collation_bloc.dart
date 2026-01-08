@@ -26,6 +26,7 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     on<ClearResultEvent>(_onClearResult);
     on<ResolveDiffEvent>(_onResolveDiff);
     on<CheckOpenCCStatusEvent>(_onCheckOpenCCStatus);
+    on<DismissMergeHintEvent>(_onDismissMergeHint);
 
     // 初始化时检查 OpenCC 状态
     add(const CheckOpenCCStatusEvent());
@@ -184,7 +185,8 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
       emit(
         state.copyWith(
           isComparing: false,
-          result: () => CollationResult(diff: '', similarity: 0.0, error: '对校失败: $e'),
+          result: () =>
+              CollationResult(diff: '', similarity: 0.0, error: '对校失败: $e'),
         ),
       );
     }
@@ -193,7 +195,11 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
   /// 处理清空结果事件
   void _onClearResult(ClearResultEvent event, Emitter<CollationState> emit) {
     emit(
-      state.copyWith(result: () => null, changes: () => const [], resolutions: const {}),
+      state.copyWith(
+        result: () => null,
+        changes: () => const [],
+        resolutions: const {},
+      ),
     );
   }
 
@@ -202,6 +208,14 @@ class CollationBloc extends Bloc<CollationEvent, CollationState> {
     final newResolutions = Map<int, DiffResolution>.from(state.resolutions);
     newResolutions[event.index] = event.resolution;
     emit(state.copyWith(resolutions: newResolutions));
+  }
+
+  /// 处理关闭合并提示事件
+  void _onDismissMergeHint(
+    DismissMergeHintEvent event,
+    Emitter<CollationState> emit,
+  ) {
+    emit(state.copyWith(showMergeHint: false));
   }
 
   /// 格式化差异列表为可读文本

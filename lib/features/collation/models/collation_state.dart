@@ -27,6 +27,9 @@ class CollationState extends Equatable {
   final bool isOpenCCReady;
   final String? openCCError;
 
+  // 对校结果中是否显示提示信息
+  final bool showMergeHint;
+
   const CollationState({
     this.text1 = '',
     this.text2 = '',
@@ -40,6 +43,7 @@ class CollationState extends Equatable {
     this.isOpenCCLoading = false,
     this.isOpenCCReady = false,
     this.openCCError,
+    this.showMergeHint = true,
   });
 
   CollationState copyWith({
@@ -55,6 +59,7 @@ class CollationState extends Equatable {
     bool? isOpenCCLoading,
     bool? isOpenCCReady,
     String? openCCError,
+    bool? showMergeHint,
   }) {
     return CollationState(
       text1: text1 ?? this.text1,
@@ -69,6 +74,7 @@ class CollationState extends Equatable {
       isOpenCCLoading: isOpenCCLoading ?? this.isOpenCCLoading,
       isOpenCCReady: isOpenCCReady ?? this.isOpenCCReady,
       openCCError: openCCError ?? this.openCCError,
+      showMergeHint: showMergeHint ?? this.showMergeHint,
     );
   }
 
@@ -90,6 +96,7 @@ class CollationState extends Equatable {
     isOpenCCLoading,
     isOpenCCReady,
     openCCError,
+    showMergeHint,
   ];
 }
 

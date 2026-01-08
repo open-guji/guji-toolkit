@@ -96,3 +96,8 @@ class ResolveDiffEvent extends CollationEvent {
   @override
   List<Object?> get props => [index, resolution];
 }
+
+/// 关闭合并提示事件
+class DismissMergeHintEvent extends CollationEvent {
+  const DismissMergeHintEvent();
+}
