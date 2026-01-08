@@ -54,12 +54,3 @@ class ScannerPage extends StatelessWidget {
     return const PlaceholderPage(title: '扫描', icon: Icons.scanner);
   }
 }
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const PlaceholderPage(title: '设置', icon: Icons.settings);
-  }
-}

@@ -16,35 +16,32 @@ class StatisticalAnalysisView extends StatelessWidget {
           children: [
             // 统计信息行：相似度 + 详细统计，更加紧凑
             Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
               children: [
                 // 相似度
                 _buildCompactSimilarity(context, result.similarity),
-                const SizedBox(width: 24),
+                const SizedBox(width: 32),
                 // 具体的增删改统计
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildSimpleCount(
-                        context,
-                        '新增',
-                        result.insertCount,
-                        Colors.green,
-                      ),
-                      _buildSimpleCount(
-                        context,
-                        '删除',
-                        result.deleteCount,
-                        Colors.red,
-                      ),
-                      _buildSimpleCount(
-                        context,
-                        '修改',
-                        result.modifyCount,
-                        Colors.blue,
-                      ),
-                    ],
-                  ),
+                _buildSimpleCount(
+                  context,
+                  '新增',
+                  result.insertCount,
+                  Colors.green,
+                ),
+                const SizedBox(width: 24),
+                _buildSimpleCount(
+                  context,
+                  '删除',
+                  result.deleteCount,
+                  Colors.red,
+                ),
+                const SizedBox(width: 24),
+                _buildSimpleCount(
+                  context,
+                  '修改',
+                  result.modifyCount,
+                  Colors.blue,
                 ),
               ],
             ),
@@ -121,11 +118,18 @@ class StatisticalAnalysisView extends StatelessWidget {
   ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        // 使用 Baseline 包装点，使其底部对齐文字基准线
+        Baseline(
+          baseline: 16, // 点的高度是 8，设置为 8 意味着其底部对齐基准线
+          baselineType: TextBaseline.alphabetic,
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
         ),
         const SizedBox(width: 6),
         Text(
@@ -139,7 +143,7 @@ class StatisticalAnalysisView extends StatelessWidget {
           count.toString(),
           style: Theme.of(
             context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );

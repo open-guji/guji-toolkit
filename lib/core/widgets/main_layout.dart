@@ -98,9 +98,6 @@ class MainLayout extends StatelessWidget {
       case 3:
         context.go('/scanner');
         break;
-      case 4:
-        context.go('/settings');
-        break;
     }
   }
 }
