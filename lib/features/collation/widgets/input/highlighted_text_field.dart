@@ -3,6 +3,10 @@ import 'package:guji_diff/guji_diff.dart';
 
 /// 辅助类:从 CollationChange 列表生成高亮文本
 class HighlightedTextHelper {
+  static String _processText(String text) {
+    return text.replaceAll('\n', '\u21B5\n');
+  }
+
   /// 生成特定类型的高亮文本
   /// [showDelete] 是否显示删除 (text1 或 merged)
   /// [showInsert] 是否显示新增 (text2 或 merged)
@@ -27,7 +31,7 @@ class HighlightedTextHelper {
           if (showDelete) {
             spans.add(
               TextSpan(
-                text: change.text,
+                text: _processText(change.text),
                 style: TextStyle(
                   backgroundColor: Colors.red.shade100,
                   color: Colors.red.shade900,
@@ -41,7 +45,7 @@ class HighlightedTextHelper {
           if (showInsert) {
             spans.add(
               TextSpan(
-                text: change.text,
+                text: _processText(change.text),
                 style: TextStyle(
                   backgroundColor: Colors.green.shade100,
                   color: Colors.green.shade900,
@@ -137,7 +141,9 @@ class HighlightedTextField extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: (isExpanded || syncHeight) ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize: (isExpanded || syncHeight)
+          ? MainAxisSize.max
+          : MainAxisSize.min,
       children: [
         Text(
           label,

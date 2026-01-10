@@ -89,7 +89,7 @@ class DiffSpanBuilder {
               children: [
                 if (currentResolution == DiffResolution.acceptOriginal)
                   TextSpan(
-                    text: _processText(deleteChange.text, includeNewline: true),
+                    text: _processText(deleteChange.text),
                     style: TextStyle(
                       color: Colors.black87,
                       backgroundColor: Colors.yellow.shade200,
@@ -97,7 +97,7 @@ class DiffSpanBuilder {
                   )
                 else if (currentResolution == DiffResolution.acceptNew)
                   TextSpan(
-                    text: _processText(insertChange.text, includeNewline: true),
+                    text: _processText(insertChange.text),
                     style: TextStyle(
                       color: Colors.black87,
                       backgroundColor: Colors.yellow.shade200,
@@ -105,10 +105,7 @@ class DiffSpanBuilder {
                   )
                 else ...[
                   TextSpan(
-                    text: _processText(
-                      deleteChange.text,
-                      includeNewline: false,
-                    ),
+                    text: _processText(deleteChange.text),
                     style: TextStyle(
                       backgroundColor: Colors.red.shade100,
                       color: Colors.red.shade900,
@@ -116,7 +113,7 @@ class DiffSpanBuilder {
                     ),
                   ),
                   TextSpan(
-                    text: _processText(insertChange.text, includeNewline: true),
+                    text: _processText(insertChange.text),
                     style: TextStyle(
                       backgroundColor: Colors.green.shade100,
                       color: Colors.green.shade900,
@@ -130,6 +127,20 @@ class DiffSpanBuilder {
         ),
       ),
     );
+
+    // Add actual newline to the outer spans list if the accepted/active side has one
+    final bool hasNewlineInDelete = deleteChange.text.contains('\n');
+    final bool hasNewlineInInsert = insertChange.text.contains('\n');
+
+    final bool shouldBreak =
+        (currentResolution == DiffResolution.acceptOriginal &&
+            hasNewlineInDelete) ||
+        (currentResolution == DiffResolution.acceptNew && hasNewlineInInsert) ||
+        (currentResolution == DiffResolution.unresolved && hasNewlineInInsert);
+
+    if (shouldBreak) {
+      spans.add(const TextSpan(text: '\n'));
+    }
   }
 
   void _addSingleSpan(
@@ -156,10 +167,16 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: _processText(change.text, includeNewline: true),
+              text: _processText(change.text),
+              horizontalPadding: change.text == '\n' ? 4.0 : 0,
+              decoration: change.text == '\n'
+                  ? BoxDecoration(color: Colors.yellow.shade200)
+                  : null,
               style: TextStyle(
                 color: Colors.black87,
-                backgroundColor: Colors.yellow.shade200,
+                backgroundColor: change.text == '\n'
+                    ? null
+                    : Colors.yellow.shade200,
               ),
               menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
                 index: i,
@@ -169,6 +186,9 @@ class DiffSpanBuilder {
             ),
           ),
         );
+        if (change.text.contains('\n')) {
+          spans.add(const TextSpan(text: '\n'));
+        }
       } else if (resolution == DiffResolution.acceptNew) {
         // Deleted (Placeholder)
         spans.add(
@@ -177,8 +197,14 @@ class DiffSpanBuilder {
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
               text: '\u2423', // Open box space symbol
+              horizontalPadding: change.text == '\n' ? 4.0 : 0,
+              decoration: change.text == '\n'
+                  ? BoxDecoration(color: Colors.yellow.shade200)
+                  : null,
               style: TextStyle(
-                backgroundColor: Colors.yellow.shade200,
+                backgroundColor: change.text == '\n'
+                    ? null
+                    : Colors.yellow.shade200,
                 color: Colors.yellow.shade900.withValues(alpha: 0.5),
               ),
               menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
@@ -196,9 +222,15 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: _processText(change.text, includeNewline: false),
+              text: _processText(change.text),
+              horizontalPadding: change.text == '\n' ? 4.0 : 0,
+              decoration: change.text == '\n'
+                  ? BoxDecoration(color: Colors.red.shade100)
+                  : null,
               style: TextStyle(
-                backgroundColor: Colors.red.shade100,
+                backgroundColor: change.text == '\n'
+                    ? null
+                    : Colors.red.shade100,
                 color: Colors.red.shade900,
                 decoration: TextDecoration.lineThrough,
               ),
@@ -219,10 +251,16 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: _processText(change.text, includeNewline: true),
+              text: _processText(change.text),
+              horizontalPadding: change.text == '\n' ? 4.0 : 0,
+              decoration: change.text == '\n'
+                  ? BoxDecoration(color: Colors.yellow.shade200)
+                  : null,
               style: TextStyle(
                 color: Colors.black87,
-                backgroundColor: Colors.yellow.shade200,
+                backgroundColor: change.text == '\n'
+                    ? null
+                    : Colors.yellow.shade200,
               ),
               menuBuilder: (context, close) => menuHelper.buildInsertMenu(
                 index: i,
@@ -232,6 +270,9 @@ class DiffSpanBuilder {
             ),
           ),
         );
+        if (change.text.contains('\n')) {
+          spans.add(const TextSpan(text: '\n'));
+        }
       } else if (resolution == DiffResolution.acceptOriginal) {
         // Rejected (Placeholder)
         spans.add(
@@ -240,8 +281,14 @@ class DiffSpanBuilder {
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
               text: '\u2423', // Open box space symbol
+              horizontalPadding: change.text == '\n' ? 4.0 : 0,
+              decoration: change.text == '\n'
+                  ? BoxDecoration(color: Colors.yellow.shade200)
+                  : null,
               style: TextStyle(
-                backgroundColor: Colors.yellow.shade200,
+                backgroundColor: change.text == '\n'
+                    ? null
+                    : Colors.yellow.shade200,
                 color: Colors.yellow.shade900.withValues(alpha: 0.5),
               ),
               menuBuilder: (context, close) => menuHelper.buildInsertMenu(
@@ -259,9 +306,15 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: _processText(change.text, includeNewline: true),
+              text: _processText(change.text),
+              horizontalPadding: change.text == '\n' ? 4.0 : 0,
+              decoration: change.text == '\n'
+                  ? BoxDecoration(color: Colors.green.shade100)
+                  : null,
               style: TextStyle(
-                backgroundColor: Colors.green.shade100,
+                backgroundColor: change.text == '\n'
+                    ? null
+                    : Colors.green.shade100,
                 color: Colors.green.shade900,
                 fontWeight: FontWeight.bold,
               ),
@@ -273,11 +326,14 @@ class DiffSpanBuilder {
             ),
           ),
         );
+        if (change.text.contains('\n')) {
+          spans.add(const TextSpan(text: '\n'));
+        }
       }
     }
   }
 
-  String _processText(String text, {bool includeNewline = false}) {
-    return text.replaceAll('\n', includeNewline ? '\u21B5\n' : '\u21B5');
+  String _processText(String text) {
+    return text.replaceAll('\n', '\u21B5');
   }
 }
