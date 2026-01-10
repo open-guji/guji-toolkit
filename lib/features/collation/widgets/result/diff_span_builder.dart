@@ -79,9 +79,9 @@ class DiffSpanBuilder {
         child: HoverableTextWidget(
           menuBuilder: (context, close) => menuHelper.buildModificationMenu(
             deleteIndex: delIdx,
-            deleteText: deleteChange.text,
+            deleteText: _processText(deleteChange.text),
             insertIndex: insIdx,
-            insertText: insertChange.text,
+            insertText: _processText(insertChange.text),
             close: close,
           ),
           child: Text.rich(
@@ -89,7 +89,7 @@ class DiffSpanBuilder {
               children: [
                 if (currentResolution == DiffResolution.acceptOriginal)
                   TextSpan(
-                    text: deleteChange.text,
+                    text: _processText(deleteChange.text, includeNewline: true),
                     style: TextStyle(
                       color: Colors.black87,
                       backgroundColor: Colors.yellow.shade200,
@@ -97,7 +97,7 @@ class DiffSpanBuilder {
                   )
                 else if (currentResolution == DiffResolution.acceptNew)
                   TextSpan(
-                    text: insertChange.text,
+                    text: _processText(insertChange.text, includeNewline: true),
                     style: TextStyle(
                       color: Colors.black87,
                       backgroundColor: Colors.yellow.shade200,
@@ -105,7 +105,10 @@ class DiffSpanBuilder {
                   )
                 else ...[
                   TextSpan(
-                    text: deleteChange.text,
+                    text: _processText(
+                      deleteChange.text,
+                      includeNewline: false,
+                    ),
                     style: TextStyle(
                       backgroundColor: Colors.red.shade100,
                       color: Colors.red.shade900,
@@ -113,7 +116,7 @@ class DiffSpanBuilder {
                     ),
                   ),
                   TextSpan(
-                    text: insertChange.text,
+                    text: _processText(insertChange.text, includeNewline: true),
                     style: TextStyle(
                       backgroundColor: Colors.green.shade100,
                       color: Colors.green.shade900,
@@ -153,14 +156,14 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: change.text,
+              text: _processText(change.text, includeNewline: true),
               style: TextStyle(
                 color: Colors.black87,
                 backgroundColor: Colors.yellow.shade200,
               ),
               menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
                 index: i,
-                text: change.text,
+                text: _processText(change.text),
                 close: close,
               ),
             ),
@@ -180,7 +183,7 @@ class DiffSpanBuilder {
               ),
               menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
                 index: i,
-                text: change.text,
+                text: _processText(change.text),
                 close: close,
               ),
             ),
@@ -193,7 +196,7 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: change.text,
+              text: _processText(change.text, includeNewline: false),
               style: TextStyle(
                 backgroundColor: Colors.red.shade100,
                 color: Colors.red.shade900,
@@ -201,7 +204,7 @@ class DiffSpanBuilder {
               ),
               menuBuilder: (context, close) => menuHelper.buildDeleteMenu(
                 index: i,
-                text: change.text,
+                text: _processText(change.text),
                 close: close,
               ),
             ),
@@ -216,14 +219,14 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: change.text,
+              text: _processText(change.text, includeNewline: true),
               style: TextStyle(
                 color: Colors.black87,
                 backgroundColor: Colors.yellow.shade200,
               ),
               menuBuilder: (context, close) => menuHelper.buildInsertMenu(
                 index: i,
-                text: change.text,
+                text: _processText(change.text),
                 close: close,
               ),
             ),
@@ -243,7 +246,7 @@ class DiffSpanBuilder {
               ),
               menuBuilder: (context, close) => menuHelper.buildInsertMenu(
                 index: i,
-                text: change.text,
+                text: _processText(change.text),
                 close: close,
               ),
             ),
@@ -256,7 +259,7 @@ class DiffSpanBuilder {
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,
             child: HoverableTextWidget(
-              text: change.text,
+              text: _processText(change.text, includeNewline: true),
               style: TextStyle(
                 backgroundColor: Colors.green.shade100,
                 color: Colors.green.shade900,
@@ -264,7 +267,7 @@ class DiffSpanBuilder {
               ),
               menuBuilder: (context, close) => menuHelper.buildInsertMenu(
                 index: i,
-                text: change.text,
+                text: _processText(change.text),
                 close: close,
               ),
             ),
@@ -272,5 +275,9 @@ class DiffSpanBuilder {
         );
       }
     }
+  }
+
+  String _processText(String text, {bool includeNewline = false}) {
+    return text.replaceAll('\n', includeNewline ? '\u21B5\n' : '\u21B5');
   }
 }

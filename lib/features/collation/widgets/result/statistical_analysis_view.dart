@@ -62,7 +62,9 @@ class StatisticalAnalysisView extends StatelessWidget {
                 runSpacing: 8,
                 children: result.patterns.entries.map<Widget>((entry) {
                   return Chip(
-                    label: Text('${entry.key} (${entry.value})'),
+                    label: Text(
+                      '${entry.key.replaceAll('\n', '\u21B5')} (${entry.value})',
+                    ),
                     backgroundColor: Theme.of(
                       context,
                     ).colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
