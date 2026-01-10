@@ -215,7 +215,7 @@ Widget 测试      → 验证 UI 交互
 
 - [Flutter Testing Documentation](https://flutter.dev/docs/testing)
 - [Riverpod Testing Guide](https://riverpod.dev/docs/cookbooks/testing)
-- [guji-diff GitHub](https://github.com/sheldonlidev/guji-diff)
+- [guji-diff GitHub](https://github.com/open-guji/guji-diff)
 - [OpenCC Project](https://github.com/BYVoid/OpenCC)
 
 ## 🎓 学习要点

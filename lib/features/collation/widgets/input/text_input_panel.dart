@@ -28,19 +28,33 @@ class _TextInputPanelState extends State<TextInputPanel> {
 
   void _syncScroll1() {
     if (_isSyncing) return;
+    if (!_scrollController1.hasClients || !_scrollController2.hasClients)
+      return;
+
+    final max1 = _scrollController1.position.maxScrollExtent;
+    final max2 = _scrollController2.position.maxScrollExtent;
+
+    if (max1 <= 0) return;
+
     _isSyncing = true;
-    if (_scrollController2.hasClients) {
-      _scrollController2.jumpTo(_scrollController1.offset);
-    }
+    final ratio = _scrollController1.offset / max1;
+    _scrollController2.jumpTo(ratio * max2);
     _isSyncing = false;
   }
 
   void _syncScroll2() {
     if (_isSyncing) return;
+    if (!_scrollController1.hasClients || !_scrollController2.hasClients)
+      return;
+
+    final max1 = _scrollController1.position.maxScrollExtent;
+    final max2 = _scrollController2.position.maxScrollExtent;
+
+    if (max2 <= 0) return;
+
     _isSyncing = true;
-    if (_scrollController1.hasClients) {
-      _scrollController1.jumpTo(_scrollController2.offset);
-    }
+    final ratio = _scrollController2.offset / max2;
+    _scrollController1.jumpTo(ratio * max1);
     _isSyncing = false;
   }
 
@@ -125,7 +139,8 @@ class _TextInputPanelState extends State<TextInputPanel> {
           // Wrap with ConstrainedBox to set min/max height
           content = ConstrainedBox(
             constraints: const BoxConstraints(
-              minHeight: 150, // Minimum height ~5 lines at 14px font * 1.5 line height
+              minHeight:
+                  150, // Minimum height ~5 lines at 14px font * 1.5 line height
               maxHeight: 450, // Maximum height ~15 lines
             ),
             child: IntrinsicHeight(

@@ -9,6 +9,9 @@ class HoverableTextWidget extends StatefulWidget {
   final Widget Function(BuildContext context, VoidCallback close) menuBuilder;
   final LayerLink? anchorLink; // Optional anchor link for menu positioning
   final bool isAnchor; // Whether this widget is the anchor (creates the target)
+  final double horizontalPadding; // Optional padding for small segments
+  final BoxDecoration?
+  decoration; // Optional decoration (e.g. background color)
 
   const HoverableTextWidget({
     super.key,
@@ -18,6 +21,8 @@ class HoverableTextWidget extends StatefulWidget {
     required this.menuBuilder,
     this.anchorLink,
     this.isAnchor = false,
+    this.horizontalPadding = 0,
+    this.decoration,
   });
 
   @override
@@ -101,7 +106,12 @@ class _HoverableTextWidgetState extends State<HoverableTextWidget> {
   @override
   Widget build(BuildContext context) {
     final displayWidget =
-        widget.child ?? Text(widget.text ?? '', style: widget.style);
+        widget.child ??
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
+          decoration: widget.decoration,
+          child: Text(widget.text ?? '', style: widget.style),
+        );
 
     final textWidget = MouseRegion(
       onEnter: (_) => _showMenu(),
