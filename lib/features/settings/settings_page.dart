@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:yaml/yaml.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -13,6 +14,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String _version = '...';
   String _lastUpdated = '...';
   Map<String, String> _dependencies = {};
+  String _changelog = '';
   bool _isLoading = true;
 
   @override
@@ -55,6 +57,18 @@ class _SettingsPageState extends State<SettingsPage> {
       }
     } catch (e) {
       debugPrint('Error loading pubspec: $e');
+    }
+
+    try {
+      final changelogString = await rootBundle.loadString('CHANGELOG.md');
+      if (mounted) {
+        setState(() {
+          _changelog = changelogString;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading changelog: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -82,6 +96,20 @@ class _SettingsPageState extends State<SettingsPage> {
                       (e) => _buildDependencyTile(context, e.key, e.value),
                     ),
                   ]),
+                if (_changelog.isNotEmpty) ...[
+                  const SizedBox(height: 32),
+                  _buildSection(context, '更新日志', [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: MarkdownBody(
+                        data: _changelog,
+                        shrinkWrap: true,
+                        selectable: true,
+                      ),
+                    ),
+                  ]),
+                  const SizedBox(height: 16),
+                ],
               ],
             ),
     );
