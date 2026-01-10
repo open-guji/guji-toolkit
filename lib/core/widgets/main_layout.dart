@@ -59,6 +59,21 @@ class MainLayout extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     IconButton(
+                      onPressed: () => LinkLauncher.launch(
+                        'https://wj.qq.com/s2/25492820/38ce/',
+                      ),
+                      icon: const Icon(Icons.feedback_outlined),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '反馈',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    IconButton(
                       onPressed: () => context.go('/settings'),
                       icon: Icon(
                         location.startsWith('/settings')
