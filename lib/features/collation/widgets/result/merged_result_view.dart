@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'diff_text_renderer.dart';
+import '../common/collation_panel.dart';
 import 'collation_legend.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/bloc.dart';
@@ -34,26 +35,17 @@ class MergedResultView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const MergeHintBox(),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Theme.of(context).dividerColor, width: 1),
-          ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 150, maxHeight: 400),
-            child: SingleChildScrollView(
-              child: DiffTextRenderer(
-                changes: result.mergedView,
-                resolutions: resolutions,
-                onResolve: (index, resolution) {
-                  context.read<CollationBloc>().add(
-                    ResolveDiffEvent(index, resolution),
-                  );
-                },
-              ),
+        CollationPanel(
+          title: null, // 合并模式不需要标题
+          child: SingleChildScrollView(
+            child: DiffTextRenderer(
+              changes: result.mergedView,
+              resolutions: resolutions,
+              onResolve: (index, resolution) {
+                context.read<CollationBloc>().add(
+                  ResolveDiffEvent(index, resolution),
+                );
+              },
             ),
           ),
         ),

@@ -30,7 +30,7 @@ void main() {
       home: Scaffold(
         body: BlocProvider<CollationBloc>.value(
           value: mockBloc,
-          child: const TextInputPanel(),
+          child: const SingleChildScrollView(child: TextInputPanel()),
         ),
       ),
     );
