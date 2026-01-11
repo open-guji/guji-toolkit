@@ -2,36 +2,56 @@
 
 (function () {
     let transformers = null;
-    let punctuationPipeline = null;
+    let pipeline = null;
     let currentModel = null;
     let env = null;
+    let requestedSource = 'hf-mirror';
 
     window.transformersEngine = {
         async initialize() {
-            console.log("Transformers Engine v1.2 Initializing (with loadModel & Export)...");
+            console.log("[JS] initialize() entry. transformers ready?", !!transformers);
             if (!transformers) {
-
+                console.log("[JS] Transformers Engine v1.4 Initializing...");
                 const module = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
                 transformers = module;
                 env = module.env;
-                env.allowLocalModels = true;
-                env.remoteHost = 'https://hf-mirror.com'; // 默认镜像
+
+                // Configure environment based on user's best practices
+                env.allowLocalModels = false; // Only remote/cache
+                env.useBrowserCache = true;   // Enable browser caching
+
+                // Set custom cache location if needed, but default is fine
+                // env.cacheDir = 'transformers-cache'; 
+
+                // Apply the requested source during initialization
+                console.log("[JS] Applying initial source inside initialize():", requestedSource);
+                this.setSource(requestedSource);
+                console.log("[JS] Environment initialized. remoteHost is now:", env.remoteHost);
             }
         },
 
         setSource(source) {
-            if (!env) return;
+            console.log(`[JS] setSource called with: ${source}`);
+            requestedSource = source;
+            if (!env) {
+                console.log(`[JS] env not ready. Source [${source}] queued.`);
+                return;
+            }
+
+            console.log(`[JS] Applying remoteHost for source: ${source}`);
             if (source === 'hf-mirror') {
                 env.remoteHost = 'https://hf-mirror.com';
             } else {
                 env.remoteHost = 'https://huggingface.co';
             }
+            console.log("[JS] Current env.remoteHost:", env.remoteHost);
         },
 
-        async loadModel(modelName, subfolder, onProgress) {
+        async loadModel(modelName, taskType, subfolder, onProgress) {
+            console.log(`[JS] loadModel entry: ${modelName}, task: ${taskType}, subfolder: ${subfolder}`);
             await this.initialize();
             try {
-                if (currentModel !== modelName || !punctuationPipeline) {
+                if (currentModel !== modelName || !pipeline) {
                     const options = {
                         progress_callback: (p) => {
                             if (p.status === 'progress' && onProgress) {
@@ -41,83 +61,65 @@
                     };
                     if (subfolder) options.subfolder = subfolder;
 
-                    punctuationPipeline = await transformers.pipeline('token-classification', modelName, options);
+                    console.log("[JS] Creating pipeline with options:", JSON.stringify(options));
+                    console.log("[JS] Using remoteHost:", env.remoteHost);
+
+                    pipeline = await transformers.pipeline(taskType, modelName, options);
                     currentModel = modelName;
+                    console.log("[JS] Model loaded and cached successfully!");
                 }
             } catch (e) {
-                console.error("Load model failed:", e);
+                console.error("[JS] Load model failed:", e);
                 throw e;
             }
         },
 
-
-        async runPunctuation(text, modelName, onProgress) {
-            await this.initialize();
+        async runInference(text, modelName, taskType, subfolder, onProgress) {
+            console.log(`[JS] runInference entry: ${modelName}, task: ${taskType}`);
+            await this.loadModel(modelName, taskType, subfolder, onProgress);
 
             try {
-                if (currentModel !== modelName || !punctuationPipeline) {
-                    console.log(`Loading model: ${modelName}`);
-                    punctuationPipeline = await transformers.pipeline('token-classification', modelName, {
-                        progress_callback: (p) => {
-                            if (p.status === 'progress' && onProgress) {
-                                onProgress(p.progress);
-                            }
-                        }
-                    });
-                    currentModel = modelName;
+                const output = await pipeline(text);
+                console.log("[JS] Inference output received:", output);
+
+                if (taskType === 'token-classification') {
+                    // Reconstruct from labels for punctuation
+                    if (output.length > 0 && output[0].entity) {
+                        return this._reconstructFromLabels(text, output);
+                    }
+                    return output.map(x => x.word).join('') || text;
+                } else if (taskType === 'fill-mask') {
+                    // For Fill-Mask, return the top result or pretty string
+                    if (Array.isArray(output) && output.length > 0) {
+                        return output[0].sequence || JSON.stringify(output[0]);
+                    }
+                    return JSON.stringify(output);
                 }
 
-                const output = await punctuationPipeline(text);
-
-                // Transformers.js for token-classification returns an array of tokens with their labels
-                // We need to reconstruct the text with punctuation
-                let punctuatedText = '';
-                let lastIndex = 0;
-
-                // Simple reconstruction: tokens usually map back to the original text
-                // For Classical Chinese, tokens are often single characters
-                for (let i = 0; i < output.length; i++) {
-                    const item = output[i];
-                    punctuatedText += item.word;
-
-                    // Add punctuation based on label (e.g., 'LABEL_1' might be CC, 'LABEL_2' might be PU)
-                    // The specific mapping depends on the model.
-                    // For now, we return the raw output if it's already punctuated or handle it simply.
-                    // Note: many classical Chinese punctuation models actually replace/insert marks.
-                }
-
-                // Temporary: if output is just classification, we need a better restorer.
-                // But many models like raynardj's return the simplified result or we need to join them.
-                if (output.length > 0 && output[0].entity) {
-                    // If it's NER style, we need to join tokens and labels
-                    return this._reconstructFromLabels(text, output);
-                }
-
-                return output.map(x => x.word).join('') || text;
+                return typeof output === 'string' ? output : JSON.stringify(output);
             } catch (e) {
-                console.error("Punctuation failed:", e);
+                console.error("[JS] Inference failed:", e);
                 throw e;
             }
         },
 
         _reconstructFromLabels(text, output) {
-            // Placeholder for a more complex reconstruction logic
-            // In many cases, the output already contains the punctuated version in 'word'
-            // or we need to map labels to characters like ， 。 etc.
+            // Simplified reconstruction: join the words from tokens
             return output.map(x => x.word).join('');
         },
 
-        async checkCache(modelName) {
+        async checkCache(modelName, subfolder) {
             if (!window.caches) return false;
             try {
                 const cacheName = 'transformers-cache';
                 const cache = await caches.open(cacheName);
                 const keys = await cache.keys();
 
-                // A model is considered cached if we have the weight file and config
                 const cachedFiles = keys.map(request => request.url);
-                const hasWeights = cachedFiles.some(url => url.includes(modelName) && (url.includes('.onnx') || url.includes('.safetensors') || url.includes('.bin')));
-                const hasConfig = cachedFiles.some(url => url.includes(modelName) && url.includes('config.json'));
+                const searchString = subfolder ? `${modelName}/${subfolder}` : modelName;
+
+                const hasWeights = cachedFiles.some(url => url.includes(searchString) && (url.includes('.onnx') || url.includes('.safetensors') || url.includes('.bin')));
+                const hasConfig = cachedFiles.some(url => url.includes(searchString) && url.includes('config.json'));
 
                 return hasWeights && hasConfig;
             } catch (e) {
@@ -125,32 +127,42 @@
             }
         },
 
-
-        async exportModel(modelName) {
+        async exportModel(modelName, subfolder) {
             const files = [
                 'config.json',
                 'tokenizer.json',
                 'tokenizer_config.json',
                 'special_tokens_map.json',
-                'model.safetensors'
+                'vocab.txt',
+                'model.onnx'
             ];
 
-            // 确保环境已初始化以获取 remoteHost
             await this.initialize();
-            const baseUrl = env.remoteHost + '/' + modelName + '/resolve/main/';
+            const zip = new JSZip();
+            const modelFolder = zip.folder(modelName.split('/').pop());
+
+            let baseUrl = env.remoteHost + '/' + modelName + '/resolve/main/';
+            if (subfolder) baseUrl += subfolder + '/';
+
+            console.log(`[JS] Exporting from: ${baseUrl}`);
 
             for (const file of files) {
-                const url = baseUrl + file;
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = file;
-                link.target = '_blank';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                await new Promise(r => setTimeout(r, 500));
+                try {
+                    const response = await fetch(baseUrl + file);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        modelFolder.file(file, blob);
+                    }
+                } catch (e) {
+                    console.warn(`[JS] Failed to fetch ${file} for export:`, e);
+                }
             }
+
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `${modelName.split('/').pop()}.zip`;
+            link.click();
         }
     };
 })();
-

@@ -2,12 +2,21 @@
 /// 用于解耦具体的算法实现（如本地 Transformers.js 或 远程 LLM）
 abstract class PunctuationEngine {
   /// 预加载/安装模型
-  Future<void> loadModel(String modelName, {String? subfolder});
+  Future<void> loadModel(
+    String modelName, {
+    String? subfolder,
+    String? modelType,
+  });
 
   /// 对文本进行标点
   /// [text] 原始文本
   /// [modelName] 模型名称
-  Future<String> punctuate(String text, String modelName, {String? subfolder});
+  Future<String> punctuate(
+    String text,
+    String modelName, {
+    String? subfolder,
+    String? modelType,
+  });
 
   /// 下载模型
   /// [modelName] 模型名称

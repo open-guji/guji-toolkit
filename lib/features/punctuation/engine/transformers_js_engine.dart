@@ -12,6 +12,14 @@ extension type TransformersEngineJS._(JSObject _) implements JSObject {
   external void setSource(JSString source);
   external JSPromise loadModel(
     JSString modelName,
+    JSString taskType,
+    JSString? subfolder,
+    JSFunction onProgress,
+  );
+  external JSPromise<JSString> runInference(
+    JSString text,
+    JSString modelName,
+    JSString taskType,
     JSString? subfolder,
     JSFunction onProgress,
   );
@@ -30,7 +38,11 @@ class TransformersJsEngine implements PunctuationEngine {
   String get engineName => 'Transformers.js (Local)';
 
   @override
-  Future<void> loadModel(String modelName, {String? subfolder}) async {
+  Future<void> loadModel(
+    String modelName, {
+    String? subfolder,
+    String? modelType,
+  }) async {
     final engine = _getEngine();
     if (engine == null) throw Exception('Transformers engine not found');
 
@@ -38,12 +50,14 @@ class TransformersJsEngine implements PunctuationEngine {
       _progressController.add(p.toDartDouble);
     }.toJS;
 
-    // We trust that the JS engine is correctly loaded based on index.html
-    // If not, it will throw a property access error on call.
-
     try {
       await engine
-          .loadModel(modelName.toJS, subfolder?.toJS, onProgress)
+          .loadModel(
+            modelName.toJS,
+            (modelType ?? 'token-classification').toJS,
+            subfolder?.toJS,
+            onProgress,
+          )
           .toDart;
     } catch (e) {
       throw Exception('模型加载失败: $e');
@@ -55,6 +69,7 @@ class TransformersJsEngine implements PunctuationEngine {
     String text,
     String modelName, {
     String? subfolder,
+    String? modelType,
   }) async {
     final engine = _getEngine();
     if (engine == null) throw Exception('Transformers engine not found');
@@ -65,7 +80,13 @@ class TransformersJsEngine implements PunctuationEngine {
 
     try {
       final resultValue = await engine
-          .runPunctuation(text.toJS, modelName.toJS, onProgress)
+          .runInference(
+            text.toJS,
+            modelName.toJS,
+            (modelType ?? 'token-classification').toJS,
+            subfolder?.toJS,
+            onProgress,
+          )
           .toDart;
       return resultValue.toDart;
     } catch (e) {

@@ -76,6 +76,7 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
         state.originalText,
         state.selectedModel,
         subfolder: subfolder,
+        modelType: model.type,
       );
 
       await progressSubscription.cancel();
@@ -227,7 +228,11 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
             add(UpdateProgressEvent(progress));
           });
 
-      await engine.loadModel(event.modelName, subfolder: subfolder);
+      await engine.loadModel(
+        event.modelName,
+        subfolder: subfolder,
+        modelType: model.type,
+      );
 
       await progressSubscription.cancel();
 
