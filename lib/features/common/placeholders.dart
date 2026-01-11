@@ -54,3 +54,12 @@ class ScannerPage extends StatelessWidget {
     return const PlaceholderPage(title: '扫描', icon: Icons.scanner);
   }
 }
+
+class PunctuationPage extends StatelessWidget {
+  const PunctuationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const PlaceholderPage(title: '断句标点', icon: Icons.format_quote);
+  }
+}

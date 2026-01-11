@@ -20,9 +20,15 @@ class CollationPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 默认约束：最小高度 150，最大高度 400
+    // 默认约束：
+    // - 每行约 14px * 1.5 (line-height) = 21px
+    // - 5 行 = 105px，加上一些缓冲 = 140px
     final effectiveConstraints =
-        constraints ?? const BoxConstraints(minHeight: 150, maxHeight: 400);
+        constraints ??
+        BoxConstraints(
+          minHeight: isExpanded ? 300 : 140, // 非展开时至少 5 行高度
+          maxHeight: 400,
+        );
 
     final panel = Container(
       width: double.infinity,

@@ -71,6 +71,13 @@ class HomePage extends StatelessWidget {
                     onTap: () => context.go('/collation'),
                   ),
                   _ActionCard(
+                    title: '断句标点',
+                    description: '自动或手动为古籍文本断句和添加标点。',
+                    icon: Icons.format_quote,
+                    onTap: () => context.go('/punctuation'),
+                    isComingSoon: true,
+                  ),
+                  _ActionCard(
                     title: '开始编辑',
                     description: '直接修改和校勘文本。',
                     icon: Icons.edit,

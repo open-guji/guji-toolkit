@@ -30,6 +30,11 @@ class MainLayout extends StatelessWidget {
                   label: Text('文本对校'),
                 ),
                 NavigationRailDestination(
+                  icon: Icon(Icons.format_quote_outlined),
+                  selectedIcon: Icon(Icons.format_quote),
+                  label: Text('断句标点'),
+                ),
+                NavigationRailDestination(
                   icon: Icon(Icons.edit_note_outlined),
                   selectedIcon: Icon(Icons.edit_note),
                   label: Text('编辑器'),
@@ -109,8 +114,9 @@ class MainLayout extends StatelessWidget {
   int? _getSelectedIndex(String location) {
     if (location == '/') return 0;
     if (location.startsWith('/collation')) return 1;
-    if (location.startsWith('/editor')) return 2;
-    if (location.startsWith('/scanner')) return 3;
+    if (location.startsWith('/punctuation')) return 2;
+    if (location.startsWith('/editor')) return 3;
+    if (location.startsWith('/scanner')) return 4;
     return null;
   }
 
@@ -123,9 +129,12 @@ class MainLayout extends StatelessWidget {
         context.go('/collation');
         break;
       case 2:
-        context.go('/editor');
+        context.go('/punctuation');
         break;
       case 3:
+        context.go('/editor');
+        break;
+      case 4:
         context.go('/scanner');
         break;
     }

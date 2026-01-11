@@ -29,6 +29,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const ScannerPage(),
           ),
           GoRoute(
+            path: '/punctuation',
+            builder: (context, state) => const PunctuationPage(),
+          ),
+          GoRoute(
             path: '/settings',
             builder: (context, state) => const SettingsPage(),
           ),
