@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../common/widgets/widgets.dart';
 import '../bloc/bloc.dart';
+import 'punctuation_examples_panel.dart';
 
 class PunctuationInputPanel extends StatefulWidget {
   final bool isWide;
@@ -40,11 +41,13 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
         builder: (context, constraints) {
           final inputOriginal = PanelContainer(
             title: '底本',
+            titleTrailing: const PunctuationExamplesPanel(),
+            backgroundColor: const Color(0xFFFCF5E5), // 仿纸张米色
             isExpanded: widget.isWide,
             child: BorderlessTextField(
               controller: _originalController,
               hintText: '请输入底本内容...',
-              minLines: 8,
+              minLines: 12, // 增加高度
               onChanged: (value) {
                 context.read<PunctuationBloc>().add(
                   UpdateOriginalTextEvent(value),
@@ -55,11 +58,13 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
 
           final inputPunctuated = PanelContainer(
             title: '标点本',
+            backgroundColor: Colors.white,
+            hasShadow: true, // 增加投影强化对比
             isExpanded: widget.isWide,
             child: BorderlessTextField(
               controller: _punctuatedController,
               hintText: '标点后的文本将显示在这里...',
-              minLines: 8,
+              minLines: 12, // 增加高度
               readOnly: true,
             ),
           );
@@ -78,7 +83,7 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 inputOriginal,
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 inputPunctuated,
               ],
             );

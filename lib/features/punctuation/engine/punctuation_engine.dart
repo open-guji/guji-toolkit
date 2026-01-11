@@ -16,7 +16,7 @@ abstract class PunctuationEngine {
 
   /// 下载模型
   /// [modelName] 模型名称
-  /// [source] 下载源（如 huggingface, hf-mirror）
+  /// [source] 下载源（如 huggingface, modelscope）
   /// 返回进度流 (0.0 到 1.0)
   Stream<double> downloadModel(String modelName, {String? source});
 

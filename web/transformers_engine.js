@@ -28,10 +28,13 @@
             requestedSource = source;
             if (!env) return;
             console.log(`[JS] Applying download source: ${source}`);
-            if (source === 'hf-mirror') {
-                env.remoteHost = 'https://hf-mirror.com';
+            if (source === 'modelscope' || source === 'hf-mirror') {
+                // We use modelscope now as it is more stable than hf-mirror
+                env.remoteHost = 'https://modelscope.cn/api/v1/models/';
+                env.remoteFilenamePattern = '{model}/repo/resolve/master/{file}';
             } else {
                 env.remoteHost = 'https://huggingface.co';
+                env.remoteFilenamePattern = '{model}/resolve/{revision}/{file}';
             }
         },
 
@@ -75,6 +78,7 @@
                     }
 
                     console.log("[JS] Creating pipeline with standard structure...");
+
                     // 不再手动传 subfolder，让 Transformers.js 按默认约定在 onnx/ 下找模型
                     pipeline = await transformers.pipeline(taskType, modelName, options);
                     currentModel = modelName;

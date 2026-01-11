@@ -31,181 +31,173 @@ class PunctuationModelStatus extends StatelessWidget {
         final isInstalled = state.installedModels.contains(selectedModel.id);
         final isDownloading = state.isProcessing && !isInstalled;
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 左侧占位，与模型选择下拉框对齐
-            const SizedBox(width: 80),
-            // 模型状态容器 - 固定宽度
-            SizedBox(
-              width: 600,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Theme.of(
+                context,
+              ).colorScheme.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 第一行：标题、模型安装状态和操作按钮
+                Row(
                   children: [
-                    // 第一行：标题、模型名和操作按钮
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.download_outlined,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '模型安装',
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(width: 8),
-                        // 始终显示安装状态
-                        Icon(
-                          isInstalled
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
-                          size: 14,
-                          color: isInstalled
-                              ? Colors.green.shade600
-                              : Theme.of(context).colorScheme.onSurfaceVariant
-                                    .withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          isInstalled ? '已安装' : '未安装',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isInstalled
-                                ? Colors.green.shade700
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const Spacer(),
-                        // 下载源选择（仅在未安装且未下载时显示）
-                        if (!isInstalled && !isDownloading) ...[
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                    Icon(
+                      Icons.download_outlined,
+                      size: 14,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.7),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '模型安装',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // 始终显示安装状态
+                    Icon(
+                      isInstalled
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      size: 13,
+                      color: isInstalled
+                          ? Colors.green.shade600.withValues(alpha: 0.8)
+                          : Theme.of(context).colorScheme.onSurfaceVariant
+                                .withValues(alpha: 0.4),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      isInstalled ? '已安装' : '未安装',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isInstalled
+                            ? Colors.green.shade700.withValues(alpha: 0.8)
+                            : Theme.of(context).colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    // 下载源选择（仅在未安装且未下载时显示）
+                    if (!isInstalled && !isDownloading) ...[
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '下载源',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
-                                        ),
+                              Text(
+                                '下载源',
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      fontSize: 10,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                              const SizedBox(width: 6),
+                              SegmentedButton<String>(
+                                segments: const [
+                                  ButtonSegment(
+                                    value: 'modelscope',
+                                    label: Text(
+                                      '魔搭',
+                                      style: TextStyle(fontSize: 10),
+                                    ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  SegmentedButton<String>(
-                                    segments: const [
-                                      ButtonSegment(
-                                        value: 'hf-mirror',
-                                        label: Text(
-                                          '国内',
-                                          style: TextStyle(fontSize: 11),
-                                        ),
-                                      ),
-                                      ButtonSegment(
-                                        value: 'huggingface',
-                                        label: Text(
-                                          '官方',
-                                          style: TextStyle(fontSize: 11),
-                                        ),
-                                      ),
-                                    ],
-                                    selected: {state.downloadSource},
-                                    onSelectionChanged: (newSelection) {
-                                      context.read<PunctuationBloc>().add(
-                                        UpdateDownloadSourceEvent(
-                                          newSelection.first,
-                                        ),
-                                      );
-                                    },
-                                    showSelectedIcon: false,
-                                    style: SegmentedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 0,
-                                      ),
-                                      visualDensity: const VisualDensity(
-                                        horizontal: -4,
-                                        vertical: -4,
-                                      ),
-                                      tapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
+                                  ButtonSegment(
+                                    value: 'huggingface',
+                                    label: Text(
+                                      '官方',
+                                      style: TextStyle(fontSize: 10),
                                     ),
                                   ),
                                 ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                state.downloadSource == 'hf-mirror'
-                                    ? 'https://hf-mirror.com'
-                                    : 'https://huggingface.co',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      fontSize: 10,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant
-                                          .withValues(alpha: 0.6),
+                                selected: {state.downloadSource},
+                                onSelectionChanged: (newSelection) {
+                                  context.read<PunctuationBloc>().add(
+                                    UpdateDownloadSourceEvent(
+                                      newSelection.first,
                                     ),
+                                  );
+                                },
+                                showSelectedIcon: false,
+                                style: SegmentedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 0,
+                                  ),
+                                  visualDensity: const VisualDensity(
+                                    horizontal: -4,
+                                    vertical: -4,
+                                  ),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
                               ),
                             ],
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(height: 1),
+                          Text(
+                            state.downloadSource == 'huggingface'
+                                ? 'https://huggingface.co'
+                                : 'https://modelscope.cn',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  fontSize: 9,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withValues(alpha: 0.4),
+                                ),
+                          ),
                         ],
-                        // 状态/操作按钮
-                        _buildActionButton(
-                          context,
-                          state,
-                          selectedModel,
-                          isInstalled,
-                          isDownloading,
-                        ),
-                      ],
-                    ),
-                    // 下载进度条
-                    if (isDownloading) ...[
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value: state.progress,
-                        minHeight: 2,
-                        backgroundColor: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
                       ),
+                      const SizedBox(width: 8),
                     ],
-                    // 模型元数据（作者和链接）
-                    const SizedBox(height: 12),
-                    _ModelMetadata(model: selectedModel),
+                    // 状态/操作按钮
+                    _buildActionButton(
+                      context,
+                      state,
+                      selectedModel,
+                      isInstalled,
+                      isDownloading,
+                    ),
                   ],
                 ),
-              ),
+                // 下载进度条
+                if (isDownloading) ...[
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: state.progress,
+                    minHeight: 2,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                  ),
+                ],
+                // 模型元数据（作者和链接）
+                const SizedBox(height: 8),
+                _ModelMetadata(model: selectedModel),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -285,7 +277,7 @@ class PunctuationModelStatus extends StatelessWidget {
     // 检查模型是否可用于当前下载源
     final isAvailableForSource =
         state.downloadSource == 'huggingface' ||
-        (selectedModel.hasOnnxRepo && state.downloadSource == 'hf-mirror');
+        (selectedModel.hasOnnxRepo && state.downloadSource == 'modelscope');
 
     if (!isAvailableForSource) {
       return Text(

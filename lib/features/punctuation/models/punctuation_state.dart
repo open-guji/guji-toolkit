@@ -13,7 +13,7 @@ class PunctuationState extends Equatable {
   final List<PunctuationModel> availableModels;
   final bool isProcessing;
   final double progress;
-  final String downloadSource; // 'huggingface' or 'hf-mirror'
+  final String downloadSource; // 'huggingface' or 'modelscope'
   final String? error;
 
   const PunctuationState({

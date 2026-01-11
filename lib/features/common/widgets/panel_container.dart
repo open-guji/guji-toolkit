@@ -4,18 +4,22 @@ import 'package:flutter/material.dart';
 /// 负责处理边框、内边距、标题展示以及高度约束
 class PanelContainer extends StatelessWidget {
   final String? title;
+  final Widget? titleTrailing;
   final Widget child;
   final BoxConstraints? constraints;
   final Color? backgroundColor;
   final bool isExpanded;
+  final bool hasShadow;
 
   const PanelContainer({
     super.key,
     this.title,
+    this.titleTrailing,
     required this.child,
     this.constraints,
     this.backgroundColor,
     this.isExpanded = false,
+    this.hasShadow = false,
   });
 
   @override
@@ -36,6 +40,15 @@ class PanelContainer extends StatelessWidget {
           color: Theme.of(context).colorScheme.outlineVariant,
           width: 1,
         ),
+        boxShadow: hasShadow
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: ConstrainedBox(constraints: effectiveConstraints, child: child),
     );
@@ -49,13 +62,21 @@ class PanelContainer extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Text(
-            title!,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
+          child: Row(
+            children: [
+              Text(
+                title!,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              if (titleTrailing != null) ...[
+                const SizedBox(width: 12),
+                Expanded(child: titleTrailing!),
+              ],
+            ],
           ),
         ),
         panel,

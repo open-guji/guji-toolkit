@@ -279,24 +279,20 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     DeleteModelEvent event,
     Emitter<PunctuationState> emit,
   ) async {
-    print('DEBUG: _onDeleteModel called for ${event.modelName}');
     emit(state.copyWith(isProcessing: true, error: () => null));
 
     try {
       final modelRepoPath = state.getModelRepoPath(event.modelName);
-      print('DEBUG: modelRepoPath is $modelRepoPath');
       await engine.deleteModel(modelRepoPath);
 
       final updatedInstalled = state.installedModels
           .where((id) => id != event.modelName)
           .toList();
 
-      print('DEBUG: Deletion successful, updating state');
       emit(
         state.copyWith(installedModels: updatedInstalled, isProcessing: false),
       );
     } catch (e) {
-      print('DEBUG: Deletion failed: $e');
       emit(state.copyWith(isProcessing: false, error: () => '删除模型失败: $e'));
     }
   }

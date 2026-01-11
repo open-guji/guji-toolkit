@@ -27,13 +27,13 @@ class PunctuationModel extends Equatable {
   }
 
   /// 根据下载源获取 ONNX 模型的 URL
-  /// [source] 下载源: 'huggingface' 或 'hf-mirror'
+  /// [source] 下载源: 'huggingface' 或 'modelscope'
   String getOnnxUrl(String source) {
     final repo = onnxRepo ?? id;
-    final baseDomain = source == 'hf-mirror'
-        ? 'https://hf-mirror.com'
-        : 'https://huggingface.co';
-    return '$baseDomain/$repo';
+    if (source == 'modelscope') {
+      return 'https://modelscope.cn/api/v1/models/$repo/repo/resolve/master';
+    }
+    return 'https://huggingface.co/$repo';
   }
 
   /// 检查是否有 ONNX 仓库

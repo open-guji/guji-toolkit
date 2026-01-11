@@ -15,29 +15,9 @@ class PunctuationOptionsPanel extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 标题
-            Row(
-              children: [
-                Icon(
-                  Icons.tune,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '配置选项',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
             // 标点方式选择
             _MethodSelector(state: state),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // 模型选择（仅在专用模型模式下显示）
             if (state.selectedMethod == PunctuationMethod.specialized)
@@ -69,8 +49,10 @@ class _MethodSelector extends StatelessWidget {
             children: [
               SizedBox(
                 width: 80,
-                child: Text('标点方式',
-                    style: Theme.of(context).textTheme.bodyMedium),
+                child: Text(
+                  '标点方式',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
               Expanded(
                 child: SimpleDropdown<PunctuationMethod>(
@@ -80,8 +62,8 @@ class _MethodSelector extends StatelessWidget {
                   onChanged: (value) {
                     if (value != null) {
                       context.read<PunctuationBloc>().add(
-                            SwitchMethodEvent(value),
-                          );
+                        SwitchMethodEvent(value),
+                      );
                     }
                   },
                 ),
@@ -98,9 +80,9 @@ class _MethodSelector extends StatelessWidget {
             child: Text(
               state.selectedMethod.description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.5,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
           ),
         ),
@@ -153,25 +135,29 @@ class _ModelSelector extends StatelessWidget {
             children: [
               SizedBox(
                 width: 80,
-                child: Text('模型选择',
-                    style: Theme.of(context).textTheme.bodyMedium),
+                child: Text(
+                  '模型选择',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
               Expanded(
                 child: SimpleDropdown<String>(
                   value: state.selectedModel,
                   items: state.availableModels.map((m) => m.id).toList(),
                   itemLabel: (id) {
-                    final model = state.availableModels
-                        .firstWhere((m) => m.id == id, orElse: () {
-                      return state.availableModels.first;
-                    });
+                    final model = state.availableModels.firstWhere(
+                      (m) => m.id == id,
+                      orElse: () {
+                        return state.availableModels.first;
+                      },
+                    );
                     return model.name;
                   },
                   onChanged: (value) {
                     if (value != null) {
-                      context
-                          .read<PunctuationBloc>()
-                          .add(SelectModelEvent(value));
+                      context.read<PunctuationBloc>().add(
+                        SelectModelEvent(value),
+                      );
                     }
                   },
                 ),
@@ -188,9 +174,9 @@ class _ModelSelector extends StatelessWidget {
             child: Text(
               selectedModel.description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.5,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
           ),
         ),
@@ -226,10 +212,7 @@ class _LLMProviderSelector extends StatelessWidget {
   final PunctuationState state;
   final bool enabled;
 
-  const _LLMProviderSelector({
-    required this.state,
-    this.enabled = true,
-  });
+  const _LLMProviderSelector({required this.state, this.enabled = true});
 
   @override
   Widget build(BuildContext context) {
@@ -246,10 +229,10 @@ class _LLMProviderSelector extends StatelessWidget {
                 child: Text(
                   '选择模型',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: enabled
-                            ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: enabled
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               Expanded(
@@ -262,11 +245,12 @@ class _LLMProviderSelector extends StatelessWidget {
                       ? (value) {
                           if (value != null) {
                             context.read<PunctuationBloc>().add(
-                                  UpdateLLMConfigEvent(
-                                    state.llmConfig
-                                        .copyWith(selectedProvider: value),
-                                  ),
-                                );
+                              UpdateLLMConfigEvent(
+                                state.llmConfig.copyWith(
+                                  selectedProvider: value,
+                                ),
+                              ),
+                            );
                           }
                         }
                       : null,
@@ -284,9 +268,9 @@ class _LLMProviderSelector extends StatelessWidget {
             child: Text(
               state.llmConfig.selectedProvider.description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.5,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
           ),
         ),
@@ -304,7 +288,9 @@ class _DevelopmentNotice extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
@@ -322,9 +308,9 @@ class _DevelopmentNotice extends StatelessWidget {
             child: Text(
               '此功能正在开发中，敬请期待',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    height: 1.5,
-                  ),
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                height: 1.5,
+              ),
             ),
           ),
         ],
