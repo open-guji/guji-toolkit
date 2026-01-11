@@ -60,9 +60,14 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              // Model list from configuration
               ...state.availableModels.map((model) {
                 final isInstalled = state.installedModels.contains(model.id);
+                // Currently, personal models are not on hf-mirror or modelscope
+                // If modelscope_url is empty, we assume it's NOT available for hf-mirror yet
+                final isAvailableForSource =
+                    state.downloadSource == 'huggingface' ||
+                    (model.modelscopeUrl.isNotEmpty &&
+                        state.downloadSource == 'hf-mirror');
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
@@ -118,6 +123,14 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                         )
+                      else if (!isAvailableForSource)
+                        Text(
+                          '内容暂不可用',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                        )
                       else
                         TextButton.icon(
                           onPressed: () {
@@ -138,6 +151,7 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                   ),
                 );
               }),
+
               if (state.isProcessing && state.progress < 1.0)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),

@@ -7,6 +7,7 @@ class PunctuationModel extends Equatable {
   final String huggingfaceUrl;
   final String modelscopeUrl;
   final String type;
+  final String subfolder;
 
   const PunctuationModel({
     required this.id,
@@ -15,6 +16,7 @@ class PunctuationModel extends Equatable {
     required this.huggingfaceUrl,
     required this.modelscopeUrl,
     required this.type,
+    this.subfolder = '',
   });
 
   factory PunctuationModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class PunctuationModel extends Equatable {
       huggingfaceUrl: json['huggingface_url'] as String? ?? '',
       modelscopeUrl: json['modelscope_url'] as String? ?? '',
       type: json['type'] as String? ?? '',
+      subfolder: json['subfolder'] as String? ?? '',
     );
   }
 

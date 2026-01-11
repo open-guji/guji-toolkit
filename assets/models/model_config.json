@@ -5,7 +5,8 @@
         "description": "ONNX conversion of raynardj's model. Optimized for Transformers.js and automatic punctuation tasks.",
         "huggingface_url": "https://huggingface.co/sheldonlidev/classical-chinese-punctuation-guwen-biaodian",
         "modelscope_url": "",
-        "type": "token-classification"
+        "type": "token-classification",
+        "subfolder": "onnx"
     },
     {
         "id": "sheldonlidev/guwen-punc",
@@ -13,7 +14,8 @@
         "description": "ONNX conversion of ethanyt's guwen-punc. Designed specifically for classical Chinese punctuation.",
         "huggingface_url": "https://huggingface.co/sheldonlidev/guwen-punc",
         "modelscope_url": "",
-        "type": "token-classification"
+        "type": "token-classification",
+        "subfolder": "onnx"
     },
     {
         "id": "sheldonlidev/sikuBERT",
@@ -21,6 +23,7 @@
         "description": "ONNX conversion of the SIKU-BERT model, optimized for processing the Siku Quanshu corpus and other classical texts.",
         "huggingface_url": "https://huggingface.co/sheldonlidev/sikuBERT",
         "modelscope_url": "",
-        "type": "base"
+        "type": "base",
+        "subfolder": "onnx"
     }
 ]

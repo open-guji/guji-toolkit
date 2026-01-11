@@ -26,6 +26,21 @@ class PunctuationState extends Equatable {
     this.error,
   });
 
+  bool isModelAvailable(String modelId) {
+    final model = availableModels.firstWhere(
+      (m) => m.id == modelId,
+      orElse: () => PunctuationModel(
+        id: modelId,
+        name: modelId,
+        description: '',
+        huggingfaceUrl: '',
+        modelscopeUrl: '',
+        type: '',
+      ),
+    );
+    return downloadSource == 'huggingface' || model.modelscopeUrl.isNotEmpty;
+  }
+
   PunctuationState copyWith({
     String? originalText,
     String? punctuatedText,

@@ -10,10 +10,17 @@ extension type TransformersEngineJS._(JSObject _) implements JSObject {
     JSFunction onProgress,
   );
   external void setSource(JSString source);
-  external JSPromise loadModel(JSString modelName, JSFunction onProgress);
-  external JSPromise<JSBoolean> checkCache(JSString modelName);
+  external JSPromise loadModel(
+    JSString modelName,
+    JSString? subfolder,
+    JSFunction onProgress,
+  );
+  external JSPromise<JSBoolean> checkCache(
+    JSString modelName,
+    JSString? subfolder,
+  );
 
-  external JSPromise exportModel(JSString modelName);
+  external JSPromise exportModel(JSString modelName, JSString? subfolder);
 }
 
 class TransformersJsEngine implements PunctuationEngine {
@@ -23,7 +30,7 @@ class TransformersJsEngine implements PunctuationEngine {
   String get engineName => 'Transformers.js (Local)';
 
   @override
-  Future<void> loadModel(String modelName) async {
+  Future<void> loadModel(String modelName, {String? subfolder}) async {
     final engine = _getEngine();
     if (engine == null) throw Exception('Transformers engine not found');
 
@@ -35,14 +42,20 @@ class TransformersJsEngine implements PunctuationEngine {
     // If not, it will throw a property access error on call.
 
     try {
-      await engine.loadModel(modelName.toJS, onProgress).toDart;
+      await engine
+          .loadModel(modelName.toJS, subfolder?.toJS, onProgress)
+          .toDart;
     } catch (e) {
       throw Exception('模型加载失败: $e');
     }
   }
 
   @override
-  Future<String> punctuate(String text, String modelName) async {
+  Future<String> punctuate(
+    String text,
+    String modelName, {
+    String? subfolder,
+  }) async {
     final engine = _getEngine();
     if (engine == null) throw Exception('Transformers engine not found');
 
@@ -61,7 +74,11 @@ class TransformersJsEngine implements PunctuationEngine {
   }
 
   @override
-  Stream<double> downloadModel(String modelName, {String? source}) async* {
+  Stream<double> downloadModel(
+    String modelName, {
+    String? source,
+    String? subfolder,
+  }) async* {
     final engine = _getEngine();
     if (engine != null && source != null) {
       engine.setSource(source.toJS);
@@ -72,10 +89,12 @@ class TransformersJsEngine implements PunctuationEngine {
   }
 
   @override
-  Future<bool> isModelCached(String modelName) async {
+  Future<bool> isModelCached(String modelName, {String? subfolder}) async {
     final engine = _getEngine();
     if (engine == null) return false;
-    final result = await engine.checkCache(modelName.toJS).toDart;
+    final result = await engine
+        .checkCache(modelName.toJS, subfolder?.toJS)
+        .toDart;
     return result.toDart;
   }
 
@@ -87,10 +106,10 @@ class TransformersJsEngine implements PunctuationEngine {
   }
 
   @override
-  Future<void> exportModel(String modelName) async {
+  Future<void> exportModel(String modelName, {String? subfolder}) async {
     final engine = _getEngine();
     if (engine == null) return;
-    await engine.exportModel(modelName.toJS).toDart;
+    await engine.exportModel(modelName.toJS, subfolder?.toJS).toDart;
   }
 
   TransformersEngineJS? _getEngine() {

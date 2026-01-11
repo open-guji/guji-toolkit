@@ -47,12 +47,27 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       return;
     }
 
+    if (!state.isModelAvailable(state.selectedModel) &&
+        !state.installedModels.contains(state.selectedModel)) {
+      emit(state.copyWith(error: () => '当前下载源暂不支持该模型，请切换到官方源'));
+      return;
+    }
+
     emit(state.copyWith(isProcessing: true, progress: 0.0, error: () => null));
 
     try {
+      final model = state.availableModels.firstWhere(
+        (m) => m.id == state.selectedModel,
+      );
+      final subfolder = model.subfolder.isNotEmpty ? model.subfolder : null;
+
       // 监听下载/加载进度
       final progressSubscription = engine
-          .downloadModel(state.selectedModel, source: state.downloadSource)
+          .downloadModel(
+            state.selectedModel,
+            source: state.downloadSource,
+            subfolder: subfolder,
+          )
           .listen((progress) {
             add(UpdateProgressEvent(progress));
           });
@@ -60,6 +75,7 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       final result = await engine.punctuate(
         state.originalText,
         state.selectedModel,
+        subfolder: subfolder,
       );
 
       await progressSubscription.cancel();
@@ -130,12 +146,23 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
           .map((json) => PunctuationModel.fromJson(json))
           .toList();
 
-      final cachedModels = await engine.getCachedModels();
+      final cachedModels = await Future.wait(
+        models.map(
+          (m) => engine.isModelCached(
+            m.id,
+            subfolder: m.subfolder.isNotEmpty ? m.subfolder : null,
+          ),
+        ),
+      );
+      final List<String> installedIds = [];
+      for (int i = 0; i < models.length; i++) {
+        if (cachedModels[i]) installedIds.add(models[i].id);
+      }
 
       emit(
         state.copyWith(
           availableModels: models,
-          installedModels: cachedModels,
+          installedModels: installedIds,
           // If default isn't in available models (unlikely but safe), use the first one
           selectedModel: models.any((m) => m.id == state.selectedModel)
               ? state.selectedModel
@@ -152,7 +179,14 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     Emitter<PunctuationState> emit,
   ) async {
     try {
-      await engine.exportModel(event.modelName);
+      final model = state.availableModels.firstWhere(
+        (m) => m.id == event.modelName,
+        orElse: () => throw Exception('Model not found in config'),
+      );
+      await engine.exportModel(
+        event.modelName,
+        subfolder: model.subfolder.isNotEmpty ? model.subfolder : null,
+      );
     } catch (e) {
       emit(state.copyWith(error: () => '导出模型失败: $e'));
     }
@@ -162,6 +196,11 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     InstallModelEvent event,
     Emitter<PunctuationState> emit,
   ) async {
+    if (!state.isModelAvailable(event.modelName)) {
+      emit(state.copyWith(error: () => '当前下载源暂不支持该模型，请切换到官方源'));
+      return;
+    }
+
     emit(
       state.copyWith(
         selectedModel: event.modelName,
@@ -172,13 +211,23 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     );
 
     try {
+      final model = state.availableModels.firstWhere(
+        (m) => m.id == event.modelName,
+        orElse: () => throw Exception('Model not found in config'),
+      );
+      final subfolder = model.subfolder.isNotEmpty ? model.subfolder : null;
+
       final progressSubscription = engine
-          .downloadModel(event.modelName, source: state.downloadSource)
+          .downloadModel(
+            event.modelName,
+            source: state.downloadSource,
+            subfolder: subfolder,
+          )
           .listen((progress) {
             add(UpdateProgressEvent(progress));
           });
 
-      await engine.loadModel(event.modelName);
+      await engine.loadModel(event.modelName, subfolder: subfolder);
 
       await progressSubscription.cancel();
 

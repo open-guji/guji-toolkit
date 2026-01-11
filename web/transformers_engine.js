@@ -28,17 +28,20 @@
             }
         },
 
-        async loadModel(modelName, onProgress) {
+        async loadModel(modelName, subfolder, onProgress) {
             await this.initialize();
             try {
                 if (currentModel !== modelName || !punctuationPipeline) {
-                    punctuationPipeline = await transformers.pipeline('token-classification', modelName, {
+                    const options = {
                         progress_callback: (p) => {
                             if (p.status === 'progress' && onProgress) {
                                 onProgress(p.progress);
                             }
                         }
-                    });
+                    };
+                    if (subfolder) options.subfolder = subfolder;
+
+                    punctuationPipeline = await transformers.pipeline('token-classification', modelName, options);
                     currentModel = modelName;
                 }
             } catch (e) {
@@ -46,6 +49,7 @@
                 throw e;
             }
         },
+
 
         async runPunctuation(text, modelName, onProgress) {
             await this.initialize();
