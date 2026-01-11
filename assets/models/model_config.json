@@ -14,13 +14,5 @@
         "huggingface_url": "https://huggingface.co/sheldonlidev/guwen-punc",
         "modelscope_url": "",
         "type": "token-classification"
-    },
-    {
-        "id": "sheldonlidev/sikuBERT",
-        "name": "SikuBERT",
-        "description": "ONNX conversion of the SIKU-BERT model, optimized for processing the Siku Quanshu corpus and other classical texts.",
-        "huggingface_url": "https://huggingface.co/sheldonlidev/sikuBERT",
-        "modelscope_url": "",
-        "type": "fill-mask"
     }
 ]

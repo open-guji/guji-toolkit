@@ -169,7 +169,8 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     Emitter<PunctuationState> emit,
   ) async {
     try {
-      final model = state.availableModels.firstWhere(
+      // Validate model exists
+      state.availableModels.firstWhere(
         (m) => m.id == event.modelName,
         orElse: () => throw Exception('Model not found in config'),
       );

@@ -10,7 +10,7 @@
     window.transformersEngine = {
         async initialize() {
             if (!transformers) {
-                console.log("[JS] Transformers Engine v1.9 Initializing...");
+                console.log("[JS] Transformers Engine v1.12 Initializing...");
                 const module = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
                 transformers = module;
                 env = module.env;
@@ -45,19 +45,34 @@
 
                     const options = {
                         progress_callback: (p) => {
-                            if (p.status === 'progress' && progressCallback) {
-                                try {
-                                    progressCallback(p.progress);
-                                } catch (err) { }
+                            if (progressCallback) {
+                                if (p.status === 'progress') {
+                                    // p.progress is 0-100 from Transformers.js
+                                    // BLoC expects 0-1 range for progress indicator.
+                                    let val = p.progress;
+                                    if (typeof val !== 'number' || isNaN(val)) {
+                                        val = 0;
+                                    }
+                                    progressCallback(val / 100);
+                                } else if (p.status === 'done') {
+                                    // Ensure it reaches 100% (1.0) for each file
+                                    progressCallback(1.0);
+                                }
                             }
                         },
-                        // Transformers.js 默认搜索顺序: 
+                        // Transformers.js 默认搜索顺序:
                         // 1. 根目录 model_quantized.onnx
                         // 2. onnx/model_quantized.onnx
                         // 3. 根目录 model.onnx
                         // 4. onnx/model.onnx (这是我们当前的目标位置)
                         quantized: false
                     };
+
+                    // For punctuation models (token-classification), we must disable aggregation
+                    // to get the label for every single character.
+                    if (taskType === 'token-classification') {
+                        options.aggregation_strategy = 'none';
+                    }
 
                     console.log("[JS] Creating pipeline with standard structure...");
                     // 不再手动传 subfolder，让 Transformers.js 按默认约定在 onnx/ 下找模型
@@ -76,29 +91,15 @@
 
             try {
                 const output = await pipeline(text);
-                console.log("[JS] Inference output received:", output);
+                console.log("[JS] Inference output received (length):", output.length);
 
-                if (taskType === 'token-classification') {
-                    if (output.length > 0 && output[0].entity) {
-                        return this._reconstructFromLabels(text, output);
-                    }
-                    return output.map(x => x.word).join('') || text;
-                } else if (taskType === 'fill-mask') {
-                    if (Array.isArray(output) && output.length > 0) {
-                        return output[0].sequence || JSON.stringify(output[0]);
-                    }
-                    return JSON.stringify(output);
-                }
-
-                return typeof output === 'string' ? output : JSON.stringify(output);
+                // Return raw output structure as JSON string
+                // Dart side will handle parsing and reconstruction
+                return JSON.stringify(output);
             } catch (e) {
                 console.error("[JS] Inference failed:", e);
                 throw e;
             }
-        },
-
-        _reconstructFromLabels(text, output) {
-            return output.map(x => x.word).join('');
         },
 
         async checkCache(modelName) {
