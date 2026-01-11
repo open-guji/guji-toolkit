@@ -10,6 +10,15 @@ enum PunctuationMethod {
         return '大语言模型';
     }
   }
+
+  String get description {
+    switch (this) {
+      case PunctuationMethod.specialized:
+        return '使用专门训练的古文标点模型，准确度高，模型下载后本地离线使用';
+      case PunctuationMethod.llm:
+        return '使用大语言模型进行标点，支持自定义提示词，闭源模型需要网络连接和相关账号';
+    }
+  }
 }
 
 enum LLMServiceType {

@@ -19,8 +19,7 @@ class PunctuationState extends Equatable {
   const PunctuationState({
     this.originalText = '',
     this.punctuatedText = '',
-    this.selectedModel =
-        'sheldonlidev/classical-chinese-punctuation-guwen-biaodian',
+    this.selectedModel = 'classical-chinese-punctuation-guwen-biaodian',
     this.selectedMethod = PunctuationMethod.specialized,
     this.llmConfig = const LLMConfig(),
     this.installedModels = const [], // Empty initially to show "Install"
@@ -41,12 +40,31 @@ class PunctuationState extends Equatable {
         id: modelId,
         name: modelId,
         description: '',
-        huggingfaceUrl: '',
-        modelscopeUrl: '',
+        originalAuthor: '',
+        originalRepo: '',
         type: '',
       ),
     );
-    return downloadSource == 'huggingface' || model.modelscopeUrl.isNotEmpty;
+    // 官方源总是可用，国内镜像只有配置了 onnxRepo 的模型才可用
+    return downloadSource == 'huggingface' || model.hasOnnxRepo;
+  }
+
+  /// 获取模型的完整仓库路径用于下载
+  /// 根据当前下载源返回正确的仓库路径
+  String getModelRepoPath(String modelId) {
+    final model = availableModels.firstWhere(
+      (m) => m.id == modelId,
+      orElse: () => PunctuationModel(
+        id: modelId,
+        name: modelId,
+        description: '',
+        originalAuthor: '',
+        originalRepo: '',
+        type: '',
+      ),
+    );
+    // 如果有 ONNX 仓库，使用 ONNX 仓库路径；否则使用 ID
+    return model.onnxRepo ?? model.id;
   }
 
   PunctuationState copyWith({

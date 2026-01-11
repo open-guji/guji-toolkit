@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../common/widgets/widgets.dart';
 import '../bloc/bloc.dart';
 import '../models/punctuation_config.dart';
+import '../models/punctuation_model.dart';
 
 class PunctuationOptionsPanel extends StatelessWidget {
   const PunctuationOptionsPanel({super.key});
@@ -56,15 +57,6 @@ class _MethodSelector extends StatelessWidget {
 
   const _MethodSelector({required this.state});
 
-  String _getMethodDescription(PunctuationMethod method) {
-    switch (method) {
-      case PunctuationMethod.specialized:
-        return '使用专门训练的古文标点模型，准确度高，支持离线使用';
-      case PunctuationMethod.llm:
-        return '使用大语言模型进行标点，支持自定义提示词，需要网络连接';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -104,7 +96,7 @@ class _MethodSelector extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              _getMethodDescription(state.selectedMethod),
+              state.selectedMethod.description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.5,
@@ -123,15 +115,20 @@ class _ModelSelector extends StatelessWidget {
 
   const _ModelSelector({required this.state});
 
-  String _getModelDescription(String modelId) {
-    // 根据模型 ID 返回不同的描述
-    if (modelId.contains('guwen')) {
-      return '专为古文断句设计，基于标点标注，适合文言文标点';
-    } else if (modelId.contains('wiki')) {
-      return '基于维基百科训练，适合现代文和古文混合文本';
-    } else {
-      return '通用古文标点模型';
-    }
+  PunctuationModel _getSelectedModel() {
+    return state.availableModels.firstWhere(
+      (m) => m.id == state.selectedModel,
+      orElse: () => state.availableModels.isNotEmpty
+          ? state.availableModels.first
+          : const PunctuationModel(
+              id: '',
+              name: '',
+              description: '暂无描述',
+              originalAuthor: '',
+              originalRepo: '',
+              type: '',
+            ),
+    );
   }
 
   @override
@@ -143,6 +140,8 @@ class _ModelSelector extends StatelessWidget {
         child: Text('正在加载模型列表...'),
       );
     }
+
+    final selectedModel = _getSelectedModel();
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +163,6 @@ class _ModelSelector extends StatelessWidget {
                   itemLabel: (id) {
                     final model = state.availableModels
                         .firstWhere((m) => m.id == id, orElse: () {
-                      // 如果找不到，返回一个默认模型
                       return state.availableModels.first;
                     });
                     return model.name;
@@ -183,12 +181,12 @@ class _ModelSelector extends StatelessWidget {
         ),
         const SizedBox(width: 16),
 
-        // 右侧：简介
+        // 右侧：模型描述
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              _getModelDescription(state.selectedModel),
+              selectedModel.description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.5,

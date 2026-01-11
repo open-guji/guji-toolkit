@@ -92,15 +92,16 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
         final model = state.availableModels.firstWhere(
           (m) => m.id == state.selectedModel,
         );
+        final modelRepoPath = state.getModelRepoPath(state.selectedModel);
         final progressSubscription = engine
-            .downloadModel(state.selectedModel, source: state.downloadSource)
+            .downloadModel(modelRepoPath, source: state.downloadSource)
             .listen((progress) {
               add(UpdateProgressEvent(progress));
             });
 
         final result = await engine.punctuate(
           state.originalText,
-          state.selectedModel,
+          modelRepoPath,
           modelType: model.type,
         );
 
@@ -201,7 +202,10 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
           .toList();
 
       final cachedModels = await Future.wait(
-        models.map((m) => engine.isModelCached(m.id)),
+        models.map((m) {
+          final repoPath = m.onnxRepo ?? m.id;
+          return engine.isModelCached(repoPath);
+        }),
       );
 
       final List<String> installedIds = [];
@@ -247,13 +251,14 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
         (m) => m.id == event.modelName,
         orElse: () => throw Exception('Model not found in config'),
       );
+      final modelRepoPath = state.getModelRepoPath(event.modelName);
       final progressSubscription = engine
-          .downloadModel(event.modelName, source: state.downloadSource)
+          .downloadModel(modelRepoPath, source: state.downloadSource)
           .listen((progress) {
             add(UpdateProgressEvent(progress));
           });
 
-      await engine.loadModel(event.modelName, modelType: model.type);
+      await engine.loadModel(modelRepoPath, modelType: model.type);
 
       await progressSubscription.cancel();
 

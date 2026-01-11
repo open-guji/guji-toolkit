@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../bloc/bloc.dart';
 import '../models/punctuation_config.dart';
 
@@ -30,26 +31,31 @@ class PunctuationModelStatus extends StatelessWidget {
         final isInstalled = state.installedModels.contains(selectedModel.id);
         final isDownloading = state.isProcessing && !isInstalled;
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Theme.of(context)
-                  .colorScheme
-                  .outlineVariant
-                  .withValues(alpha: 0.5),
-            ),
-          ),
-          child: Row(
-            children: [
-              // 模型信息
-              Expanded(
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 左侧占位，与模型选择下拉框对齐
+            const SizedBox(width: 80),
+            // 模型状态容器 - 固定宽度
+            SizedBox(
+              width: 600,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .outlineVariant
+                        .withValues(alpha: 0.5),
+                  ),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // 第一行：标题、模型名和操作按钮
                     Row(
                       children: [
                         Icon(
@@ -75,8 +81,48 @@ class PunctuationModelStatus extends StatelessWidget {
                                         .onSurfaceVariant,
                                   ),
                         ),
+                        const Spacer(),
+                        // 下载源选择（仅在未安装且未下载时显示）
+                        if (!isInstalled && !isDownloading) ...[
+                          Text(
+                            '下载源',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                          const SizedBox(width: 8),
+                          SegmentedButton<String>(
+                            segments: const [
+                              ButtonSegment(
+                                value: 'hf-mirror',
+                                label: Text('国内', style: TextStyle(fontSize: 12)),
+                              ),
+                              ButtonSegment(
+                                value: 'huggingface',
+                                label: Text('官方', style: TextStyle(fontSize: 12)),
+                              ),
+                            ],
+                            selected: {state.downloadSource},
+                            onSelectionChanged: (newSelection) {
+                              context.read<PunctuationBloc>().add(
+                                    UpdateDownloadSourceEvent(newSelection.first),
+                                  );
+                            },
+                            showSelectedIcon: false,
+                            style: SegmentedButton.styleFrom(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        // 状态/操作按钮
+                        _buildActionButton(context, state, selectedModel, isInstalled,
+                            isDownloading),
                       ],
                     ),
+                    // 下载进度条
                     if (isDownloading) ...[
                       const SizedBox(height: 8),
                       LinearProgressIndicator(
@@ -86,53 +132,14 @@ class PunctuationModelStatus extends StatelessWidget {
                             Theme.of(context).colorScheme.surfaceContainerHighest,
                       ),
                     ],
+                    // 模型元数据（作者和链接）
+                    const SizedBox(height: 12),
+                    _ModelMetadata(model: selectedModel),
                   ],
                 ),
               ),
-
-              const SizedBox(width: 16),
-
-              // 下载源选择（仅在未安装且未下载时显示）
-              if (!isInstalled && !isDownloading) ...[
-                Text(
-                  '下载源',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-                const SizedBox(width: 8),
-                SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(
-                      value: 'hf-mirror',
-                      label: Text('国内', style: TextStyle(fontSize: 12)),
-                    ),
-                    ButtonSegment(
-                      value: 'huggingface',
-                      label: Text('官方', style: TextStyle(fontSize: 12)),
-                    ),
-                  ],
-                  selected: {state.downloadSource},
-                  onSelectionChanged: (newSelection) {
-                    context.read<PunctuationBloc>().add(
-                          UpdateDownloadSourceEvent(newSelection.first),
-                        );
-                  },
-                  showSelectedIcon: false,
-                  style: SegmentedButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-                const SizedBox(width: 16),
-              ],
-
-              // 状态/操作按钮
-              _buildActionButton(context, state, selectedModel, isInstalled,
-                  isDownloading),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
@@ -195,8 +202,7 @@ class PunctuationModelStatus extends StatelessWidget {
 
     // 检查模型是否可用于当前下载源
     final isAvailableForSource = state.downloadSource == 'huggingface' ||
-        (selectedModel.modelscopeUrl.isNotEmpty &&
-            state.downloadSource == 'hf-mirror');
+        (selectedModel.hasOnnxRepo && state.downloadSource == 'hf-mirror');
 
     if (!isAvailableForSource) {
       return Text(
@@ -221,6 +227,70 @@ class PunctuationModelStatus extends StatelessWidget {
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
+    );
+  }
+}
+
+/// 模型元数据组件（作者、HuggingFace 链接等）
+class _ModelMetadata extends StatelessWidget {
+  final dynamic model;
+
+  const _ModelMetadata({required this.model});
+
+  Future<void> _openUrl(String urlString) async {
+    final url = Uri.parse(urlString);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 6,
+      children: [
+        // 原作者
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_outline,
+              size: 14,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '作者: ${model.originalAuthor}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
+        // HuggingFace 链接
+        InkWell(
+          onTap: () => _openUrl(model.getOriginalUrl()),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.open_in_new,
+                size: 14,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'HuggingFace 仓库',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
