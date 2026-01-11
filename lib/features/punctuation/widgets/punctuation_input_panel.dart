@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../collation/widgets/common/collation_panel.dart';
+import '../../common/widgets/widgets.dart';
 import '../bloc/bloc.dart';
 
 class PunctuationInputPanel extends StatefulWidget {
@@ -38,26 +38,13 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final inputOriginal = CollationPanel(
+          final inputOriginal = PanelContainer(
             title: '底本',
             isExpanded: widget.isWide,
-            child: TextField(
+            child: BorderlessTextField(
               controller: _originalController,
-              maxLines: null,
-              minLines: 5,
-              textAlignVertical: TextAlignVertical.top,
-              decoration: const InputDecoration(
-                hintText: '请输入底本内容...',
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                contentPadding: EdgeInsets.only(right: 12),
-                filled: false,
-              ),
-              style: const TextStyle(fontSize: 14, height: 1.5),
-
+              hintText: '请输入底本内容...',
+              minLines: 8,
               onChanged: (value) {
                 context.read<PunctuationBloc>().add(
                   UpdateOriginalTextEvent(value),
@@ -66,26 +53,14 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
             ),
           );
 
-          final inputPunctuated = CollationPanel(
+          final inputPunctuated = PanelContainer(
             title: '标点本',
             isExpanded: widget.isWide,
-            child: TextField(
+            child: BorderlessTextField(
               controller: _punctuatedController,
-              maxLines: null,
-              minLines: 5,
-              readOnly: true, // Output field
-              textAlignVertical: TextAlignVertical.top,
-              decoration: const InputDecoration(
-                hintText: '标点后的文本将显示在这里...',
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                contentPadding: EdgeInsets.only(right: 12),
-                filled: false,
-              ),
-              style: const TextStyle(fontSize: 14, height: 1.5),
+              hintText: '标点后的文本将显示在这里...',
+              minLines: 8,
+              readOnly: true,
             ),
           );
 
@@ -94,7 +69,7 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: inputOriginal),
-                const SizedBox(width: 16),
+                const SizedBox(width: 24),
                 Expanded(child: inputPunctuated),
               ],
             );
@@ -103,7 +78,7 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 inputOriginal,
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 inputPunctuated,
               ],
             );

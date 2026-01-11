@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
-import '../common/collation_panel.dart';
+import 'package:guji_toolkit/features/common/widgets/widgets.dart';
 import 'highlighted_text_field.dart';
 
 class TextInputPanel extends StatefulWidget {
@@ -109,7 +109,7 @@ class _TextInputPanelState extends State<TextInputPanel> {
             : null;
       },
       builder: (context, state) {
-        final input1 = CollationPanel(
+        final input1 = PanelContainer(
           title: '底本',
           isExpanded: widget.isWide,
           child: HighlightedTextField(
@@ -123,7 +123,7 @@ class _TextInputPanelState extends State<TextInputPanel> {
           ),
         );
 
-        final input2 = CollationPanel(
+        final input2 = PanelContainer(
           title: '校本',
           isExpanded: widget.isWide,
           child: HighlightedTextField(

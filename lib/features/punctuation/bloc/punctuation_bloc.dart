@@ -21,12 +21,9 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     on<UpdateDownloadSourceEvent>(_onUpdateDownloadSource);
     on<UpdateProgressEvent>(_onUpdateProgress);
     on<PunctuationStarted>(_onStarted);
-    on<ExportModelEvent>(_onExportModel);
     on<InstallModelEvent>(_onInstallModel);
     on<SwitchMethodEvent>(_onSwitchMethod);
     on<UpdateLLMConfigEvent>(_onUpdateLLMConfig);
-    on<UpdateStorageLocationEvent>(_onUpdateStorageLocation);
-    on<UpdateLocalModelPathEvent>(_onUpdateLocalModelPath);
   }
 
   void _onSwitchMethod(
@@ -44,6 +41,7 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       state.copyWith(
         llmConfig: state.llmConfig.copyWith(
           serviceType: event.config.serviceType,
+          selectedProvider: event.config.selectedProvider,
           provider: event.config.provider,
           apiKey: event.config.apiKey,
           baseUrl: event.config.baseUrl,
@@ -166,20 +164,6 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     emit(state.copyWith(downloadSource: event.source));
   }
 
-  void _onUpdateStorageLocation(
-    UpdateStorageLocationEvent event,
-    Emitter<PunctuationState> emit,
-  ) {
-    emit(state.copyWith(storageLocation: event.location));
-  }
-
-  void _onUpdateLocalModelPath(
-    UpdateLocalModelPathEvent event,
-    Emitter<PunctuationState> emit,
-  ) {
-    emit(state.copyWith(localModelPath: event.path));
-  }
-
   void _onLoadExample(
     LoadPunctuationExampleEvent event,
     Emitter<PunctuationState> emit,
@@ -237,22 +221,6 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       );
     } catch (e) {
       // Ignore initial check errors or log them
-    }
-  }
-
-  Future<void> _onExportModel(
-    ExportModelEvent event,
-    Emitter<PunctuationState> emit,
-  ) async {
-    try {
-      // Validate model exists
-      state.availableModels.firstWhere(
-        (m) => m.id == event.modelName,
-        orElse: () => throw Exception('Model not found in config'),
-      );
-      await engine.exportModel(event.modelName);
-    } catch (e) {
-      emit(state.copyWith(error: () => '导出模型失败: $e'));
     }
   }
 

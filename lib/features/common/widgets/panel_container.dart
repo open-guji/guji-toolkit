@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 /// 统一的文本展示/输入面板外壳
 /// 负责处理边框、内边距、标题展示以及高度约束
-class CollationPanel extends StatelessWidget {
+class PanelContainer extends StatelessWidget {
   final String? title;
   final Widget child;
   final BoxConstraints? constraints;
   final Color? backgroundColor;
   final bool isExpanded;
 
-  const CollationPanel({
+  const PanelContainer({
     super.key,
     this.title,
     required this.child,
@@ -22,7 +22,7 @@ class CollationPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     // TextField 的 minLines 控制最小高度，这里只需要限制最大高度
     final effectiveConstraints =
-        constraints ?? const BoxConstraints(maxHeight: 400);
+        constraints ?? const BoxConstraints(maxHeight: 500);
 
     final panel = Container(
       width: double.infinity,

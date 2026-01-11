@@ -2,20 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'punctuation_model.dart';
 import 'punctuation_config.dart';
 
-enum StorageLocation {
-  browserCache,
-  localFile;
-
-  String get label {
-    switch (this) {
-      case StorageLocation.browserCache:
-        return '浏览器缓存';
-      case StorageLocation.localFile:
-        return '本地文件';
-    }
-  }
-}
-
 /// 标点状态模型
 class PunctuationState extends Equatable {
   final String originalText;
@@ -28,8 +14,6 @@ class PunctuationState extends Equatable {
   final bool isProcessing;
   final double progress;
   final String downloadSource; // 'huggingface' or 'hf-mirror'
-  final StorageLocation storageLocation;
-  final String? localModelPath;
   final String? error;
 
   const PunctuationState({
@@ -44,8 +28,6 @@ class PunctuationState extends Equatable {
     this.isProcessing = false,
     this.progress = 0.0,
     this.downloadSource = 'huggingface',
-    this.storageLocation = StorageLocation.browserCache,
-    this.localModelPath,
     this.error,
   });
 
@@ -78,8 +60,6 @@ class PunctuationState extends Equatable {
     bool? isProcessing,
     double? progress,
     String? downloadSource,
-    StorageLocation? storageLocation,
-    String? localModelPath,
     String? Function()? error,
   }) {
     return PunctuationState(
@@ -93,8 +73,6 @@ class PunctuationState extends Equatable {
       isProcessing: isProcessing ?? this.isProcessing,
       progress: progress ?? this.progress,
       downloadSource: downloadSource ?? this.downloadSource,
-      storageLocation: storageLocation ?? this.storageLocation,
-      localModelPath: localModelPath ?? this.localModelPath,
       error: error != null ? error() : this.error,
     );
   }
@@ -104,13 +82,13 @@ class PunctuationState extends Equatable {
     originalText,
     punctuatedText,
     selectedModel,
+    selectedMethod,
+    llmConfig,
     installedModels,
     availableModels,
     isProcessing,
     progress,
     downloadSource,
-    storageLocation,
-    localModelPath,
     error,
   ];
 }

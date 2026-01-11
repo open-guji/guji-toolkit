@@ -97,7 +97,7 @@ class HighlightEditingController extends TextEditingController {
 }
 
 /// 可高亮差异的文本输入框
-/// 该组件现在仅负责 TextField 的配置，其外壳由 CollationPanel 提供
+/// 该组件现在仅负责 TextField 的配置，其外壳由 PanelContainer 提供
 class HighlightedTextField extends StatelessWidget {
   final String hint;
   final HighlightEditingController controller;

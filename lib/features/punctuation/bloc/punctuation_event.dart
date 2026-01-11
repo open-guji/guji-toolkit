@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import '../models/punctuation_config.dart';
-import '../models/punctuation_state.dart';
 
 abstract class PunctuationEvent extends Equatable {
   const PunctuationEvent();
@@ -59,24 +58,6 @@ class UpdateDownloadSourceEvent extends PunctuationEvent {
   List<Object?> get props => [source];
 }
 
-/// 更新模型存储位置事件
-class UpdateStorageLocationEvent extends PunctuationEvent {
-  final StorageLocation location;
-  const UpdateStorageLocationEvent(this.location);
-
-  @override
-  List<Object?> get props => [location];
-}
-
-/// 更新本地模型路径事件
-class UpdateLocalModelPathEvent extends PunctuationEvent {
-  final String path;
-  const UpdateLocalModelPathEvent(this.path);
-
-  @override
-  List<Object?> get props => [path];
-}
-
 /// 内部处理进度更新事件
 class UpdateProgressEvent extends PunctuationEvent {
   final double progress;
@@ -88,14 +69,6 @@ class UpdateProgressEvent extends PunctuationEvent {
 
 class ClearPunctuationResultEvent extends PunctuationEvent {
   const ClearPunctuationResultEvent();
-}
-
-class ExportModelEvent extends PunctuationEvent {
-  final String modelName;
-  const ExportModelEvent(this.modelName);
-
-  @override
-  List<Object?> get props => [modelName];
 }
 
 class SwitchMethodEvent extends PunctuationEvent {

@@ -118,44 +118,6 @@
             } catch (e) {
                 return false;
             }
-        },
-
-        async exportModel(modelName) {
-            const files = [
-                'config.json',
-                'tokenizer.json',
-                'tokenizer_config.json',
-                'special_tokens_map.json',
-                'vocab.txt',
-                'onnx/model.onnx' // 导出时使用新结构路径
-            ];
-
-            await this.initialize();
-            const zip = new JSZip();
-            const modelFolder = zip.folder(modelName.split('/').pop());
-
-            let baseUrl = env.remoteHost + '/' + modelName + '/resolve/main/';
-
-            console.log(`[JS] Exporting from: ${baseUrl}`);
-
-            for (const file of files) {
-                try {
-                    const response = await fetch(baseUrl + file);
-                    if (response.ok) {
-                        const blob = await response.blob();
-                        const fileName = file.includes('/') ? file.split('/').pop() : file;
-                        modelFolder.file(fileName, blob);
-                    }
-                } catch (e) {
-                    console.warn(`[JS] Failed to fetch ${file} for export:`, e);
-                }
-            }
-
-            const content = await zip.generateAsync({ type: "blob" });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(content);
-            link.download = `${modelName.split('/').pop()}.zip`;
-            link.click();
         }
     };
 })();

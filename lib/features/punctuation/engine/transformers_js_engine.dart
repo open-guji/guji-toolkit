@@ -24,8 +24,6 @@ extension type TransformersEngineJS._(JSObject _) implements JSObject {
     JSFunction onProgress,
   );
   external JSPromise<JSBoolean> checkCache(JSString modelName);
-
-  external JSPromise exportModel(JSString modelName);
 }
 
 class TransformersJsEngine implements PunctuationEngine {
@@ -248,13 +246,6 @@ class TransformersJsEngine implements PunctuationEngine {
     // Currently we only have one model, simplify check
     final cached = await isModelCached('Xenova/siku-bert');
     return cached ? ['Xenova/siku-bert'] : [];
-  }
-
-  @override
-  Future<void> exportModel(String modelName) async {
-    final engine = _getEngine();
-    if (engine == null) return;
-    await engine.exportModel(modelName.toJS).toDart;
   }
 
   TransformersEngineJS? _getEngine() {

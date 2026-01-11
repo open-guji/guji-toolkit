@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../common/widgets/widgets.dart';
 import '../bloc/bloc.dart';
-import '../models/punctuation_model.dart';
 import '../models/punctuation_config.dart';
 
 class PunctuationOptionsPanel extends StatelessWidget {
@@ -14,6 +14,7 @@ class PunctuationOptionsPanel extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 标题
             Row(
               children: [
                 Icon(
@@ -23,31 +24,25 @@ class PunctuationOptionsPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '标点方式',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(width: 16),
-                // Method selection
-                _MethodDropdown(
-                  selectedMethod: state.selectedMethod,
-                  onChanged: (value) {
-                    if (value != null) {
-                      context.read<PunctuationBloc>().add(
-                        SwitchMethodEvent(value),
-                      );
-                    }
-                  },
+                  '配置选项',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
 
+            // 标点方式选择
+            _MethodSelector(state: state),
+            const SizedBox(height: 16),
+
+            // 模型选择（仅在专用模型模式下显示）
             if (state.selectedMethod == PunctuationMethod.specialized)
-              _SpecializedModelOptions(state: state)
+              _ModelSelector(state: state)
             else
-              _LLMOptions(state: state),
+              _LLMConfigSection(state: state),
           ],
         );
       },
@@ -55,62 +50,66 @@ class PunctuationOptionsPanel extends StatelessWidget {
   }
 }
 
-class _MethodDropdown extends StatelessWidget {
-  final PunctuationMethod selectedMethod;
-  final ValueChanged<PunctuationMethod?> onChanged;
-
-  const _MethodDropdown({
-    required this.selectedMethod,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<PunctuationMethod>(
-          value: selectedMethod,
-          onChanged: onChanged,
-          isDense: true,
-          style: Theme.of(context).textTheme.bodySmall,
-          items: PunctuationMethod.values.map((method) {
-            return DropdownMenuItem<PunctuationMethod>(
-              value: method,
-              child: Text(method.label),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-}
-
-class _SpecializedModelOptions extends StatelessWidget {
+/// 标点方式选择器
+class _MethodSelector extends StatelessWidget {
   final PunctuationState state;
 
-  const _SpecializedModelOptions({required this.state});
+  const _MethodSelector({required this.state});
+
+  String _getMethodDescription(PunctuationMethod method) {
+    switch (method) {
+      case PunctuationMethod.specialized:
+        return '使用专门训练的古文标点模型，准确度高，支持离线使用';
+      case PunctuationMethod.llm:
+        return '使用大语言模型进行标点，支持自定义提示词，需要网络连接';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(width: 26), // Access icons alignment
-        Text('模型选择', style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(width: 8),
+        // 左侧：标签和下拉框
+        SizedBox(
+          width: 280,
+          child: Row(
+            children: [
+              SizedBox(
+                width: 80,
+                child: Text('标点方式',
+                    style: Theme.of(context).textTheme.bodyMedium),
+              ),
+              Expanded(
+                child: SimpleDropdown<PunctuationMethod>(
+                  value: state.selectedMethod,
+                  items: PunctuationMethod.values,
+                  itemLabel: (method) => method.label,
+                  onChanged: (value) {
+                    if (value != null) {
+                      context.read<PunctuationBloc>().add(
+                            SwitchMethodEvent(value),
+                          );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 16),
+
+        // 右侧：简介
         Expanded(
-          child: _ModelDropdown(
-            selectedModel: state.selectedModel,
-            models: state.availableModels,
-            onChanged: (value) {
-              if (value != null) {
-                context.read<PunctuationBloc>().add(SelectModelEvent(value));
-              }
-            },
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              _getMethodDescription(state.selectedMethod),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+            ),
           ),
         ),
       ],
@@ -118,230 +117,217 @@ class _SpecializedModelOptions extends StatelessWidget {
   }
 }
 
-class _ModelDropdown extends StatelessWidget {
-  final String selectedModel;
-  final List<PunctuationModel> models;
-  final ValueChanged<String?> onChanged;
+/// 模型选择器（专用模型模式）
+class _ModelSelector extends StatelessWidget {
+  final PunctuationState state;
 
-  const _ModelDropdown({
-    required this.selectedModel,
-    required this.models,
-    required this.onChanged,
-  });
+  const _ModelSelector({required this.state});
+
+  String _getModelDescription(String modelId) {
+    // 根据模型 ID 返回不同的描述
+    if (modelId.contains('guwen')) {
+      return '专为古文断句设计，基于标点标注，适合文言文标点';
+    } else if (modelId.contains('wiki')) {
+      return '基于维基百科训练，适合现代文和古文混合文本';
+    } else {
+      return '通用古文标点模型';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: selectedModel,
-          onChanged: onChanged,
-          isDense: true,
-          isExpanded: true,
-          style: Theme.of(context).textTheme.bodySmall,
-          items: models.map((PunctuationModel model) {
-            return DropdownMenuItem<String>(
-              value: model.id,
-              child: Text(model.name, overflow: TextOverflow.ellipsis),
-            );
-          }).toList(),
+    // 如果没有可用模型，显示加载提示
+    if (state.availableModels.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: Text('正在加载模型列表...'),
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 左侧：标签和下拉框
+        SizedBox(
+          width: 280,
+          child: Row(
+            children: [
+              SizedBox(
+                width: 80,
+                child: Text('模型选择',
+                    style: Theme.of(context).textTheme.bodyMedium),
+              ),
+              Expanded(
+                child: SimpleDropdown<String>(
+                  value: state.selectedModel,
+                  items: state.availableModels.map((m) => m.id).toList(),
+                  itemLabel: (id) {
+                    final model = state.availableModels
+                        .firstWhere((m) => m.id == id, orElse: () {
+                      // 如果找不到，返回一个默认模型
+                      return state.availableModels.first;
+                    });
+                    return model.name;
+                  },
+                  onChanged: (value) {
+                    if (value != null) {
+                      context
+                          .read<PunctuationBloc>()
+                          .add(SelectModelEvent(value));
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+        const SizedBox(width: 16),
+
+        // 右侧：简介
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              _getModelDescription(state.selectedModel),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _LLMOptions extends StatelessWidget {
+/// LLM 配置区域
+class _LLMConfigSection extends StatelessWidget {
   final PunctuationState state;
 
-  const _LLMOptions({required this.state});
+  const _LLMConfigSection({required this.state});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const SizedBox(width: 26),
-            Text('服务类型', style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(width: 8),
-            _ServiceTypeDropdown(
-              selectedType: state.llmConfig.serviceType,
-              onChanged: (value) {
-                if (value != null) {
-                  context.read<PunctuationBloc>().add(
-                    UpdateLLMConfigEvent(
-                      state.llmConfig.copyWith(serviceType: value),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        if (state.llmConfig.serviceType == LLMServiceType.cloud)
-          _CloudLLMInputs(state: state)
-        else
-          _LocalLLMInputs(state: state),
+        // 显示开发中提示
+        const _DevelopmentNotice(),
+        const SizedBox(height: 16),
+
+        // 大语言模型选择（暂时禁用）
+        _LLMProviderSelector(state: state, enabled: false),
       ],
     );
   }
 }
 
-class _ServiceTypeDropdown extends StatelessWidget {
-  final LLMServiceType selectedType;
-  final ValueChanged<LLMServiceType?> onChanged;
+/// LLM 提供商选择器
+class _LLMProviderSelector extends StatelessWidget {
+  final PunctuationState state;
+  final bool enabled;
 
-  const _ServiceTypeDropdown({
-    required this.selectedType,
-    required this.onChanged,
+  const _LLMProviderSelector({
+    required this.state,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 左侧：标签和下拉框
+        SizedBox(
+          width: 280,
+          child: Row(
+            children: [
+              SizedBox(
+                width: 80,
+                child: Text(
+                  '选择模型',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: enabled
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ),
+              Expanded(
+                child: SimpleDropdown<LLMProvider>(
+                  value: state.llmConfig.selectedProvider,
+                  items: LLMProvider.values,
+                  itemLabel: (provider) => provider.label,
+                  enabled: enabled,
+                  onChanged: enabled
+                      ? (value) {
+                          if (value != null) {
+                            context.read<PunctuationBloc>().add(
+                                  UpdateLLMConfigEvent(
+                                    state.llmConfig
+                                        .copyWith(selectedProvider: value),
+                                  ),
+                                );
+                          }
+                        }
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 16),
+
+        // 右侧：简介
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              state.llmConfig.selectedProvider.description,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 正在开发中提示组件
+class _DevelopmentNotice extends StatelessWidget {
+  const _DevelopmentNotice();
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<LLMServiceType>(
-          value: selectedType,
-          onChanged: onChanged,
-          isDense: true,
-          style: Theme.of(context).textTheme.bodySmall,
-          items: LLMServiceType.values.map((type) {
-            return DropdownMenuItem<LLMServiceType>(
-              value: type,
-              child: Text(type.label),
-            );
-          }).toList(),
+        color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
         ),
       ),
-    );
-  }
-}
-
-class _CloudLLMInputs extends StatelessWidget {
-  final PunctuationState state;
-  const _CloudLLMInputs({required this.state});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 26.0),
-      child: Column(
+      child: Row(
         children: [
-          const SizedBox(height: 8),
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'API Provider (e.g., OpenAI, DeepSeek)',
-              isDense: true,
-              border: OutlineInputBorder(),
-            ),
-            style: Theme.of(context).textTheme.bodySmall,
-            onChanged: (val) {
-              context.read<PunctuationBloc>().add(
-                UpdateLLMConfigEvent(state.llmConfig.copyWith(provider: val)),
-              );
-            },
-            controller: TextEditingController(text: state.llmConfig.provider)
-              ..selection = TextSelection.fromPosition(
-                TextPosition(offset: state.llmConfig.provider.length),
-              ),
+          Icon(
+            Icons.info_outline,
+            size: 20,
+            color: Theme.of(context).colorScheme.secondary,
           ),
-          const SizedBox(height: 8),
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'API Key',
-              isDense: true,
-              border: OutlineInputBorder(),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '此功能正在开发中，敬请期待',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    height: 1.5,
+                  ),
             ),
-            style: Theme.of(context).textTheme.bodySmall,
-            obscureText: true,
-            onChanged: (val) {
-              context.read<PunctuationBloc>().add(
-                UpdateLLMConfigEvent(state.llmConfig.copyWith(apiKey: val)),
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Model Name (e.g., gpt-3.5-turbo)',
-              isDense: true,
-              border: OutlineInputBorder(),
-            ),
-            style: Theme.of(context).textTheme.bodySmall,
-            onChanged: (val) {
-              context.read<PunctuationBloc>().add(
-                UpdateLLMConfigEvent(state.llmConfig.copyWith(modelName: val)),
-              );
-            },
-            controller: TextEditingController(text: state.llmConfig.modelName)
-              ..selection = TextSelection.fromPosition(
-                TextPosition(offset: state.llmConfig.modelName.length),
-              ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LocalLLMInputs extends StatelessWidget {
-  final PunctuationState state;
-  const _LocalLLMInputs({required this.state});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 26.0),
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Base URL (e.g., http://localhost:11434/v1)',
-              isDense: true,
-              border: OutlineInputBorder(),
-            ),
-            style: Theme.of(context).textTheme.bodySmall,
-            onChanged: (val) {
-              context.read<PunctuationBloc>().add(
-                UpdateLLMConfigEvent(state.llmConfig.copyWith(baseUrl: val)),
-              );
-            },
-            controller: TextEditingController(text: state.llmConfig.baseUrl)
-              ..selection = TextSelection.fromPosition(
-                TextPosition(offset: state.llmConfig.baseUrl.length),
-              ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            decoration: const InputDecoration(
-              labelText: 'Model Name (e.g., llama2, qwen)',
-              isDense: true,
-              border: OutlineInputBorder(),
-            ),
-            style: Theme.of(context).textTheme.bodySmall,
-            onChanged: (val) {
-              context.read<PunctuationBloc>().add(
-                UpdateLLMConfigEvent(state.llmConfig.copyWith(modelName: val)),
-              );
-            },
-            controller: TextEditingController(text: state.llmConfig.modelName)
-              ..selection = TextSelection.fromPosition(
-                TextPosition(offset: state.llmConfig.modelName.length),
-              ),
           ),
         ],
       ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'diff_text_renderer.dart';
-import '../common/collation_panel.dart';
-import 'collation_legend.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:guji_toolkit/features/common/widgets/widgets.dart';
 import '../../bloc/bloc.dart';
 import '../../services/collation_result_exporter.dart';
+import 'diff_text_renderer.dart';
+import 'collation_legend.dart';
 import 'components/merge_hint_box.dart';
 import 'components/merge_progress_indicator.dart';
 import 'components/merge_actions.dart';
@@ -35,7 +35,7 @@ class MergedResultView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const MergeHintBox(),
-        CollationPanel(
+        PanelContainer(
           title: null, // 合并模式不需要标题
           child: SingleChildScrollView(
             child: DiffTextRenderer(

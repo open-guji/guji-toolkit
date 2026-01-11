@@ -20,9 +20,6 @@ abstract class PunctuationEngine {
   /// 返回进度流 (0.0 到 1.0)
   Stream<double> downloadModel(String modelName, {String? source});
 
-  /// 导出模型到桌面
-  Future<void> exportModel(String modelName);
-
   /// 检查模型是否在浏览器缓存中
   Future<bool> isModelCached(String modelName);
 

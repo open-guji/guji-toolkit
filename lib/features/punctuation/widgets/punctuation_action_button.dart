@@ -12,52 +12,61 @@ class PunctuationActionButton extends StatelessWidget {
         final isLoading = state.isProcessing;
         final isModelBeingInstalled = isLoading && state.punctuatedText.isEmpty;
 
-        return SizedBox(
-          height: 48,
-          child: ElevatedButton(
-            onPressed: isLoading
-                ? null
-                : () {
-                    context.read<PunctuationBloc>().add(
-                      const PerformPunctuationEvent(),
-                    );
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        return Center(
+          child: SizedBox(
+            width: 280,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      context.read<PunctuationBloc>().add(
+                            const PerformPunctuationEvent(),
+                          );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isLoading) ...[
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Theme.of(context).colorScheme.onPrimary,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isLoading) ...[
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    isModelBeingInstalled
-                        ? '正在下载与安装 ${(state.progress * 100).toStringAsFixed(0)}%...'
-                        : '正在标点...',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ] else ...[
-                  const Icon(Icons.auto_fix_high, size: 20),
-                  const SizedBox(width: 8),
-                  const Text(
-                    '开始自动标点',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+                    const SizedBox(width: 12),
+                    Text(
+                      isModelBeingInstalled
+                          ? '正在下载 ${(state.progress * 100).toStringAsFixed(0)}%'
+                          : '正在标点',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ] else ...[
+                    const Icon(Icons.auto_fix_high, size: 20),
+                    const SizedBox(width: 10),
+                    const Text(
+                      '开始自动标点',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         );
