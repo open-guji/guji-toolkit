@@ -24,10 +24,10 @@ class PunctuationOptionsPanel extends StatelessWidget {
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 16),
-            // Model selection dropdown
+            // Model selection
             _ModelDropdown(
               selectedModel: state.selectedModel,
-              models: state.installedModels,
+              models: const ['Xenova/siku-bert'],
               onChanged: (value) {
                 if (value != null) {
                   context.read<PunctuationBloc>().add(SelectModelEvent(value));

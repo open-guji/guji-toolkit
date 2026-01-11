@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/bloc.dart';
+import 'engine/transformers_js_engine.dart';
 import 'widgets/widgets.dart';
 
 class PunctuationPage extends StatelessWidget {
@@ -9,8 +10,8 @@ class PunctuationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => PunctuationBloc(),
-      child: const _PunctuationPageContent(),
+      create: (context) => PunctuationBloc(engine: TransformersJsEngine()),
+      child: _PunctuationPageContent(),
     );
   }
 }
@@ -28,13 +29,13 @@ class _PunctuationPageContent extends StatelessWidget {
           children: [
             const _PageHeader(),
             const SizedBox(height: 24),
-            const PunctuationModelManagementPanel(),
+            PunctuationModelManagementPanel(),
             const SizedBox(height: 24),
-            const _SettingsSection(),
+            _SettingsSection(),
             const SizedBox(height: 16),
             const _InputSection(),
             const SizedBox(height: 12),
-            const PunctuationActionButton(),
+            PunctuationActionButton(),
             const SizedBox(height: 48),
           ],
         ),

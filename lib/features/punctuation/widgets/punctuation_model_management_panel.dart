@@ -38,19 +38,32 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  if (state.isProcessing && state.progress < 1.0)
-                    Text(
-                      '下载中: ${(state.progress * 100).toStringAsFixed(0)}%',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                  // 下载源切换
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(value: 'hf-mirror', label: Text('国内镜像')),
+                      ButtonSegment(value: 'huggingface', label: Text('官方源')),
+                    ],
+                    selected: {state.downloadSource},
+                    onSelectionChanged: (newSelection) {
+                      context.read<PunctuationBloc>().add(
+                        UpdateDownloadSourceEvent(newSelection.first),
+                      );
+                    },
+                    showSelectedIcon: false,
+                    style: SegmentedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      textStyle: Theme.of(context).textTheme.labelSmall,
                     ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-              // Simplified list of models for now
-              ...['Xenova/siku-bert', 'Xenova/puku-bert'].map((model) {
+              // Only SikuBERT for now
+              ...['Xenova/siku-bert'].map((model) {
                 final isInstalled = state.installedModels.contains(model);
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Row(
@@ -67,10 +80,23 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                           size: 16,
                           color: Colors.green.shade400,
                         )
+                      else if (state.isProcessing &&
+                          state.selectedModel == model)
+                        Text(
+                          '${(state.progress * 100).toStringAsFixed(0)}%',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        )
                       else
                         TextButton.icon(
                           onPressed: () {
-                            // TODO: Add event for downloading model
+                            context.read<PunctuationBloc>().add(
+                              SelectModelEvent(model),
+                            );
+                            // 暂时通过 Perform 触发下载
+                            // TODO: 实现专门的下载事件
                           },
                           icon: const Icon(Icons.download, size: 14),
                           label: const Text('安装'),

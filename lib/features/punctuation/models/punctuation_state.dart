@@ -8,15 +8,17 @@ class PunctuationState extends Equatable {
   final List<String> installedModels;
   final bool isProcessing;
   final double progress;
+  final String downloadSource; // 'huggingface' or 'hf-mirror'
   final String? error;
 
   const PunctuationState({
     this.originalText = '',
     this.punctuatedText = '',
     this.selectedModel = 'Xenova/siku-bert',
-    this.installedModels = const ['Xenova/siku-bert'],
+    this.installedModels = const [], // Empty initially to show "Install"
     this.isProcessing = false,
     this.progress = 0.0,
+    this.downloadSource = 'hf-mirror',
     this.error,
   });
 
@@ -27,6 +29,7 @@ class PunctuationState extends Equatable {
     List<String>? installedModels,
     bool? isProcessing,
     double? progress,
+    String? downloadSource,
     String? Function()? error,
   }) {
     return PunctuationState(
@@ -36,6 +39,7 @@ class PunctuationState extends Equatable {
       installedModels: installedModels ?? this.installedModels,
       isProcessing: isProcessing ?? this.isProcessing,
       progress: progress ?? this.progress,
+      downloadSource: downloadSource ?? this.downloadSource,
       error: error != null ? error() : this.error,
     );
   }
@@ -48,6 +52,7 @@ class PunctuationState extends Equatable {
     installedModels,
     isProcessing,
     progress,
+    downloadSource,
     error,
   ];
 }

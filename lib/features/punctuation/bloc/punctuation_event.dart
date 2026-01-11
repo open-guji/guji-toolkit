@@ -36,6 +36,24 @@ class LoadPunctuationExampleEvent extends PunctuationEvent {
   List<Object?> get props => [originalText];
 }
 
+/// 更新下载源事件
+class UpdateDownloadSourceEvent extends PunctuationEvent {
+  final String source;
+  const UpdateDownloadSourceEvent(this.source);
+
+  @override
+  List<Object?> get props => [source];
+}
+
+/// 内部处理进度更新事件
+class UpdateProgressEvent extends PunctuationEvent {
+  final double progress;
+  const UpdateProgressEvent(this.progress);
+
+  @override
+  List<Object?> get props => [progress];
+}
+
 class ClearPunctuationResultEvent extends PunctuationEvent {
   const ClearPunctuationResultEvent();
 }

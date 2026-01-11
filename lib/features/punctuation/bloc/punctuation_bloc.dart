@@ -1,14 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'punctuation_event.dart';
 import '../models/punctuation_state.dart';
+import '../engine/punctuation_engine.dart';
 
 class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
-  PunctuationBloc() : super(const PunctuationState()) {
+  final PunctuationEngine engine;
+
+  PunctuationBloc({required this.engine}) : super(const PunctuationState()) {
     on<UpdateOriginalTextEvent>(_onUpdateOriginalText);
     on<SelectModelEvent>(_onSelectModel);
     on<PerformPunctuationEvent>(_onPerformPunctuation);
     on<LoadPunctuationExampleEvent>(_onLoadExample);
     on<ClearPunctuationResultEvent>(_onClearResult);
+    on<UpdateDownloadSourceEvent>(_onUpdateDownloadSource);
+    on<UpdateProgressEvent>(_onUpdateProgress);
   }
 
   void _onUpdateOriginalText(
@@ -36,23 +41,51 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       return;
     }
 
-    emit(state.copyWith(isProcessing: true, progress: 0.1, error: () => null));
+    emit(state.copyWith(isProcessing: true, progress: 0.0, error: () => null));
 
     try {
-      // TODO: Implement actual punctuation logic via Engine layer
-      await Future.delayed(const Duration(seconds: 2));
+      // 监听下载/加载进度
+      final progressSubscription = engine
+          .downloadModel(state.selectedModel, source: state.downloadSource)
+          .listen((progress) {
+            add(UpdateProgressEvent(progress));
+          });
 
-      // Mock result
+      final result = await engine.punctuate(
+        state.originalText,
+        state.selectedModel,
+      );
+
+      await progressSubscription.cancel();
+
       emit(
         state.copyWith(
-          punctuatedText: '【标注版本】${state.originalText}',
+          punctuatedText: result,
           isProcessing: false,
           progress: 1.0,
+          installedModels: {
+            ...state.installedModels,
+            state.selectedModel,
+          }.toList(),
         ),
       );
     } catch (e) {
       emit(state.copyWith(isProcessing: false, error: () => '标点失败: $e'));
     }
+  }
+
+  void _onUpdateProgress(
+    UpdateProgressEvent event,
+    Emitter<PunctuationState> emit,
+  ) {
+    emit(state.copyWith(progress: event.progress));
+  }
+
+  void _onUpdateDownloadSource(
+    UpdateDownloadSourceEvent event,
+    Emitter<PunctuationState> emit,
+  ) {
+    emit(state.copyWith(downloadSource: event.source));
   }
 
   void _onLoadExample(
