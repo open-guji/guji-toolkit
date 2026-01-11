@@ -45,9 +45,11 @@ class _PunctuationPageContent extends StatelessWidget {
             children: [
               const _PageHeader(),
               const SizedBox(height: 24),
+              PunctuationOptionsPanel(),
+              const SizedBox(height: 24),
               PunctuationModelManagementPanel(),
               const SizedBox(height: 24),
-              _SettingsSection(),
+              const PunctuationExamplesPanel(),
               const SizedBox(height: 16),
               const _InputSection(),
               const SizedBox(height: 12),
@@ -84,39 +86,6 @@ class _PageHeader extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _SettingsSection extends StatelessWidget {
-  const _SettingsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth > 800;
-
-        if (isWide) {
-          return const Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(flex: 2, child: PunctuationOptionsPanel()),
-              SizedBox(width: 32),
-              Expanded(flex: 3, child: PunctuationExamplesPanel()),
-            ],
-          );
-        }
-
-        return const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PunctuationOptionsPanel(),
-            SizedBox(height: 16),
-            PunctuationExamplesPanel(),
-          ],
-        );
-      },
     );
   }
 }

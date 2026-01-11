@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:file_picker/file_picker.dart';
 import '../bloc/bloc.dart';
 
 class PunctuationModelManagementPanel extends StatelessWidget {
@@ -37,8 +38,70 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(width: 16),
+                  // Storage Location Selector
+                  Icon(
+                    Icons.save_outlined,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text('存储位置', style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(width: 8),
+                  _StorageLocationDropdown(
+                    selectedLocation: state.storageLocation,
+                    onChanged: (value) {
+                      if (value != null) {
+                        context.read<PunctuationBloc>().add(
+                          UpdateStorageLocationEvent(value),
+                        );
+                      }
+                    },
+                  ),
+                  if (state.storageLocation == StorageLocation.localFile) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.folder_open, size: 18),
+                      tooltip: '选择模型文件夹',
+                      onPressed: () async {
+                        final String? selectedDirectory = await FilePicker
+                            .platform
+                            .getDirectoryPath();
+                        if (selectedDirectory != null && context.mounted) {
+                          context.read<PunctuationBloc>().add(
+                            UpdateLocalModelPathEvent(selectedDirectory),
+                          );
+                        }
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    if (state.localModelPath != null) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          state.localModelPath!,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ],
                   const Spacer(),
                   // 下载源切换
+                  Text(
+                    '下载来源',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   SegmentedButton<String>(
                     segments: const [
                       ButtonSegment(value: 'hf-mirror', label: Text('国内镜像')),
@@ -59,6 +122,7 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 12),
               const SizedBox(height: 12),
               ...state.availableModels.map((model) {
                 final isInstalled = state.installedModels.contains(model.id);
@@ -167,6 +231,41 @@ class PunctuationModelManagementPanel extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _StorageLocationDropdown extends StatelessWidget {
+  final StorageLocation selectedLocation;
+  final ValueChanged<StorageLocation?> onChanged;
+
+  const _StorageLocationDropdown({
+    required this.selectedLocation,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<StorageLocation>(
+          value: selectedLocation,
+          onChanged: onChanged,
+          isDense: true,
+          style: Theme.of(context).textTheme.bodySmall,
+          items: StorageLocation.values.map((location) {
+            return DropdownMenuItem<StorageLocation>(
+              value: location,
+              child: Text(location.label),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

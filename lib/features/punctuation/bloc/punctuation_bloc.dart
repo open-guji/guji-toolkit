@@ -25,6 +25,8 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     on<InstallModelEvent>(_onInstallModel);
     on<SwitchMethodEvent>(_onSwitchMethod);
     on<UpdateLLMConfigEvent>(_onUpdateLLMConfig);
+    on<UpdateStorageLocationEvent>(_onUpdateStorageLocation);
+    on<UpdateLocalModelPathEvent>(_onUpdateLocalModelPath);
   }
 
   void _onSwitchMethod(
@@ -162,6 +164,20 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     Emitter<PunctuationState> emit,
   ) {
     emit(state.copyWith(downloadSource: event.source));
+  }
+
+  void _onUpdateStorageLocation(
+    UpdateStorageLocationEvent event,
+    Emitter<PunctuationState> emit,
+  ) {
+    emit(state.copyWith(storageLocation: event.location));
+  }
+
+  void _onUpdateLocalModelPath(
+    UpdateLocalModelPathEvent event,
+    Emitter<PunctuationState> emit,
+  ) {
+    emit(state.copyWith(localModelPath: event.path));
   }
 
   void _onLoadExample(
