@@ -29,7 +29,7 @@ class DiffTextRenderer extends StatelessWidget {
       menuHelper: menuHelper,
     );
 
-    return SelectableText.rich(
+    return Text.rich(
       TextSpan(children: spanBuilder.build()),
       style: const TextStyle(fontSize: 14, height: 1.5),
     );

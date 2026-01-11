@@ -95,7 +95,7 @@
 
             try {
                 const output = await pipeline(text);
-                console.log("[JS] Inference output received (length):", output.length);
+                console.log("[JS] Inference output received:", output);
 
                 // Return raw output structure as JSON string
                 // Dart side will handle parsing and reconstruction

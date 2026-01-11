@@ -25,10 +25,11 @@ class PanelContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TextField 的 minLines 控制最小高度，这里只需要限制最大高度
+    // 如果 isExpanded 为 true，则占用全部可用空间
     final effectiveConstraints =
         constraints ?? const BoxConstraints(maxHeight: 500);
 
-    final panel = Container(
+    final panelWidget = Container(
       width: double.infinity,
       padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12, right: 0),
       decoration: BoxDecoration(
@@ -53,33 +54,31 @@ class PanelContainer extends StatelessWidget {
       child: ConstrainedBox(constraints: effectiveConstraints, child: child),
     );
 
-    if (title == null) {
-      return panel;
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
-          child: Row(
-            children: [
-              Text(
-                title!,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+        if (title != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0, right: 4.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  title!,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
-              ),
-              if (titleTrailing != null) ...[
-                const SizedBox(width: 12),
-                Expanded(child: titleTrailing!),
+                if (titleTrailing != null) ...[
+                  const SizedBox(width: 8),
+                  Expanded(child: titleTrailing!),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-        panel,
+        panelWidget,
       ],
     );
   }

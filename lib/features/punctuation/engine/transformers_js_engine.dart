@@ -144,10 +144,12 @@ class TransformersJsEngine implements PunctuationEngine {
         bool isMatch = word == char || word == '[UNK]' || word.contains(char);
 
         if (isMatch) {
-          // Debug log: print the entity for the first few punctuations found
-          // if (token.entity != 'O' && token.entity.isNotEmpty) {
-          //   print('Debug: matched char "$char" with entity "${token.entity}"');
-          // }
+          // Always log entities for non-"O" tags to help identify model output format
+          if (token.entity != 'O' && token.entity.isNotEmpty) {
+            print(
+              '[Dart] matched char "$char" at index $i with entity "${token.entity}"',
+            );
+          }
 
           // Found the corresponding token for this character
           // Check direct punctuation match

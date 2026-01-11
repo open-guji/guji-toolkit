@@ -92,82 +92,19 @@ class PunctuationModelStatus extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    // 下载源选择（仅在未安装且未下载时显示）
                     if (!isInstalled && !isDownloading) ...[
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '下载源',
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      fontSize: 10,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    ),
+                      SelectionContainer.disabled(
+                        child: Text(
+                          '确保你所在的地区可以访问 Hugging Face',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                fontSize: 10,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withValues(alpha: 0.7),
                               ),
-                              const SizedBox(width: 6),
-                              SegmentedButton<String>(
-                                segments: const [
-                                  ButtonSegment(
-                                    value: 'modelscope',
-                                    label: Text(
-                                      '魔搭',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  ),
-                                  ButtonSegment(
-                                    value: 'huggingface',
-                                    label: Text(
-                                      '官方',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  ),
-                                ],
-                                selected: {state.downloadSource},
-                                onSelectionChanged: (newSelection) {
-                                  context.read<PunctuationBloc>().add(
-                                    UpdateDownloadSourceEvent(
-                                      newSelection.first,
-                                    ),
-                                  );
-                                },
-                                showSelectedIcon: false,
-                                style: SegmentedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 0,
-                                  ),
-                                  visualDensity: const VisualDensity(
-                                    horizontal: -4,
-                                    vertical: -4,
-                                  ),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 1),
-                          Text(
-                            state.downloadSource == 'huggingface'
-                                ? 'https://huggingface.co'
-                                : 'https://modelscope.cn',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  fontSize: 9,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant
-                                      .withValues(alpha: 0.4),
-                                ),
-                          ),
-                        ],
+                        ),
                       ),
                       const SizedBox(width: 8),
                     ],
