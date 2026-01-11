@@ -28,15 +28,5 @@
         "onnx_repo": "sheldonlidev/zh-wiki-punctuation-restore",
         "type": "token-classification",
         "size": "407 MB"
-    },
-    {
-        "id": "korean-classical-chinese-punctuation",
-        "name": "韩国古汉文标点",
-        "description": "基于韩国古典汉文历史文献训练的标点预测模型，支持 7 种标点符号（、。·？！《》），F1 分数达 0.91。基于 SikuRoBERTa 架构，适用于东亚古典汉文文献的数字化。",
-        "original_author": "yachagye",
-        "original_repo": "korean-classical-chinese-punctuation",
-        "onnx_repo": "sheldonlidev/korean-classical-chinese-punctuation",
-        "type": "token-classification",
-        "size": "434 MB"
     }
 ]
