@@ -121,8 +121,9 @@ class HighlightedTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       scrollController: scrollController,
-      maxLines: null,
-      expands: true, // 填充 CollationPanel 提供的空间
+      minLines: 5, // 最小显示 5 行
+      maxLines: null, // 允许根据内容增长
+      expands: false,
       textAlignVertical: TextAlignVertical.top,
       decoration: InputDecoration(
         hintText: hint,
@@ -131,7 +132,7 @@ class HighlightedTextField extends StatelessWidget {
         focusedBorder: InputBorder.none,
         errorBorder: InputBorder.none,
         disabledBorder: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
+        contentPadding: const EdgeInsets.only(right: 12),
         filled: false,
       ),
       onChanged: onChanged,

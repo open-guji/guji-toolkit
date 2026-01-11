@@ -14,14 +14,7 @@ class ResultDisplayPanel extends StatelessWidget {
         final result = state.result;
 
         if (result == null) {
-          return Center(
-            child: Text(
-              '点击"开始对比"查看结果',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withAlpha((255 * 0.6).toInt()),
-                  ),
-            ),
-          );
+          return const SizedBox.shrink();
         }
 
         if (result.error != null) {
@@ -86,7 +79,9 @@ class ResultDisplayPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withAlpha((255 * 0.1).toInt()),
+        color: Theme.of(
+          context,
+        ).colorScheme.errorContainer.withAlpha((255 * 0.1).toInt()),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Theme.of(context).colorScheme.error),
       ),
