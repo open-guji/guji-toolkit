@@ -55,11 +55,4 @@ class ScannerPage extends StatelessWidget {
   }
 }
 
-class PunctuationPage extends StatelessWidget {
-  const PunctuationPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const PlaceholderPage(title: '断句标点', icon: Icons.format_quote);
-  }
-}
+// Removed PunctuationPage placeholder as it is now implemented in lib/features/punctuation/punctuation_page.dart

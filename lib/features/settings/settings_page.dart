@@ -77,41 +77,63 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('设置'), centerTitle: false),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(24.0),
-              children: [
-                _buildSection(context, '关于', [
-                  _buildInfoTile(context, '项目名称', '古籍助手 (Guji Toolkit)'),
-                  _buildInfoTile(context, '当前版本', _version),
-                  _buildInfoTile(context, '更新时间', _lastUpdated),
-                ]),
-                const SizedBox(height: 32),
-                if (_dependencies.isNotEmpty)
-                  _buildSection(context, '依赖项', [
-                    ..._dependencies.entries.map(
-                      (e) => _buildDependencyTile(context, e.key, e.value),
-                    ),
-                  ]),
-                if (_changelog.isNotEmpty) ...[
-                  const SizedBox(height: 32),
-                  _buildSection(context, '更新日志', [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: MarkdownBody(
-                        data: _changelog,
-                        shrinkWrap: true,
-                        selectable: true,
-                      ),
-                    ),
-                  ]),
-                  const SizedBox(height: 16),
-                ],
-              ],
-            ),
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '设置',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '查看版本、依赖及更新日志',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          _buildSection(context, '关于', [
+            _buildInfoTile(context, '项目名称', '古籍助手 (Guji Toolkit)'),
+            _buildInfoTile(context, '当前版本', _version),
+            _buildInfoTile(context, '更新时间', _lastUpdated),
+          ]),
+          const SizedBox(height: 32),
+          if (_dependencies.isNotEmpty)
+            _buildSection(context, '依赖项', [
+              ..._dependencies.entries.map(
+                (e) => _buildDependencyTile(context, e.key, e.value),
+              ),
+            ]),
+          if (_changelog.isNotEmpty) ...[
+            const SizedBox(height: 32),
+            _buildSection(context, '更新日志', [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: MarkdownBody(
+                  data: _changelog,
+                  shrinkWrap: true,
+                  selectable: true,
+                ),
+              ),
+            ]),
+            const SizedBox(height: 16),
+          ],
+        ],
+      ),
     );
   }
 
