@@ -67,7 +67,7 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
           );
 
           final inputPunctuated = CollationPanel(
-            title: '即将被标注之后的版本',
+            title: '标点本',
             isExpanded: widget.isWide,
             child: TextField(
               controller: _punctuatedController,

@@ -28,6 +28,8 @@ class _PunctuationPageContent extends StatelessWidget {
           children: [
             const _PageHeader(),
             const SizedBox(height: 24),
+            const PunctuationModelManagementPanel(),
+            const SizedBox(height: 24),
             const _SettingsSection(),
             const SizedBox(height: 16),
             const _InputSection(),
@@ -76,6 +78,7 @@ class _SettingsSection extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth > 800;
+
         if (isWide) {
           return const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,11 +89,12 @@ class _SettingsSection extends StatelessWidget {
             ],
           );
         }
+
         return const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             PunctuationOptionsPanel(),
-            SizedBox(height: 12),
+            SizedBox(height: 16),
             PunctuationExamplesPanel(),
           ],
         );

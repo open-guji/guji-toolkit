@@ -9,45 +9,30 @@ class PunctuationOptionsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<PunctuationBloc, PunctuationState>(
       builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        return Row(
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.settings,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '模型设置',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(width: 24),
-                // Model selection dropdown
-                _ModelDropdown(
-                  selectedModel: state.selectedModel,
-                  models: state.installedModels,
-                  onChanged: (value) {
-                    if (value != null) {
-                      context.read<PunctuationBloc>().add(
-                        SelectModelEvent(value),
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(width: 16),
-                // Install/Download info placeholder
-                if (state.isProcessing)
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-              ],
+            Icon(
+              Icons.tune,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '模型选择',
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 16),
+            // Model selection dropdown
+            _ModelDropdown(
+              selectedModel: state.selectedModel,
+              models: state.installedModels,
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<PunctuationBloc>().add(SelectModelEvent(value));
+                }
+              },
             ),
           ],
         );
