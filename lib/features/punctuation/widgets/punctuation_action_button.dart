@@ -10,6 +10,7 @@ class PunctuationActionButton extends StatelessWidget {
     return BlocBuilder<PunctuationBloc, PunctuationState>(
       builder: (context, state) {
         final isLoading = state.isProcessing;
+        final isModelBeingInstalled = isLoading && state.punctuatedText.isEmpty;
 
         return SizedBox(
           height: 48,
@@ -43,7 +44,9 @@ class PunctuationActionButton extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    '正在标点...',
+                    isModelBeingInstalled
+                        ? '正在下载与安装 ${(state.progress * 100).toStringAsFixed(0)}%...'
+                        : '正在标点...',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ] else ...[

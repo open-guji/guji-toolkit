@@ -10,6 +10,10 @@ extension type TransformersEngineJS._(JSObject _) implements JSObject {
     JSFunction onProgress,
   );
   external void setSource(JSString source);
+  external JSPromise loadModel(JSString modelName, JSFunction onProgress);
+  external JSPromise<JSBoolean> checkCache(JSString modelName);
+
+  external JSPromise exportModel(JSString modelName);
 }
 
 class TransformersJsEngine implements PunctuationEngine {
@@ -17,6 +21,27 @@ class TransformersJsEngine implements PunctuationEngine {
 
   @override
   String get engineName => 'Transformers.js (Local)';
+
+  @override
+  Future<void> loadModel(String modelName) async {
+    final engine = _getEngine();
+    if (engine == null) throw Exception('Transformers engine not found');
+
+    final onProgress = (JSNumber p) {
+      _progressController.add(p.toDartDouble);
+    }.toJS;
+
+    // 检查 JS 对象是否包含 loadModel 方法
+    if (!(engine as JSObject).hasProperty('loadModel'.toJS).toDart) {
+      throw Exception('浏览器加载了旧版 JS 脚本（缺少 loadModel）。请尝试 Ctrl+F5 强刷页面。');
+    }
+
+    try {
+      await engine.loadModel(modelName.toJS, onProgress).toDart;
+    } catch (e) {
+      throw Exception('模型加载失败: $e');
+    }
+  }
 
   @override
   Future<String> punctuate(String text, String modelName) async {
@@ -49,12 +74,36 @@ class TransformersJsEngine implements PunctuationEngine {
   }
 
   @override
-  Future<bool> isModelInstalled(String modelName) async {
-    return false;
+  Future<bool> isModelCached(String modelName) async {
+    final engine = _getEngine();
+    if (engine == null) return false;
+    final result = await engine.checkCache(modelName.toJS).toDart;
+    return result.toDart;
+  }
+
+  @override
+  Future<List<String>> getCachedModels() async {
+    // Currently we only have one model, simplify check
+    final cached = await isModelCached('Xenova/siku-bert');
+    return cached ? ['Xenova/siku-bert'] : [];
+  }
+
+  @override
+  Future<void> exportModel(String modelName) async {
+    final engine = _getEngine();
+    if (engine == null) return;
+    await engine.exportModel(modelName.toJS).toDart;
   }
 
   TransformersEngineJS? _getEngine() {
-    return transformersEngine;
+    final engine = transformersEngine;
+    if (engine == null) {
+      // In web, sometimes it takes a split second for the script to attach to window
+      // though typically not if loaded in index.html.
+      // We'll return null and let the caller handle it.
+      return null;
+    }
+    return engine;
   }
 }
 

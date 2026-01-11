@@ -7,6 +7,10 @@ abstract class PunctuationEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class PunctuationStarted extends PunctuationEvent {
+  const PunctuationStarted();
+}
+
 class UpdateOriginalTextEvent extends PunctuationEvent {
   final String text;
   const UpdateOriginalTextEvent(this.text);
@@ -25,6 +29,14 @@ class SelectModelEvent extends PunctuationEvent {
 
 class PerformPunctuationEvent extends PunctuationEvent {
   const PerformPunctuationEvent();
+}
+
+class InstallModelEvent extends PunctuationEvent {
+  final String modelName;
+  const InstallModelEvent(this.modelName);
+
+  @override
+  List<Object?> get props => [modelName];
 }
 
 class LoadPunctuationExampleEvent extends PunctuationEvent {
@@ -56,4 +68,12 @@ class UpdateProgressEvent extends PunctuationEvent {
 
 class ClearPunctuationResultEvent extends PunctuationEvent {
   const ClearPunctuationResultEvent();
+}
+
+class ExportModelEvent extends PunctuationEvent {
+  final String modelName;
+  const ExportModelEvent(this.modelName);
+
+  @override
+  List<Object?> get props => [modelName];
 }

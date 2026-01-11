@@ -74,13 +74,27 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
-                      if (isInstalled)
+                      if (isInstalled) ...[
+                        IconButton(
+                          icon: const Icon(
+                            Icons.drive_file_move_outlined,
+                            size: 16,
+                          ),
+                          onPressed: () {
+                            context.read<PunctuationBloc>().add(
+                              ExportModelEvent(model),
+                            );
+                          },
+                          tooltip: '导出到桌面',
+                          constraints: const BoxConstraints(),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                        ),
                         Icon(
                           Icons.check_circle,
                           size: 16,
                           color: Colors.green.shade400,
-                        )
-                      else if (state.isProcessing &&
+                        ),
+                      ] else if (state.isProcessing &&
                           state.selectedModel == model)
                         Text(
                           '${(state.progress * 100).toStringAsFixed(0)}%',
@@ -93,11 +107,10 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                         TextButton.icon(
                           onPressed: () {
                             context.read<PunctuationBloc>().add(
-                              SelectModelEvent(model),
+                              InstallModelEvent(model),
                             );
-                            // 暂时通过 Perform 触发下载
-                            // TODO: 实现专门的下载事件
                           },
+
                           icon: const Icon(Icons.download, size: 14),
                           label: const Text('安装'),
                           style: TextButton.styleFrom(

@@ -10,7 +10,9 @@ class PunctuationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => PunctuationBloc(engine: TransformersJsEngine()),
+      create: (context) =>
+          PunctuationBloc(engine: TransformersJsEngine())
+            ..add(const PunctuationStarted()),
       child: _PunctuationPageContent(),
     );
   }
@@ -21,23 +23,38 @@ class _PunctuationPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const _PageHeader(),
-            const SizedBox(height: 24),
-            PunctuationModelManagementPanel(),
-            const SizedBox(height: 24),
-            _SettingsSection(),
-            const SizedBox(height: 16),
-            const _InputSection(),
-            const SizedBox(height: 12),
-            PunctuationActionButton(),
-            const SizedBox(height: 48),
-          ],
+    return BlocListener<PunctuationBloc, PunctuationState>(
+      listenWhen: (previous, current) =>
+          current.error != null && previous.error != current.error,
+      listener: (context, state) {
+        if (state.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error!),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const _PageHeader(),
+              const SizedBox(height: 24),
+              PunctuationModelManagementPanel(),
+              const SizedBox(height: 24),
+              _SettingsSection(),
+              const SizedBox(height: 16),
+              const _InputSection(),
+              const SizedBox(height: 12),
+              PunctuationActionButton(),
+              const SizedBox(height: 48),
+            ],
+          ),
         ),
       ),
     );

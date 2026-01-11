@@ -14,6 +14,9 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     on<ClearPunctuationResultEvent>(_onClearResult);
     on<UpdateDownloadSourceEvent>(_onUpdateDownloadSource);
     on<UpdateProgressEvent>(_onUpdateProgress);
+    on<PunctuationStarted>(_onStarted);
+    on<ExportModelEvent>(_onExportModel);
+    on<InstallModelEvent>(_onInstallModel);
   }
 
   void _onUpdateOriginalText(
@@ -108,5 +111,64 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     emit(
       state.copyWith(originalText: '', punctuatedText: '', error: () => null),
     );
+  }
+
+  Future<void> _onStarted(
+    PunctuationStarted event,
+    Emitter<PunctuationState> emit,
+  ) async {
+    try {
+      final cachedModels = await engine.getCachedModels();
+      emit(state.copyWith(installedModels: cachedModels));
+    } catch (e) {
+      // Ignore initial check errors
+    }
+  }
+
+  Future<void> _onExportModel(
+    ExportModelEvent event,
+    Emitter<PunctuationState> emit,
+  ) async {
+    try {
+      await engine.exportModel(event.modelName);
+    } catch (e) {
+      emit(state.copyWith(error: () => '导出模型失败: $e'));
+    }
+  }
+
+  Future<void> _onInstallModel(
+    InstallModelEvent event,
+    Emitter<PunctuationState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        selectedModel: event.modelName,
+        isProcessing: true,
+        progress: 0.0,
+        error: () => null,
+      ),
+    );
+
+    try {
+      final progressSubscription = engine
+          .downloadModel(event.modelName, source: state.downloadSource)
+          .listen((progress) {
+            add(UpdateProgressEvent(progress));
+          });
+
+      await engine.loadModel(event.modelName);
+
+      await progressSubscription.cancel();
+
+      emit(
+        state.copyWith(
+          isProcessing: false,
+          progress: 1.0,
+          installedModels: {...state.installedModels, event.modelName}.toList(),
+        ),
+      );
+    } catch (e) {
+      emit(state.copyWith(isProcessing: false, error: () => '安装失败: $e'));
+    }
   }
 }
