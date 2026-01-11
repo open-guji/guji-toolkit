@@ -59,15 +59,9 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       final model = state.availableModels.firstWhere(
         (m) => m.id == state.selectedModel,
       );
-      final subfolder = model.subfolder.isNotEmpty ? model.subfolder : null;
-
       // 监听下载/加载进度
       final progressSubscription = engine
-          .downloadModel(
-            state.selectedModel,
-            source: state.downloadSource,
-            subfolder: subfolder,
-          )
+          .downloadModel(state.selectedModel, source: state.downloadSource)
           .listen((progress) {
             add(UpdateProgressEvent(progress));
           });
@@ -75,7 +69,6 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       final result = await engine.punctuate(
         state.originalText,
         state.selectedModel,
-        subfolder: subfolder,
         modelType: model.type,
       );
 
@@ -148,13 +141,9 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
           .toList();
 
       final cachedModels = await Future.wait(
-        models.map(
-          (m) => engine.isModelCached(
-            m.id,
-            subfolder: m.subfolder.isNotEmpty ? m.subfolder : null,
-          ),
-        ),
+        models.map((m) => engine.isModelCached(m.id)),
       );
+
       final List<String> installedIds = [];
       for (int i = 0; i < models.length; i++) {
         if (cachedModels[i]) installedIds.add(models[i].id);
@@ -184,10 +173,7 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
         (m) => m.id == event.modelName,
         orElse: () => throw Exception('Model not found in config'),
       );
-      await engine.exportModel(
-        event.modelName,
-        subfolder: model.subfolder.isNotEmpty ? model.subfolder : null,
-      );
+      await engine.exportModel(event.modelName);
     } catch (e) {
       emit(state.copyWith(error: () => '导出模型失败: $e'));
     }
@@ -216,23 +202,13 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
         (m) => m.id == event.modelName,
         orElse: () => throw Exception('Model not found in config'),
       );
-      final subfolder = model.subfolder.isNotEmpty ? model.subfolder : null;
-
       final progressSubscription = engine
-          .downloadModel(
-            event.modelName,
-            source: state.downloadSource,
-            subfolder: subfolder,
-          )
+          .downloadModel(event.modelName, source: state.downloadSource)
           .listen((progress) {
             add(UpdateProgressEvent(progress));
           });
 
-      await engine.loadModel(
-        event.modelName,
-        subfolder: subfolder,
-        modelType: model.type,
-      );
+      await engine.loadModel(event.modelName, modelType: model.type);
 
       await progressSubscription.cancel();
 

@@ -13,22 +13,17 @@ extension type TransformersEngineJS._(JSObject _) implements JSObject {
   external JSPromise loadModel(
     JSString modelName,
     JSString taskType,
-    JSString? subfolder,
     JSFunction onProgress,
   );
   external JSPromise<JSString> runInference(
     JSString text,
     JSString modelName,
     JSString taskType,
-    JSString? subfolder,
     JSFunction onProgress,
   );
-  external JSPromise<JSBoolean> checkCache(
-    JSString modelName,
-    JSString? subfolder,
-  );
+  external JSPromise<JSBoolean> checkCache(JSString modelName);
 
-  external JSPromise exportModel(JSString modelName, JSString? subfolder);
+  external JSPromise exportModel(JSString modelName);
 }
 
 class TransformersJsEngine implements PunctuationEngine {
@@ -38,11 +33,7 @@ class TransformersJsEngine implements PunctuationEngine {
   String get engineName => 'Transformers.js (Local)';
 
   @override
-  Future<void> loadModel(
-    String modelName, {
-    String? subfolder,
-    String? modelType,
-  }) async {
+  Future<void> loadModel(String modelName, {String? modelType}) async {
     final engine = _getEngine();
     if (engine == null) throw Exception('Transformers engine not found');
 
@@ -55,7 +46,6 @@ class TransformersJsEngine implements PunctuationEngine {
           .loadModel(
             modelName.toJS,
             (modelType ?? 'token-classification').toJS,
-            subfolder?.toJS,
             onProgress,
           )
           .toDart;
@@ -68,7 +58,6 @@ class TransformersJsEngine implements PunctuationEngine {
   Future<String> punctuate(
     String text,
     String modelName, {
-    String? subfolder,
     String? modelType,
   }) async {
     final engine = _getEngine();
@@ -84,7 +73,6 @@ class TransformersJsEngine implements PunctuationEngine {
             text.toJS,
             modelName.toJS,
             (modelType ?? 'token-classification').toJS,
-            subfolder?.toJS,
             onProgress,
           )
           .toDart;
@@ -95,11 +83,7 @@ class TransformersJsEngine implements PunctuationEngine {
   }
 
   @override
-  Stream<double> downloadModel(
-    String modelName, {
-    String? source,
-    String? subfolder,
-  }) async* {
+  Stream<double> downloadModel(String modelName, {String? source}) async* {
     final engine = _getEngine();
     if (engine != null && source != null) {
       engine.setSource(source.toJS);
@@ -110,12 +94,10 @@ class TransformersJsEngine implements PunctuationEngine {
   }
 
   @override
-  Future<bool> isModelCached(String modelName, {String? subfolder}) async {
+  Future<bool> isModelCached(String modelName) async {
     final engine = _getEngine();
     if (engine == null) return false;
-    final result = await engine
-        .checkCache(modelName.toJS, subfolder?.toJS)
-        .toDart;
+    final result = await engine.checkCache(modelName.toJS).toDart;
     return result.toDart;
   }
 
@@ -127,10 +109,10 @@ class TransformersJsEngine implements PunctuationEngine {
   }
 
   @override
-  Future<void> exportModel(String modelName, {String? subfolder}) async {
+  Future<void> exportModel(String modelName) async {
     final engine = _getEngine();
     if (engine == null) return;
-    await engine.exportModel(modelName.toJS, subfolder?.toJS).toDart;
+    await engine.exportModel(modelName.toJS).toDart;
   }
 
   TransformersEngineJS? _getEngine() {

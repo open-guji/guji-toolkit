@@ -22,7 +22,7 @@ class PunctuationState extends Equatable {
     this.availableModels = const [],
     this.isProcessing = false,
     this.progress = 0.0,
-    this.downloadSource = 'hf-mirror',
+    this.downloadSource = 'huggingface',
     this.error,
   });
 

@@ -5,68 +5,65 @@
     let pipeline = null;
     let currentModel = null;
     let env = null;
-    let requestedSource = 'hf-mirror';
+    let requestedSource = 'huggingface';
 
     window.transformersEngine = {
         async initialize() {
-            console.log("[JS] initialize() entry. transformers ready?", !!transformers);
             if (!transformers) {
-                console.log("[JS] Transformers Engine v1.4 Initializing...");
+                console.log("[JS] Transformers Engine v1.9 Initializing...");
                 const module = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
                 transformers = module;
                 env = module.env;
 
-                // Configure environment based on user's best practices
-                env.allowLocalModels = false; // Only remote/cache
-                env.useBrowserCache = true;   // Enable browser caching
+                // Configure environment
+                env.allowLocalModels = false;
+                env.useBrowserCache = true;
 
-                // Set custom cache location if needed, but default is fine
-                // env.cacheDir = 'transformers-cache'; 
-
-                // Apply the requested source during initialization
-                console.log("[JS] Applying initial source inside initialize():", requestedSource);
                 this.setSource(requestedSource);
-                console.log("[JS] Environment initialized. remoteHost is now:", env.remoteHost);
+                console.log("[JS] Environment initialized. remoteHost:", env.remoteHost);
             }
         },
 
         setSource(source) {
-            console.log(`[JS] setSource called with: ${source}`);
             requestedSource = source;
-            if (!env) {
-                console.log(`[JS] env not ready. Source [${source}] queued.`);
-                return;
-            }
-
-            console.log(`[JS] Applying remoteHost for source: ${source}`);
+            if (!env) return;
+            console.log(`[JS] Applying download source: ${source}`);
             if (source === 'hf-mirror') {
                 env.remoteHost = 'https://hf-mirror.com';
             } else {
                 env.remoteHost = 'https://huggingface.co';
             }
-            console.log("[JS] Current env.remoteHost:", env.remoteHost);
         },
 
-        async loadModel(modelName, taskType, subfolder, onProgress) {
-            console.log(`[JS] loadModel entry: ${modelName}, task: ${taskType}, subfolder: ${subfolder}`);
+        async loadModel(modelName, taskType, onProgress) {
+            console.log(`[JS] loadModel: ${modelName}, task: ${taskType}`);
             await this.initialize();
+
             try {
                 if (currentModel !== modelName || !pipeline) {
+                    const progressCallback = (typeof onProgress === 'function') ? onProgress : null;
+
                     const options = {
                         progress_callback: (p) => {
-                            if (p.status === 'progress' && onProgress) {
-                                onProgress(p.progress);
+                            if (p.status === 'progress' && progressCallback) {
+                                try {
+                                    progressCallback(p.progress);
+                                } catch (err) { }
                             }
-                        }
+                        },
+                        // Transformers.js 默认搜索顺序: 
+                        // 1. 根目录 model_quantized.onnx
+                        // 2. onnx/model_quantized.onnx
+                        // 3. 根目录 model.onnx
+                        // 4. onnx/model.onnx (这是我们当前的目标位置)
+                        quantized: false
                     };
-                    if (subfolder) options.subfolder = subfolder;
 
-                    console.log("[JS] Creating pipeline with options:", JSON.stringify(options));
-                    console.log("[JS] Using remoteHost:", env.remoteHost);
-
+                    console.log("[JS] Creating pipeline with standard structure...");
+                    // 不再手动传 subfolder，让 Transformers.js 按默认约定在 onnx/ 下找模型
                     pipeline = await transformers.pipeline(taskType, modelName, options);
                     currentModel = modelName;
-                    console.log("[JS] Model loaded and cached successfully!");
+                    console.log("[JS] Model loaded successfully!");
                 }
             } catch (e) {
                 console.error("[JS] Load model failed:", e);
@@ -74,22 +71,19 @@
             }
         },
 
-        async runInference(text, modelName, taskType, subfolder, onProgress) {
-            console.log(`[JS] runInference entry: ${modelName}, task: ${taskType}`);
-            await this.loadModel(modelName, taskType, subfolder, onProgress);
+        async runInference(text, modelName, taskType, onProgress) {
+            await this.loadModel(modelName, taskType, onProgress);
 
             try {
                 const output = await pipeline(text);
                 console.log("[JS] Inference output received:", output);
 
                 if (taskType === 'token-classification') {
-                    // Reconstruct from labels for punctuation
                     if (output.length > 0 && output[0].entity) {
                         return this._reconstructFromLabels(text, output);
                     }
                     return output.map(x => x.word).join('') || text;
                 } else if (taskType === 'fill-mask') {
-                    // For Fill-Mask, return the top result or pretty string
                     if (Array.isArray(output) && output.length > 0) {
                         return output[0].sequence || JSON.stringify(output[0]);
                     }
@@ -104,22 +98,20 @@
         },
 
         _reconstructFromLabels(text, output) {
-            // Simplified reconstruction: join the words from tokens
             return output.map(x => x.word).join('');
         },
 
-        async checkCache(modelName, subfolder) {
+        async checkCache(modelName) {
             if (!window.caches) return false;
             try {
                 const cacheName = 'transformers-cache';
                 const cache = await caches.open(cacheName);
                 const keys = await cache.keys();
-
                 const cachedFiles = keys.map(request => request.url);
-                const searchString = subfolder ? `${modelName}/${subfolder}` : modelName;
 
-                const hasWeights = cachedFiles.some(url => url.includes(searchString) && (url.includes('.onnx') || url.includes('.safetensors') || url.includes('.bin')));
-                const hasConfig = cachedFiles.some(url => url.includes(searchString) && url.includes('config.json'));
+                // 检查是否包含核心文件 (此时可能在根目录也可能在 onnx 目录，取决于缓存时的行为)
+                const hasWeights = cachedFiles.some(url => url.includes(modelName) && url.includes('model.onnx'));
+                const hasConfig = cachedFiles.some(url => url.includes(modelName) && url.includes('config.json'));
 
                 return hasWeights && hasConfig;
             } catch (e) {
@@ -127,14 +119,14 @@
             }
         },
 
-        async exportModel(modelName, subfolder) {
+        async exportModel(modelName) {
             const files = [
                 'config.json',
                 'tokenizer.json',
                 'tokenizer_config.json',
                 'special_tokens_map.json',
                 'vocab.txt',
-                'model.onnx'
+                'onnx/model.onnx' // 导出时使用新结构路径
             ];
 
             await this.initialize();
@@ -142,7 +134,6 @@
             const modelFolder = zip.folder(modelName.split('/').pop());
 
             let baseUrl = env.remoteHost + '/' + modelName + '/resolve/main/';
-            if (subfolder) baseUrl += subfolder + '/';
 
             console.log(`[JS] Exporting from: ${baseUrl}`);
 
@@ -151,7 +142,8 @@
                     const response = await fetch(baseUrl + file);
                     if (response.ok) {
                         const blob = await response.blob();
-                        modelFolder.file(file, blob);
+                        const fileName = file.includes('/') ? file.split('/').pop() : file;
+                        modelFolder.file(fileName, blob);
                     }
                 } catch (e) {
                     console.warn(`[JS] Failed to fetch ${file} for export:`, e);
