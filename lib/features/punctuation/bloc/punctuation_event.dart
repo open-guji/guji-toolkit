@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../models/punctuation_config.dart';
 
 abstract class PunctuationEvent extends Equatable {
   const PunctuationEvent();
@@ -76,4 +77,20 @@ class ExportModelEvent extends PunctuationEvent {
 
   @override
   List<Object?> get props => [modelName];
+}
+
+class SwitchMethodEvent extends PunctuationEvent {
+  final PunctuationMethod method;
+  const SwitchMethodEvent(this.method);
+
+  @override
+  List<Object?> get props => [method];
+}
+
+class UpdateLLMConfigEvent extends PunctuationEvent {
+  final LLMConfig config;
+  const UpdateLLMConfigEvent(this.config);
+
+  @override
+  List<Object?> get props => [config];
 }

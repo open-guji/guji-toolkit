@@ -61,6 +61,7 @@ class TransformersJsEngine implements PunctuationEngine {
     String text,
     String modelName, {
     String? modelType,
+    Map<String, dynamic>? extraConfig,
   }) async {
     final engine = _getEngine();
     if (engine == null) throw Exception('Transformers engine not found');
@@ -90,7 +91,6 @@ class TransformersJsEngine implements PunctuationEngine {
         if (decoded is List && decoded.isNotEmpty) {
           return decoded[0]['sequence'] as String? ?? resultStr;
         }
-        return resultStr;
       }
 
       return resultStr;
@@ -146,9 +146,9 @@ class TransformersJsEngine implements PunctuationEngine {
 
         if (isMatch) {
           // Debug log: print the entity for the first few punctuations found
-          if (token.entity != 'O' && token.entity.isNotEmpty) {
-            print('Debug: matched char "$char" with entity "${token.entity}"');
-          }
+          // if (token.entity != 'O' && token.entity.isNotEmpty) {
+          //   print('Debug: matched char "$char" with entity "${token.entity}"');
+          // }
 
           // Found the corresponding token for this character
           // Check direct punctuation match

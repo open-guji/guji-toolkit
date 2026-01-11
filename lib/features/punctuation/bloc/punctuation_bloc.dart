@@ -4,10 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'punctuation_event.dart';
 import '../models/punctuation_state.dart';
 import '../models/punctuation_model.dart';
+import '../models/punctuation_config.dart';
 import '../engine/punctuation_engine.dart';
+import '../engine/llm_punctuation_engine.dart';
 
 class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
   final PunctuationEngine engine;
+  final PunctuationEngine llmEngine = LLMPunctuationEngine();
 
   PunctuationBloc({required this.engine}) : super(const PunctuationState()) {
     on<UpdateOriginalTextEvent>(_onUpdateOriginalText);
@@ -20,6 +23,32 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     on<PunctuationStarted>(_onStarted);
     on<ExportModelEvent>(_onExportModel);
     on<InstallModelEvent>(_onInstallModel);
+    on<SwitchMethodEvent>(_onSwitchMethod);
+    on<UpdateLLMConfigEvent>(_onUpdateLLMConfig);
+  }
+
+  void _onSwitchMethod(
+    SwitchMethodEvent event,
+    Emitter<PunctuationState> emit,
+  ) {
+    emit(state.copyWith(selectedMethod: event.method));
+  }
+
+  void _onUpdateLLMConfig(
+    UpdateLLMConfigEvent event,
+    Emitter<PunctuationState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        llmConfig: state.llmConfig.copyWith(
+          serviceType: event.config.serviceType,
+          provider: event.config.provider,
+          apiKey: event.config.apiKey,
+          baseUrl: event.config.baseUrl,
+          modelName: event.config.modelName,
+        ),
+      ),
+    );
   }
 
   void _onUpdateOriginalText(
@@ -47,46 +76,77 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       return;
     }
 
-    if (!state.isModelAvailable(state.selectedModel) &&
-        !state.installedModels.contains(state.selectedModel)) {
-      emit(state.copyWith(error: () => '当前下载源暂不支持该模型，请切换到官方源'));
-      return;
-    }
-
-    emit(state.copyWith(isProcessing: true, progress: 0.0, error: () => null));
-
-    try {
-      final model = state.availableModels.firstWhere(
-        (m) => m.id == state.selectedModel,
-      );
-      // 监听下载/加载进度
-      final progressSubscription = engine
-          .downloadModel(state.selectedModel, source: state.downloadSource)
-          .listen((progress) {
-            add(UpdateProgressEvent(progress));
-          });
-
-      final result = await engine.punctuate(
-        state.originalText,
-        state.selectedModel,
-        modelType: model.type,
-      );
-
-      await progressSubscription.cancel();
+    if (state.selectedMethod == PunctuationMethod.specialized) {
+      // Specialized Model Logic
+      if (!state.isModelAvailable(state.selectedModel) &&
+          !state.installedModels.contains(state.selectedModel)) {
+        emit(state.copyWith(error: () => '当前下载源暂不支持该模型，请切换到官方源'));
+        return;
+      }
 
       emit(
-        state.copyWith(
-          punctuatedText: result,
-          isProcessing: false,
-          progress: 1.0,
-          installedModels: {
-            ...state.installedModels,
-            state.selectedModel,
-          }.toList(),
-        ),
+        state.copyWith(isProcessing: true, progress: 0.0, error: () => null),
       );
-    } catch (e) {
-      emit(state.copyWith(isProcessing: false, error: () => '标点失败: $e'));
+
+      try {
+        final model = state.availableModels.firstWhere(
+          (m) => m.id == state.selectedModel,
+        );
+        final progressSubscription = engine
+            .downloadModel(state.selectedModel, source: state.downloadSource)
+            .listen((progress) {
+              add(UpdateProgressEvent(progress));
+            });
+
+        final result = await engine.punctuate(
+          state.originalText,
+          state.selectedModel,
+          modelType: model.type,
+        );
+
+        await progressSubscription.cancel();
+
+        emit(
+          state.copyWith(
+            punctuatedText: result,
+            isProcessing: false,
+            progress: 1.0,
+            installedModels: {
+              ...state.installedModels,
+              state.selectedModel,
+            }.toList(),
+          ),
+        );
+      } catch (e) {
+        emit(state.copyWith(isProcessing: false, error: () => '标点失败: $e'));
+      }
+    } else {
+      // LLM Logic
+      emit(
+        state.copyWith(isProcessing: true, progress: 0.0, error: () => null),
+      );
+
+      try {
+        final result = await llmEngine.punctuate(
+          state.originalText,
+          state.llmConfig.modelName,
+          extraConfig: {
+            'provider': state.llmConfig.provider,
+            'apiKey': state.llmConfig.apiKey,
+            'baseUrl': state.llmConfig.baseUrl,
+          },
+        );
+
+        emit(
+          state.copyWith(
+            punctuatedText: result,
+            isProcessing: false,
+            progress: 1.0,
+          ),
+        );
+      } catch (e) {
+        emit(state.copyWith(isProcessing: false, error: () => 'LLM 标点失败: $e'));
+      }
     }
   }
 

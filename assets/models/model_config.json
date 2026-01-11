@@ -14,5 +14,13 @@
         "huggingface_url": "https://huggingface.co/sheldonlidev/guwen-punc",
         "modelscope_url": "",
         "type": "token-classification"
+    },
+    {
+        "id": "sheldonlidev/zh-wiki-punctuation-restore",
+        "name": "Wiki Punctuation Restore",
+        "description": "Punctuation restoration model based on Chinese Wikipedia data, suitable for modern Chinese (ONNX).",
+        "huggingface_url": "https://huggingface.co/sheldonlidev/zh-wiki-punctuation-restore",
+        "modelscope_url": "",
+        "type": "token-classification"
     }
 ]

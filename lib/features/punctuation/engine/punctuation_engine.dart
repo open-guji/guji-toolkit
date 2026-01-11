@@ -7,7 +7,12 @@ abstract class PunctuationEngine {
   /// 对文本进行标点
   /// [text] 原始文本
   /// [modelName] 模型名称
-  Future<String> punctuate(String text, String modelName, {String? modelType});
+  Future<String> punctuate(
+    String text,
+    String modelName, {
+    String? modelType,
+    Map<String, dynamic>? extraConfig,
+  });
 
   /// 下载模型
   /// [modelName] 模型名称
