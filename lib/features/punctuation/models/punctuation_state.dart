@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'punctuation_model.dart';
 
 /// 标点状态模型
 class PunctuationState extends Equatable {
@@ -6,6 +7,7 @@ class PunctuationState extends Equatable {
   final String punctuatedText;
   final String selectedModel;
   final List<String> installedModels;
+  final List<PunctuationModel> availableModels;
   final bool isProcessing;
   final double progress;
   final String downloadSource; // 'huggingface' or 'hf-mirror'
@@ -14,8 +16,10 @@ class PunctuationState extends Equatable {
   const PunctuationState({
     this.originalText = '',
     this.punctuatedText = '',
-    this.selectedModel = 'Xenova/siku-bert',
+    this.selectedModel =
+        'sheldonlidev/classical-chinese-punctuation-guwen-biaodian',
     this.installedModels = const [], // Empty initially to show "Install"
+    this.availableModels = const [],
     this.isProcessing = false,
     this.progress = 0.0,
     this.downloadSource = 'hf-mirror',
@@ -27,6 +31,7 @@ class PunctuationState extends Equatable {
     String? punctuatedText,
     String? selectedModel,
     List<String>? installedModels,
+    List<PunctuationModel>? availableModels,
     bool? isProcessing,
     double? progress,
     String? downloadSource,
@@ -37,6 +42,7 @@ class PunctuationState extends Equatable {
       punctuatedText: punctuatedText ?? this.punctuatedText,
       selectedModel: selectedModel ?? this.selectedModel,
       installedModels: installedModels ?? this.installedModels,
+      availableModels: availableModels ?? this.availableModels,
       isProcessing: isProcessing ?? this.isProcessing,
       progress: progress ?? this.progress,
       downloadSource: downloadSource ?? this.downloadSource,
@@ -50,6 +56,7 @@ class PunctuationState extends Equatable {
     punctuatedText,
     selectedModel,
     installedModels,
+    availableModels,
     isProcessing,
     progress,
     downloadSource,

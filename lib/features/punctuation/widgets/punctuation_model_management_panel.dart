@@ -60,18 +60,33 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              // Only SikuBERT for now
-              ...['Xenova/siku-bert'].map((model) {
-                final isInstalled = state.installedModels.contains(model);
+              // Model list from configuration
+              ...state.availableModels.map((model) {
+                final isInstalled = state.installedModels.contains(model.id);
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          model,
-                          style: Theme.of(context).textTheme.bodySmall,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              model.name,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              model.id,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
                       if (isInstalled) ...[
@@ -82,7 +97,7 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                           ),
                           onPressed: () {
                             context.read<PunctuationBloc>().add(
-                              ExportModelEvent(model),
+                              ExportModelEvent(model.id),
                             );
                           },
                           tooltip: '导出到桌面',
@@ -95,7 +110,7 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                           color: Colors.green.shade400,
                         ),
                       ] else if (state.isProcessing &&
-                          state.selectedModel == model)
+                          state.selectedModel == model.id)
                         Text(
                           '${(state.progress * 100).toStringAsFixed(0)}%',
                           style: Theme.of(context).textTheme.labelSmall
@@ -107,10 +122,9 @@ class PunctuationModelManagementPanel extends StatelessWidget {
                         TextButton.icon(
                           onPressed: () {
                             context.read<PunctuationBloc>().add(
-                              InstallModelEvent(model),
+                              InstallModelEvent(model.id),
                             );
                           },
-
                           icon: const Icon(Icons.download, size: 14),
                           label: const Text('安装'),
                           style: TextButton.styleFrom(

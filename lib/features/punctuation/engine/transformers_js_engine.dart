@@ -31,10 +31,8 @@ class TransformersJsEngine implements PunctuationEngine {
       _progressController.add(p.toDartDouble);
     }.toJS;
 
-    // 检查 JS 对象是否包含 loadModel 方法
-    if (!(engine as JSObject).hasProperty('loadModel'.toJS).toDart) {
-      throw Exception('浏览器加载了旧版 JS 脚本（缺少 loadModel）。请尝试 Ctrl+F5 强刷页面。');
-    }
+    // We trust that the JS engine is correctly loaded based on index.html
+    // If not, it will throw a property access error on call.
 
     try {
       await engine.loadModel(modelName.toJS, onProgress).toDart;

@@ -1,6 +1,9 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'punctuation_event.dart';
 import '../models/punctuation_state.dart';
+import '../models/punctuation_model.dart';
 import '../engine/punctuation_engine.dart';
 
 class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
@@ -118,10 +121,29 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     Emitter<PunctuationState> emit,
   ) async {
     try {
+      // Load model configuration
+      final String configJson = await rootBundle.loadString(
+        'assets/models/model_config.json',
+      );
+      final List<dynamic> decoded = json.decode(configJson);
+      final List<PunctuationModel> models = decoded
+          .map((json) => PunctuationModel.fromJson(json))
+          .toList();
+
       final cachedModels = await engine.getCachedModels();
-      emit(state.copyWith(installedModels: cachedModels));
+
+      emit(
+        state.copyWith(
+          availableModels: models,
+          installedModels: cachedModels,
+          // If default isn't in available models (unlikely but safe), use the first one
+          selectedModel: models.any((m) => m.id == state.selectedModel)
+              ? state.selectedModel
+              : (models.isNotEmpty ? models.first.id : state.selectedModel),
+        ),
+      );
     } catch (e) {
-      // Ignore initial check errors
+      // Ignore initial check errors or log them
     }
   }
 

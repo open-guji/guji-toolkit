@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/bloc.dart';
+import '../models/punctuation_model.dart';
 
 class PunctuationOptionsPanel extends StatelessWidget {
   const PunctuationOptionsPanel({super.key});
@@ -27,7 +28,7 @@ class PunctuationOptionsPanel extends StatelessWidget {
             // Model selection
             _ModelDropdown(
               selectedModel: state.selectedModel,
-              models: const ['Xenova/siku-bert'],
+              models: state.availableModels,
               onChanged: (value) {
                 if (value != null) {
                   context.read<PunctuationBloc>().add(SelectModelEvent(value));
@@ -43,7 +44,7 @@ class PunctuationOptionsPanel extends StatelessWidget {
 
 class _ModelDropdown extends StatelessWidget {
   final String selectedModel;
-  final List<String> models;
+  final List<PunctuationModel> models;
   final ValueChanged<String?> onChanged;
 
   const _ModelDropdown({
@@ -66,8 +67,11 @@ class _ModelDropdown extends StatelessWidget {
           onChanged: onChanged,
           isDense: true,
           style: Theme.of(context).textTheme.bodySmall,
-          items: models.map((String value) {
-            return DropdownMenuItem<String>(value: value, child: Text(value));
+          items: models.map((PunctuationModel model) {
+            return DropdownMenuItem<String>(
+              value: model.id,
+              child: Text(model.name),
+            );
           }).toList(),
         ),
       ),

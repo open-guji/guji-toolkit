@@ -48,11 +48,11 @@
         },
 
         async runPunctuation(text, modelName, onProgress) {
-
             await this.initialize();
 
             try {
                 if (currentModel !== modelName || !punctuationPipeline) {
+                    console.log(`Loading model: ${modelName}`);
                     punctuationPipeline = await transformers.pipeline('token-classification', modelName, {
                         progress_callback: (p) => {
                             if (p.status === 'progress' && onProgress) {
@@ -65,25 +65,62 @@
 
                 const output = await punctuationPipeline(text);
 
-                // TODO: 实现更精准的标点还原逻辑
-                return text;
+                // Transformers.js for token-classification returns an array of tokens with their labels
+                // We need to reconstruct the text with punctuation
+                let punctuatedText = '';
+                let lastIndex = 0;
+
+                // Simple reconstruction: tokens usually map back to the original text
+                // For Classical Chinese, tokens are often single characters
+                for (let i = 0; i < output.length; i++) {
+                    const item = output[i];
+                    punctuatedText += item.word;
+
+                    // Add punctuation based on label (e.g., 'LABEL_1' might be CC, 'LABEL_2' might be PU)
+                    // The specific mapping depends on the model.
+                    // For now, we return the raw output if it's already punctuated or handle it simply.
+                    // Note: many classical Chinese punctuation models actually replace/insert marks.
+                }
+
+                // Temporary: if output is just classification, we need a better restorer.
+                // But many models like raynardj's return the simplified result or we need to join them.
+                if (output.length > 0 && output[0].entity) {
+                    // If it's NER style, we need to join tokens and labels
+                    return this._reconstructFromLabels(text, output);
+                }
+
+                return output.map(x => x.word).join('') || text;
             } catch (e) {
                 console.error("Punctuation failed:", e);
                 throw e;
             }
         },
 
+        _reconstructFromLabels(text, output) {
+            // Placeholder for a more complex reconstruction logic
+            // In many cases, the output already contains the punctuated version in 'word'
+            // or we need to map labels to characters like ， 。 etc.
+            return output.map(x => x.word).join('');
+        },
+
         async checkCache(modelName) {
             if (!window.caches) return false;
             try {
-                const cache = await caches.open('transformers-cache');
+                const cacheName = 'transformers-cache';
+                const cache = await caches.open(cacheName);
                 const keys = await cache.keys();
-                // 只要缓存中存在该模型的任何条目即认为已缓存
-                return keys.some(request => request.url.includes(modelName));
+
+                // A model is considered cached if we have the weight file and config
+                const cachedFiles = keys.map(request => request.url);
+                const hasWeights = cachedFiles.some(url => url.includes(modelName) && (url.includes('.onnx') || url.includes('.safetensors') || url.includes('.bin')));
+                const hasConfig = cachedFiles.some(url => url.includes(modelName) && url.includes('config.json'));
+
+                return hasWeights && hasConfig;
             } catch (e) {
                 return false;
             }
         },
+
 
         async exportModel(modelName) {
             const files = [
