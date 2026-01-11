@@ -6,7 +6,8 @@
         "original_author": "raynardj",
         "original_repo": "classical-chinese-punctuation-guwen-biaodian",
         "onnx_repo": "sheldonlidev/classical-chinese-punctuation-guwen-biaodian",
-        "type": "token-classification"
+        "type": "token-classification",
+        "size": "407 MB"
     },
     {
         "id": "guwen-punc",
@@ -14,7 +15,9 @@
         "description": "古文标点符号标注模型，专门用于对古汉语/文言文进行标点符号的自动添加。采用 RoBERTa/BERT 架构，适用于古籍数字化和文献整理。",
         "original_author": "ethanyt",
         "original_repo": "guwen-punc",
-        "type": "token-classification"
+        "onnx_repo": "sheldonlidev/guwen-punc",
+        "type": "token-classification",
+        "size": "414 MB"
     },
     {
         "id": "zh-wiki-punctuation-restore",
@@ -23,7 +26,8 @@
         "original_author": "p208p2002",
         "original_repo": "zh-wiki-punctuation-restore",
         "onnx_repo": "sheldonlidev/zh-wiki-punctuation-restore",
-        "type": "token-classification"
+        "type": "token-classification",
+        "size": "407 MB"
     },
     {
         "id": "korean-classical-chinese-punctuation",
@@ -32,6 +36,7 @@
         "original_author": "yachagye",
         "original_repo": "korean-classical-chinese-punctuation",
         "onnx_repo": "sheldonlidev/korean-classical-chinese-punctuation",
-        "type": "token-classification"
+        "type": "token-classification",
+        "size": "434 MB"
     }
 ]

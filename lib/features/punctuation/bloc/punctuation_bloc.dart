@@ -22,6 +22,7 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
     on<UpdateProgressEvent>(_onUpdateProgress);
     on<PunctuationStarted>(_onStarted);
     on<InstallModelEvent>(_onInstallModel);
+    on<DeleteModelEvent>(_onDeleteModel);
     on<SwitchMethodEvent>(_onSwitchMethod);
     on<UpdateLLMConfigEvent>(_onUpdateLLMConfig);
   }
@@ -271,6 +272,32 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
       );
     } catch (e) {
       emit(state.copyWith(isProcessing: false, error: () => '安装失败: $e'));
+    }
+  }
+
+  Future<void> _onDeleteModel(
+    DeleteModelEvent event,
+    Emitter<PunctuationState> emit,
+  ) async {
+    print('DEBUG: _onDeleteModel called for ${event.modelName}');
+    emit(state.copyWith(isProcessing: true, error: () => null));
+
+    try {
+      final modelRepoPath = state.getModelRepoPath(event.modelName);
+      print('DEBUG: modelRepoPath is $modelRepoPath');
+      await engine.deleteModel(modelRepoPath);
+
+      final updatedInstalled = state.installedModels
+          .where((id) => id != event.modelName)
+          .toList();
+
+      print('DEBUG: Deletion successful, updating state');
+      emit(
+        state.copyWith(installedModels: updatedInstalled, isProcessing: false),
+      );
+    } catch (e) {
+      print('DEBUG: Deletion failed: $e');
+      emit(state.copyWith(isProcessing: false, error: () => '删除模型失败: $e'));
     }
   }
 }

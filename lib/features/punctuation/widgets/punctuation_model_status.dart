@@ -40,15 +40,17 @@ class PunctuationModelStatus extends StatelessWidget {
             SizedBox(
               width: 600,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outlineVariant
-                        .withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                   ),
                 ),
                 child: Column(
@@ -65,61 +67,124 @@ class PunctuationModelStatus extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '模型状态',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
+                          '模型安装',
+                          style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
+                        // 始终显示安装状态
+                        Icon(
+                          isInstalled
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          size: 14,
+                          color: isInstalled
+                              ? Colors.green.shade600
+                              : Theme.of(context).colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(width: 4),
                         Text(
-                          selectedModel.name,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                          isInstalled ? '已安装' : '未安装',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isInstalled
+                                ? Colors.green.shade700
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         const Spacer(),
                         // 下载源选择（仅在未安装且未下载时显示）
                         if (!isInstalled && !isDownloading) ...[
-                          Text(
-                            '下载源',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                          const SizedBox(width: 8),
-                          SegmentedButton<String>(
-                            segments: const [
-                              ButtonSegment(
-                                value: 'hf-mirror',
-                                label: Text('国内', style: TextStyle(fontSize: 12)),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '下载源',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                        ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  SegmentedButton<String>(
+                                    segments: const [
+                                      ButtonSegment(
+                                        value: 'hf-mirror',
+                                        label: Text(
+                                          '国内',
+                                          style: TextStyle(fontSize: 11),
+                                        ),
+                                      ),
+                                      ButtonSegment(
+                                        value: 'huggingface',
+                                        label: Text(
+                                          '官方',
+                                          style: TextStyle(fontSize: 11),
+                                        ),
+                                      ),
+                                    ],
+                                    selected: {state.downloadSource},
+                                    onSelectionChanged: (newSelection) {
+                                      context.read<PunctuationBloc>().add(
+                                        UpdateDownloadSourceEvent(
+                                          newSelection.first,
+                                        ),
+                                      );
+                                    },
+                                    showSelectedIcon: false,
+                                    style: SegmentedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 0,
+                                      ),
+                                      visualDensity: const VisualDensity(
+                                        horizontal: -4,
+                                        vertical: -4,
+                                      ),
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              ButtonSegment(
-                                value: 'huggingface',
-                                label: Text('官方', style: TextStyle(fontSize: 12)),
+                              const SizedBox(height: 2),
+                              Text(
+                                state.downloadSource == 'hf-mirror'
+                                    ? 'https://hf-mirror.com'
+                                    : 'https://huggingface.co',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      fontSize: 10,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withValues(alpha: 0.6),
+                                    ),
                               ),
                             ],
-                            selected: {state.downloadSource},
-                            onSelectionChanged: (newSelection) {
-                              context.read<PunctuationBloc>().add(
-                                    UpdateDownloadSourceEvent(newSelection.first),
-                                  );
-                            },
-                            showSelectedIcon: false,
-                            style: SegmentedButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              visualDensity: VisualDensity.compact,
-                            ),
                           ),
                           const SizedBox(width: 12),
                         ],
                         // 状态/操作按钮
-                        _buildActionButton(context, state, selectedModel, isInstalled,
-                            isDownloading),
+                        _buildActionButton(
+                          context,
+                          state,
+                          selectedModel,
+                          isInstalled,
+                          isDownloading,
+                        ),
                       ],
                     ),
                     // 下载进度条
@@ -128,8 +193,9 @@ class PunctuationModelStatus extends StatelessWidget {
                       LinearProgressIndicator(
                         value: state.progress,
                         minHeight: 2,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.surfaceContainerHighest,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                       ),
                     ],
                     // 模型元数据（作者和链接）
@@ -153,25 +219,41 @@ class PunctuationModelStatus extends StatelessWidget {
     bool isDownloading,
   ) {
     if (isInstalled) {
-      // 已安装状态
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.check_circle,
-            size: 16,
-            color: Colors.green.shade600,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            '已安装',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.green.shade700,
-              fontWeight: FontWeight.w500,
+      // 已安装状态：显示删除按钮
+      return IconButton(
+        onPressed: () {
+          final bloc = context.read<PunctuationBloc>();
+          // 确认删除
+          showDialog(
+            context: context,
+            builder: (confirmContext) => AlertDialog(
+              title: const Text('确认删除'),
+              content: Text('确定要从缓存中删除模型 "${selectedModel.name}" 吗？'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(confirmContext),
+                  child: const Text('取消'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    bloc.add(DeleteModelEvent(selectedModel.id));
+                    Navigator.pop(confirmContext);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                  child: const Text('确认删除'),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
+        icon: const Icon(Icons.delete_outline, size: 20),
+        tooltip: '从缓存中删除',
+        color: Theme.of(context).colorScheme.error.withValues(alpha: 0.7),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        visualDensity: VisualDensity.compact,
       );
     }
 
@@ -192,24 +274,25 @@ class PunctuationModelStatus extends StatelessWidget {
           Text(
             '${(state.progress * 100).toStringAsFixed(0)}%',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       );
     }
 
     // 检查模型是否可用于当前下载源
-    final isAvailableForSource = state.downloadSource == 'huggingface' ||
+    final isAvailableForSource =
+        state.downloadSource == 'huggingface' ||
         (selectedModel.hasOnnxRepo && state.downloadSource == 'hf-mirror');
 
     if (!isAvailableForSource) {
       return Text(
         '该源暂不可用',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.error,
-            ),
+          color: Theme.of(context).colorScheme.error,
+        ),
       );
     }
 
@@ -217,11 +300,11 @@ class PunctuationModelStatus extends StatelessWidget {
     return TextButton.icon(
       onPressed: () {
         context.read<PunctuationBloc>().add(
-              InstallModelEvent(selectedModel.id),
-            );
+          InstallModelEvent(selectedModel.id),
+        );
       },
       icon: const Icon(Icons.download, size: 16),
-      label: const Text('安装模型', style: TextStyle(fontSize: 13)),
+      label: const Text('安装', style: TextStyle(fontSize: 13)),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         minimumSize: Size.zero,
@@ -249,45 +332,50 @@ class _ModelMetadata extends StatelessWidget {
     return Wrap(
       spacing: 16,
       runSpacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
+        // 模型大小 (第一位)
+        if (model.size != null)
+          _buildInfoItem(context, Icons.balance_outlined, '大小: ${model.size}'),
         // 原作者
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.person_outline,
-              size: 14,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '作者: ${model.originalAuthor}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ],
+        _buildInfoItem(
+          context,
+          Icons.person_outline,
+          '作者: ${model.originalAuthor}',
         ),
         // HuggingFace 链接
         InkWell(
           onTap: () => _openUrl(model.getOriginalUrl()),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.open_in_new,
-                size: 14,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'HuggingFace 仓库',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      decoration: TextDecoration.underline,
-                    ),
-              ),
-            ],
+          child: _buildInfoItem(
+            context,
+            Icons.open_in_new,
+            'HuggingFace 仓库',
+            color: Theme.of(context).colorScheme.primary,
+            underline: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoItem(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    Color? color,
+    bool underline = false,
+  }) {
+    final textColor = color ?? Theme.of(context).colorScheme.onSurfaceVariant;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: textColor),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: textColor,
+            decoration: underline ? TextDecoration.underline : null,
           ),
         ),
       ],

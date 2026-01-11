@@ -116,4 +116,9 @@ $text
   Future<void> loadModel(String modelName, {String? modelType}) async {
     // No-op connection check could go here
   }
+
+  @override
+  Future<void> deleteModel(String modelName) async {
+    // No-op for LLM
+  }
 }

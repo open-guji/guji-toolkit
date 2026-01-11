@@ -86,3 +86,11 @@ class UpdateLLMConfigEvent extends PunctuationEvent {
   @override
   List<Object?> get props => [config];
 }
+
+class DeleteModelEvent extends PunctuationEvent {
+  final String modelName;
+  const DeleteModelEvent(this.modelName);
+
+  @override
+  List<Object?> get props => [modelName];
+}

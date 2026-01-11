@@ -27,6 +27,8 @@ abstract class PunctuationEngine {
   Future<List<String>> getCachedModels();
 
   /// 获取引擎名称
-
   String get engineName;
+
+  /// 从缓存中删除模型
+  Future<void> deleteModel(String modelName);
 }

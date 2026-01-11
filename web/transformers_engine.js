@@ -118,6 +118,28 @@
             } catch (e) {
                 return false;
             }
+        },
+
+        async deleteCache(modelName) {
+            console.log(`[JS] deleteCache called for: ${modelName}`);
+            if (!window.caches) return;
+            try {
+                const cacheName = 'transformers-cache';
+                const cache = await caches.open(cacheName);
+                const keys = await cache.keys();
+
+                // 删除所有包含 modelName 的请求
+                for (const request of keys) {
+                    if (request.url.includes(modelName)) {
+                        console.log(`[JS] Deleting from cache: ${request.url}`);
+                        await cache.delete(request);
+                    }
+                }
+                console.log(`[JS] Cache cleared for model: ${modelName}`);
+            } catch (e) {
+                console.error("[JS] Delete cache failed:", e);
+                throw e;
+            }
         }
     };
 })();

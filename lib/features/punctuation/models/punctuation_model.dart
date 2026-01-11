@@ -8,6 +8,7 @@ class PunctuationModel extends Equatable {
   final String originalRepo;
   final String? onnxRepo;
   final String type;
+  final String? size;
 
   const PunctuationModel({
     required this.id,
@@ -17,6 +18,7 @@ class PunctuationModel extends Equatable {
     required this.originalRepo,
     this.onnxRepo,
     required this.type,
+    this.size,
   });
 
   /// 获取原始模型的 HuggingFace URL
@@ -46,6 +48,7 @@ class PunctuationModel extends Equatable {
       originalRepo: json['original_repo'] as String? ?? '',
       onnxRepo: json['onnx_repo'] as String?,
       type: json['type'] as String? ?? '',
+      size: json['size'] as String?,
     );
   }
 
@@ -58,6 +61,7 @@ class PunctuationModel extends Equatable {
       'original_repo': originalRepo,
       if (onnxRepo != null) 'onnx_repo': onnxRepo,
       'type': type,
+      if (size != null) 'size': size,
     };
   }
 
@@ -70,5 +74,6 @@ class PunctuationModel extends Equatable {
     originalRepo,
     onnxRepo,
     type,
+    size,
   ];
 }
