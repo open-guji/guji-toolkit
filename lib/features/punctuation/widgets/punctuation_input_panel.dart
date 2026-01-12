@@ -67,7 +67,10 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
 
             final inputPunctuated = PanelContainer(
               title: '标点本',
-              titleTrailing: const SizedBox(height: 32), // 占位以对齐左侧"示例"栏高度
+              titleTrailing: const Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: SizedBox.shrink(),
+              ), // 占位以对齐左侧"示例"栏高度
               backgroundColor: panelColor,
               isExpanded: widget.isWide,
               footer: state.punctuatedText.isNotEmpty
@@ -85,15 +88,13 @@ class _PunctuationInputPanelState extends State<PunctuationInputPanel> {
             );
 
             if (widget.isWide) {
-              return IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch, // 完全对齐
-                  children: [
-                    Expanded(child: inputOriginal),
-                    const SizedBox(width: 24),
-                    Expanded(child: inputPunctuated),
-                  ],
-                ),
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: inputOriginal),
+                  const SizedBox(width: 24),
+                  Expanded(child: inputPunctuated),
+                ],
               );
             } else {
               return Column(

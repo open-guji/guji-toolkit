@@ -17,16 +17,14 @@ class _PunctuationExamplesPanelState extends State<PunctuationExamplesPanel> {
   @override
   Widget build(BuildContext context) {
     return SelectionContainer.disabled(
-      child: SizedBox(
-        height: 32,
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end, // 靠右对齐
-            crossAxisAlignment: CrossAxisAlignment.end, // 底部对齐
-            children: [
-            if (_isExpanded)
-              Flexible(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end, // 靠右对齐
+        crossAxisAlignment: CrossAxisAlignment.end, // 底部对齐,与标题对齐
+        children: [
+          if (_isExpanded)
+            Flexible(
+              child: SizedBox(
+                height: 26, // 调整高度以匹配标题高度
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
@@ -41,8 +39,11 @@ class _PunctuationExamplesPanelState extends State<PunctuationExamplesPanel> {
                   },
                 ),
               ),
-            const SizedBox(width: 4),
-            IconButton(
+            ),
+          const SizedBox(width: 4),
+          SizedBox(
+            height: 26, // 与ListView高度一致
+            child: IconButton(
               onPressed: () => setState(() => _isExpanded = !_isExpanded),
               icon: Icon(
                 _isExpanded ? Icons.chevron_right : Icons.chevron_left, // 反转方向
@@ -56,7 +57,10 @@ class _PunctuationExamplesPanelState extends State<PunctuationExamplesPanel> {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
-            Material(
+          ),
+          SizedBox(
+            height: 26, // 与ListView高度一致
+            child: Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => setState(() => _isExpanded = !_isExpanded),
@@ -92,8 +96,8 @@ class _PunctuationExamplesPanelState extends State<PunctuationExamplesPanel> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
