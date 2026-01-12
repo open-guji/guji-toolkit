@@ -54,3 +54,5 @@ class ScannerPage extends StatelessWidget {
     return const PlaceholderPage(title: '扫描', icon: Icons.scanner);
   }
 }
+
+// Removed PunctuationPage placeholder as it is now implemented in lib/features/punctuation/punctuation_page.dart

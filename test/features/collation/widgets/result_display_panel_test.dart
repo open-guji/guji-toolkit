@@ -29,12 +29,13 @@ void main() {
   }
 
   group('ResultDisplayPanel', () {
-    testWidgets('无结果时应该显示提示信息', (tester) async {
+    testWidgets('无结果时应该显示空白', (tester) async {
       when(() => mockBloc.state).thenReturn(const CollationState());
 
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('点击"开始对比"查看结果'), findsOneWidget);
+      expect(find.text('点击"开始对比"查看结果'), findsNothing);
+      expect(find.byType(SizedBox), findsWidgets);
     });
 
     testWidgets('应该显示标签页', (tester) async {

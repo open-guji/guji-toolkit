@@ -1,0 +1,32 @@
+[
+    {
+        "id": "classical-chinese-punctuation-guwen-biaodian",
+        "name": "文言文标点",
+        "description": "用于文言文（古文）断句的深度学习模型，可以自动为未断句的古文文本添加标点符号。支持二十多种标点符号，基于 BERT 架构。",
+        "original_author": "raynardj",
+        "original_repo": "classical-chinese-punctuation-guwen-biaodian",
+        "onnx_repo": "sheldonlidev/classical-chinese-punctuation-guwen-biaodian",
+        "type": "token-classification",
+        "size": "407 MB"
+    },
+    {
+        "id": "guwen-punc",
+        "name": "古文标点",
+        "description": "古文标点符号标注模型，专门用于对古汉语/文言文进行标点符号的自动添加。采用 RoBERTa/BERT 架构，适用于古籍数字化和文献整理。",
+        "original_author": "ethanyt",
+        "original_repo": "guwen-punc",
+        "onnx_repo": "sheldonlidev/guwen-punc",
+        "type": "token-classification",
+        "size": "414 MB"
+    },
+    {
+        "id": "zh-wiki-punctuation-restore",
+        "name": "维基标点恢复",
+        "description": "基于中文维基百科数据的标点符号恢复模型，支持 6 种常见标点符号（，、。？！；），适用于现代中文文本的自动断句。",
+        "original_author": "p208p2002",
+        "original_repo": "zh-wiki-punctuation-restore",
+        "onnx_repo": "sheldonlidev/zh-wiki-punctuation-restore",
+        "type": "token-classification",
+        "size": "407 MB"
+    }
+]

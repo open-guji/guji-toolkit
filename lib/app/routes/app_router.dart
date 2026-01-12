@@ -5,6 +5,7 @@ import 'package:guji_toolkit/features/common/placeholders.dart';
 import 'package:guji_toolkit/features/home/home_page.dart';
 import 'package:guji_toolkit/features/settings/settings_page.dart';
 import 'package:guji_toolkit/features/collation/collation_page.dart';
+import 'package:guji_toolkit/features/punctuation/punctuation_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -27,6 +28,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/scanner',
             builder: (context, state) => const ScannerPage(),
+          ),
+          GoRoute(
+            path: '/punctuation',
+            builder: (context, state) => const PunctuationPage(),
           ),
           GoRoute(
             path: '/settings',

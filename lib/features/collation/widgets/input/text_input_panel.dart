@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:guji_toolkit/features/collation/bloc/bloc.dart';
+import 'package:guji_toolkit/features/common/widgets/widgets.dart';
 import 'highlighted_text_field.dart';
 
 class TextInputPanel extends StatefulWidget {
@@ -28,8 +29,9 @@ class _TextInputPanelState extends State<TextInputPanel> {
 
   void _syncScroll1() {
     if (_isSyncing) return;
-    if (!_scrollController1.hasClients || !_scrollController2.hasClients)
+    if (!_scrollController1.hasClients || !_scrollController2.hasClients) {
       return;
+    }
 
     final max1 = _scrollController1.position.maxScrollExtent;
     final max2 = _scrollController2.position.maxScrollExtent;
@@ -44,8 +46,9 @@ class _TextInputPanelState extends State<TextInputPanel> {
 
   void _syncScroll2() {
     if (_isSyncing) return;
-    if (!_scrollController1.hasClients || !_scrollController2.hasClients)
+    if (!_scrollController1.hasClients || !_scrollController2.hasClients) {
       return;
+    }
 
     final max1 = _scrollController1.position.maxScrollExtent;
     final max2 = _scrollController2.position.maxScrollExtent;
@@ -106,52 +109,44 @@ class _TextInputPanelState extends State<TextInputPanel> {
             : null;
       },
       builder: (context, state) {
-        // In wide layout, sync height between the two text fields
-        final shouldSyncHeight = widget.isWide;
-
-        final input1 = HighlightedTextField(
-          label: '底本',
-          hint: '请输入底本内容...',
-          controller: _controller1,
-          scrollController: _scrollController1,
-          isExpanded: false,
-          syncHeight: shouldSyncHeight,
-          onChanged: (value) {
-            context.read<CollationBloc>().add(UpdateText1Event(value));
-          },
+        final input1 = PanelContainer(
+          title: '底本',
+          isExpanded: widget.isWide,
+          child: HighlightedTextField(
+            hint: '请输入底本内容...',
+            controller: _controller1,
+            scrollController: _scrollController1,
+            isExpanded: true,
+            onChanged: (value) {
+              context.read<CollationBloc>().add(UpdateText1Event(value));
+            },
+          ),
         );
 
-        final input2 = HighlightedTextField(
-          label: '校本',
-          hint: '请输入校本内容（可对比多段文本）...',
-          controller: _controller2,
-          scrollController: _scrollController2,
-          isExpanded: false,
-          syncHeight: shouldSyncHeight,
-          onChanged: (value) {
-            context.read<CollationBloc>().add(UpdateText2Event(value));
-          },
+        final input2 = PanelContainer(
+          title: '校本',
+          isExpanded: widget.isWide,
+          child: HighlightedTextField(
+            hint: '请输入校本内容（可对比多段文本）...',
+            controller: _controller2,
+            scrollController: _scrollController2,
+            isExpanded: true,
+            onChanged: (value) {
+              context.read<CollationBloc>().add(UpdateText2Event(value));
+            },
+          ),
         );
 
         Widget content;
         if (widget.isWide) {
-          // Use IntrinsicHeight to make both text fields match the height of the taller one
-          // Wrap with ConstrainedBox to set min/max height
-          content = ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight:
-                  150, // Minimum height ~5 lines at 14px font * 1.5 line height
-              maxHeight: 450, // Maximum height ~15 lines
-            ),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(child: input1),
-                  const SizedBox(width: 16),
-                  Expanded(child: input2),
-                ],
-              ),
+          content = IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: input1),
+                const SizedBox(width: 16),
+                Expanded(child: input2),
+              ],
             ),
           );
         } else {

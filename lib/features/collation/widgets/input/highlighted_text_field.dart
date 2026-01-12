@@ -97,8 +97,8 @@ class HighlightEditingController extends TextEditingController {
 }
 
 /// 可高亮差异的文本输入框
+/// 该组件现在仅负责 TextField 的配置，其外壳由 PanelContainer 提供
 class HighlightedTextField extends StatelessWidget {
-  final String label;
   final String hint;
   final HighlightEditingController controller;
   final ScrollController? scrollController;
@@ -108,7 +108,6 @@ class HighlightedTextField extends StatelessWidget {
 
   const HighlightedTextField({
     super.key,
-    required this.label,
     required this.hint,
     required this.controller,
     this.scrollController,
@@ -119,42 +118,25 @@ class HighlightedTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textField = TextField(
+    return TextField(
       controller: controller,
       scrollController: scrollController,
-      maxLines: (isExpanded || syncHeight) ? null : 15,
-      minLines: (isExpanded || syncHeight) ? null : 5,
-      expands: isExpanded || syncHeight,
+      minLines: 5, // 最小显示 5 行
+      maxLines: null, // 允许根据内容增长
+      expands: false,
       textAlignVertical: TextAlignVertical.top,
       decoration: InputDecoration(
         hintText: hint,
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.all(12),
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        contentPadding: const EdgeInsets.only(right: 12),
+        filled: false,
       ),
       onChanged: onChanged,
       style: const TextStyle(fontSize: 14, height: 1.5),
-    );
-
-    final wrappedTextField = (isExpanded || syncHeight)
-        ? Expanded(child: textField)
-        : textField;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: (isExpanded || syncHeight)
-          ? MainAxisSize.max
-          : MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-        const SizedBox(height: 8),
-        wrappedTextField,
-      ],
     );
   }
 }
