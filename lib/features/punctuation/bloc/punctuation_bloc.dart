@@ -65,7 +65,7 @@ class PunctuationBloc extends Bloc<PunctuationEvent, PunctuationState> {
   }
 
   void _onSelectModel(SelectModelEvent event, Emitter<PunctuationState> emit) {
-    emit(state.copyWith(selectedModel: event.modelName));
+    emit(state.copyWith(selectedModel: event.modelName, punctuatedText: ''));
   }
 
   Future<void> _onPerformPunctuation(

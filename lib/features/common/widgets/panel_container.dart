@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 /// 负责处理边框、内边距、标题展示以及高度约束
 class PanelContainer extends StatelessWidget {
   final String? title;
+  final Widget? footer;
   final Widget? titleTrailing;
   final Widget child;
   final BoxConstraints? constraints;
@@ -14,6 +15,7 @@ class PanelContainer extends StatelessWidget {
   const PanelContainer({
     super.key,
     this.title,
+    this.footer,
     this.titleTrailing,
     required this.child,
     this.constraints,
@@ -79,6 +81,8 @@ class PanelContainer extends StatelessWidget {
             ),
           ),
         panelWidget,
+        if (footer != null)
+          Padding(padding: const EdgeInsets.only(top: 8.0), child: footer!),
       ],
     );
   }

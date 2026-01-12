@@ -9,6 +9,12 @@ class PunctuationActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PunctuationBloc, PunctuationState>(
+      buildWhen: (previous, current) =>
+          previous.isProcessing != current.isProcessing ||
+          previous.progress != current.progress ||
+          previous.selectedMethod != current.selectedMethod ||
+          previous.selectedModel != current.selectedModel ||
+          previous.installedModels != current.installedModels,
       builder: (context, state) {
         final isSpecialized =
             state.selectedMethod == PunctuationMethod.specialized;

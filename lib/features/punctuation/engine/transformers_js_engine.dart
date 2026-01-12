@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
+import 'package:flutter/foundation.dart';
 import '../models/punctuation_token.dart';
 import 'punctuation_engine.dart';
 
@@ -146,7 +147,7 @@ class TransformersJsEngine implements PunctuationEngine {
         if (isMatch) {
           // Always log entities for non-"O" tags to help identify model output format
           if (token.entity != 'O' && token.entity.isNotEmpty) {
-            print(
+            debugPrint(
               '[Dart] matched char "$char" at index $i with entity "${token.entity}"',
             );
           }

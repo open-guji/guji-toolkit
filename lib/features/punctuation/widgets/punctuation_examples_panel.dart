@@ -19,9 +19,12 @@ class _PunctuationExamplesPanelState extends State<PunctuationExamplesPanel> {
     return SelectionContainer.disabled(
       child: SizedBox(
         height: 32,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end, // 靠右对齐
-          children: [
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end, // 靠右对齐
+            crossAxisAlignment: CrossAxisAlignment.end, // 底部对齐
+            children: [
             if (_isExpanded)
               Flexible(
                 child: ListView.builder(

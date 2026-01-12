@@ -37,6 +37,26 @@ class MergedResultView extends StatelessWidget {
         const MergeHintBox(),
         PanelContainer(
           title: null, // 合并模式不需要标题
+          footer: Row(
+            children: [
+              const CollationLegend(),
+              const Spacer(),
+              // 进度指示器 (0/0 时不显示)
+              if (total > 0)
+                MergeProgressIndicator(
+                  resolved: resolved,
+                  total: total,
+                  allResolved: allResolved,
+                )
+              else if (result.mergedView.isNotEmpty &&
+                  result.text1View.isNotEmpty &&
+                  result.text2View.isNotEmpty)
+                const MergePerfectMatchIndicator(),
+              const SizedBox(width: 16),
+              // 操作按钮
+              MergeActions(result: result, resolutions: resolutions),
+            ],
+          ),
           child: SingleChildScrollView(
             child: DiffTextRenderer(
               changes: result.mergedView,
@@ -48,27 +68,6 @@ class MergedResultView extends StatelessWidget {
               },
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            const CollationLegend(),
-            const Spacer(),
-            // 进度指示器 (0/0 时不显示)
-            if (total > 0)
-              MergeProgressIndicator(
-                resolved: resolved,
-                total: total,
-                allResolved: allResolved,
-              )
-            else if (result.mergedView.isNotEmpty &&
-                result.text1View.isNotEmpty &&
-                result.text2View.isNotEmpty)
-              const MergePerfectMatchIndicator(),
-            const SizedBox(width: 16),
-            // 操作按钮
-            MergeActions(result: result, resolutions: resolutions),
-          ],
         ),
       ],
     );
