@@ -2,7 +2,7 @@
 
 ## 📋 重构概述
 
-项目主题已从标准 Material Design 更新为**古籍风格设计**，参考了 kaiyuanguji 项目的视觉设计。
+项目主题已从标准 Material Design 更新为**古籍风格设计**，参考了 kaiyuanguji-web 项目的视觉设计。
 
 **重构日期**: 2025-01-05
 **影响范围**: 全局主题配置
@@ -359,7 +359,7 @@ static ThemeData get darkTheme {
 
 ### 设计参考
 
-- **kaiyuanguji 项目** - 古籍风格主题设计
+- **kaiyuanguji-web 项目** - 古籍风格主题设计
 - [中国古籍版式](https://zh.wikipedia.org/wiki/中國古籍版式) - 传统排版研究
 - [传统色彩](https://colors.ichuantong.cn/) - 中国传统色谱
 
