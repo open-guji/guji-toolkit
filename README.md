@@ -30,7 +30,7 @@ Guji Toolkit 涵盖了古籍数字化工作流中的关键环节：
 ## 📚 更多资源
 
 关于具体的古籍内容和详细的功能清单，请参考以下资源：
-[古籍内容文件夹](https://github.com/open-guji/kaiyuanguji/tree/main/assets/content)
+[古籍内容文件夹](https://github.com/open-guji/kaiyuanguji-web/tree/main/assets/content)
 
 ## 🤝 贡献参与
 
